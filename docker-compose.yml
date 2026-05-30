@@ -1,0 +1,52 @@
+# =============================================
+# PULSE 360 — Smart Plant Platform
+# Orquestación: app Next.js + PostgreSQL 16
+# =============================================
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pulse360-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pulse_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-pulse360}
+    volumes:
+      - pulse_pgdata:/var/lib/postgresql/data
+    # Solo expuesto a localhost del host; la app se conecta por la red interna
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-pulse} -d ${POSTGRES_DB:-pulse360}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pulse360-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Conexión interna a la red de compose (host = nombre del servicio "db")
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-pulse}:${POSTGRES_PASSWORD:-pulse_secret}@db:5432/${POSTGRES_DB:-pulse360}?schema=public"
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+      APP_NAME: ${APP_NAME:-PULSE 360}
+      DEFAULT_PLANT: ${DEFAULT_PLANT:-Planta Principal}
+      # Poner en "true" la primera vez para cargar datos de ejemplo
+      RUN_SEED: ${RUN_SEED:-false}
+      NODE_ENV: production
+    volumes:
+      # Persistir evidencias subidas (No Conformidades)
+      - pulse_uploads:/app/public/uploads
+    ports:
+      - "3000:3000"
+
+volumes:
+  pulse_pgdata:
+  pulse_uploads:

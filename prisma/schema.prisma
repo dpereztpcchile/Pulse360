@@ -1,0 +1,630 @@
+// PULSE 360 - Smart Plant Platform
+// Prisma Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────
+enum UserRole {
+  ADMINISTRADOR
+  SUPERVISOR
+  OPERADOR
+}
+
+enum PlantStatus {
+  ACTIVA
+  INACTIVA
+  MANTENIMIENTO
+}
+
+enum LineStatus {
+  OPERANDO
+  EN_OBSERVACION
+  DETENIDO
+}
+
+enum Shift {
+  MANANA
+  TARDE
+  NOCHE
+}
+
+enum OrderStatus {
+  PLANIFICADA
+  EN_PROCESO
+  COMPLETADA
+  DETENIDA
+}
+
+enum MaterialCategory {
+  REFRIGERADO
+  CONGELADO
+  IMPORTADO
+  EN_TRANSITO
+}
+
+enum DispatchStatus {
+  PREPARANDO
+  LISTO
+  DESPACHADO
+  ENTREGADO
+}
+
+enum NcCategory {
+  CALIDAD
+  INOCUIDAD
+  PROCESO
+  PROVEEDOR
+}
+
+enum NcSeverity {
+  CRITICA
+  MAYOR
+  MENOR
+}
+
+enum NcStatus {
+  ABIERTA
+  EN_INVESTIGACION
+  ACCION_CORRECTIVA
+  CERRADA
+}
+
+enum AlertModule {
+  PRODUCCION
+  MATERIAS_PRIMAS
+  DESPACHO
+  NO_CONFORMIDADES
+  CAPACIDAD
+}
+
+enum AlertSeverity {
+  CRITICA
+  ADVERTENCIA
+  INFORMATIVA
+}
+
+enum AlertStatus {
+  ACTIVA
+  RECONOCIDA
+  RESUELTA
+}
+
+// Estado de avance de un registro/batch en el Control de Turno
+enum RegistroEstado {
+  PENDIENTE
+  EN_PROCESO
+  COMPLETADO
+}
+
+// Estado de ocupación de capacidad de una línea en un día
+enum CapacidadEstado {
+  HOLGURA
+  ALERTA
+  ESTRES
+}
+
+// Estado de un programa diario cargado (agregador Carga de Programa)
+enum EstadoCarga {
+  ACTIVO
+  HISTORICO
+}
+
+// ─── Modelos ─────────────────────────────────────────────
+
+model Plant {
+  id        String      @id @default(cuid())
+  name      String
+  code      String      @unique
+  location  String?
+  status    PlantStatus @default(ACTIVA)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  users     User[]
+  lines     ProductionLine[]
+  materials Material[]
+
+  @@map("plants")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          UserRole  @default(OPERADOR)
+  active        Boolean   @default(true)
+  plantId       String?
+  plant         Plant?    @relation(fields: [plantId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  sessions Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@map("sessions")
+}
+
+model ProductionLine {
+  id          String     @id @default(cuid())
+  name        String
+  code        String     @unique
+  status      LineStatus @default(OPERANDO)
+  dailyPlanKg Float      @default(0)
+  oee         Float      @default(0)
+  oeeMin      Float      @default(65) // umbral mínimo de OEE que dispara alerta
+  utilization Float      @default(0)
+  plantId     String?
+  plant       Plant?     @relation(fields: [plantId], references: [id])
+  orders      ProductionOrder[]
+  capacity    LineCapacity?
+  demandPlans DemandPlan[]
+  // Control de Turno
+  programas   ProgramaDiario[]
+  registros   RegistroProduccion[]
+  paradas     ParadaTurno[]
+  oeeTurnos   OEETurno[]
+  // Capacidad
+  configsTurnos    ConfiguracionTurnos[]
+  capacidadDiaria  CapacidadDiaria[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("production_lines")
+}
+
+model ProductionOrder {
+  id           String         @id @default(cuid())
+  orderNumber  String         @unique
+  product      String
+  lineId       String
+  line         ProductionLine @relation(fields: [lineId], references: [id])
+  shift        Shift
+  date         DateTime
+  plannedKg    Float
+  realKg       Float          @default(0)
+  status       OrderStatus    @default(PLANIFICADA)
+  responsible  String
+  observations String?
+  consumptions MaterialConsumption[]
+  dispatches   Dispatch[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@map("production_orders")
+}
+
+model NonConformity {
+  id               String     @id @default(cuid())
+  ncNumber         String     @unique
+  area             String
+  category         NcCategory
+  severity         NcSeverity
+  status           NcStatus   @default(ABIERTA)
+  title            String
+  description      String
+  rootCause        String?
+  correctiveAction String?
+  responsible      String
+  dueDate          DateTime
+  evidenceUrl      String?
+  evidenceName     String?
+  createdBy        String?
+  closedAt         DateTime?
+  history          NcStatusChange[]
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  @@map("non_conformities")
+}
+
+model NcStatusChange {
+  id         String        @id @default(cuid())
+  ncId       String
+  nc         NonConformity @relation(fields: [ncId], references: [id], onDelete: Cascade)
+  fromStatus NcStatus?
+  toStatus   NcStatus
+  changedBy  String
+  note       String?
+  createdAt  DateTime      @default(now())
+
+  @@map("nc_status_changes")
+}
+
+model Dispatch {
+  id           String           @id @default(cuid())
+  guideNumber  String           @unique
+  client       String
+  product      String
+  quantityKg   Float
+  transporter  String
+  plate        String?
+  clientPO     String?
+  estimatedAt  DateTime
+  dispatchedAt DateTime?
+  deliveredAt  DateTime?
+  status       DispatchStatus   @default(PREPARANDO)
+  orderId      String?
+  order        ProductionOrder? @relation(fields: [orderId], references: [id])
+  observations String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("dispatches")
+}
+
+model Material {
+  id           String           @id @default(cuid())
+  name         String
+  code         String           @unique
+  category     MaterialCategory
+  unit         String           @default("kg")
+  currentStock Float            @default(0)
+  minStock     Float            @default(0)
+  dailyUsageKg Float            @default(0)
+  plantId      String?
+  plant        Plant?           @relation(fields: [plantId], references: [id])
+  receipts     MaterialReceipt[]
+  consumptions MaterialConsumption[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("materials")
+}
+
+model MaterialReceipt {
+  id         String    @id @default(cuid())
+  materialId String
+  material   Material  @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  supplier   String
+  quantity   Float
+  lot        String?
+  expiryDate DateTime?
+  entryTemp  Float?
+  receivedBy String
+  createdAt  DateTime  @default(now())
+
+  @@map("material_receipts")
+}
+
+model MaterialConsumption {
+  id         String           @id @default(cuid())
+  materialId String
+  material   Material         @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  quantity   Float
+  orderId    String?
+  order      ProductionOrder? @relation(fields: [orderId], references: [id])
+  usage      String?
+  consumedBy String
+  createdAt  DateTime         @default(now())
+
+  @@map("material_consumptions")
+}
+
+model LineCapacity {
+  id            String         @id @default(cuid())
+  lineId        String         @unique
+  line          ProductionLine @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  kgPerHour     Float          @default(0)
+  hoursPerShift Float          @default(8)
+  activeShifts  Int            @default(1)
+  efficiency    Float          @default(85) // % esperado
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@map("line_capacities")
+}
+
+model DemandPlan {
+  id        String         @id @default(cuid())
+  lineId    String
+  line      ProductionLine @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  year      Int
+  month     Int // 1-12
+  week      Int // 1-5 (semana del mes)
+  demandKg  Float          @default(0)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@unique([lineId, year, month, week])
+  @@map("demand_plans")
+}
+
+// Alerta centralizada generada automáticamente por los demás módulos.
+// `sourceKey` identifica de forma determinista la condición que la originó
+// (ej. "PROD:LINE_STOPPED:<lineId>") para evitar duplicados mientras está activa.
+// No es único: una condición que se normaliza y vuelve a ocurrir genera una alerta nueva.
+model Alert {
+  id             String        @id @default(cuid())
+  sourceKey      String
+  module         AlertModule
+  type           String // tipo dentro del módulo, ej "LINEA_DETENIDA"
+  severity       AlertSeverity
+  status         AlertStatus   @default(ACTIVA)
+  title          String
+  description    String
+  responsible    String?
+  // Ciclo de vida
+  acknowledgedBy String?
+  acknowledgedAt DateTime?
+  resolvedBy     String?
+  resolvedAt     DateTime?
+  resolutionNote String?
+  autoResolved   Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status, severity])
+  @@index([sourceKey])
+  @@map("alerts")
+}
+
+// Umbrales y activación de cada tipo de alerta. Fila única (singleton).
+model AlertConfig {
+  id                 String  @id @default(cuid())
+  // Umbrales globales
+  oeeMinDefault      Float   @default(65) // OEE mínimo por defecto (si la línea no define el suyo)
+  expiryWarningDays  Int     @default(7) // días de anticipación para alerta de vencimiento
+  dispatchDelayHours Float   @default(2) // horas de tolerancia para retraso de despacho
+  capacityOverPct    Float   @default(90) // % de ocupación que dispara alerta de capacidad
+  // Toggles por tipo de alerta
+  enableLineStopped           Boolean @default(true)
+  enableOeeLow                Boolean @default(true)
+  enableShiftNoRecord         Boolean @default(true)
+  enableStockLow              Boolean @default(true)
+  enableExpiry                Boolean @default(true)
+  enableTempRange             Boolean @default(true)
+  enableDispatchDelay         Boolean @default(true)
+  enableDispatchNoTransporter Boolean @default(true)
+  enableNcCritical            Boolean @default(true)
+  enableNcOverdue             Boolean @default(true)
+  enableCapacityOver          Boolean @default(true)
+  updatedAt          DateTime @updatedAt
+
+  @@map("alert_config")
+}
+
+// ─── Control de Turno ────────────────────────────────────
+// Reemplaza el registro manual en Excel por línea. El programa diario se carga
+// desde un archivo .xlsx y pre-genera los registros de producción por línea.
+
+model ProgramaDiario {
+  id            String   @id @default(cuid())
+  fecha         DateTime
+  lineaId       String
+  linea         ProductionLine @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  turno         Shift    @default(MANANA)
+  archivoNombre String
+  creadoPor     String
+  registros     RegistroProduccion[]
+  creadoEn      DateTime @default(now())
+
+  @@index([fecha, lineaId])
+  @@map("programas_diarios")
+}
+
+model RegistroProduccion {
+  id              String   @id @default(cuid())
+  programaId      String
+  programa        ProgramaDiario @relation(fields: [programaId], references: [id], onDelete: Cascade)
+  lineaId         String
+  linea           ProductionLine @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  sku             String?
+  productoNombre  String
+  turno           Shift    @default(MANANA)
+  fecha           DateTime
+  horaInicio      DateTime?
+  horaTermino     DateTime?
+  dotacion        Int?     // N° carniceros (variante Carnicería)
+  kgPlan          Float    @default(0)
+  kgReal          Float?   // Carnicería: ingreso manual. Envasado: rentapacks × pesoUnitario
+  rentapacks      Int?     // variante Envasado
+  pesoUnitarioKg  Float?   // peso unitario del formato (kg) para variante Envasado
+  rendTeoricoPorc Float?   // % rendimiento teórico (del programa)
+  estado          RegistroEstado @default(PENDIENTE)
+  observaciones   String?
+  batches         RegistroBatch[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([fecha, lineaId])
+  @@map("registros_produccion")
+}
+
+model RegistroBatch {
+  id                   String   @id @default(cuid())
+  registroProduccionId String
+  registro             RegistroProduccion @relation(fields: [registroProduccionId], references: [id], onDelete: Cascade)
+  numeroBatch          Int
+  horaInicio           DateTime?
+  horaTermino          DateTime?
+  kgBatch              Float    @default(0)
+  duracionMinutos      Int?
+  observacion          String?
+  estado               RegistroEstado @default(PENDIENTE)
+
+  @@map("registros_batch")
+}
+
+model ParadaTurno {
+  id            String   @id @default(cuid())
+  lineaId       String
+  linea         ProductionLine @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  fecha         DateTime
+  turno         Shift    @default(MANANA)
+  motivo        String
+  duracionMin   Int
+  registradoPor String
+  createdAt     DateTime @default(now())
+
+  @@index([fecha, lineaId])
+  @@map("paradas_turno")
+}
+
+model OEETurno {
+  id               String   @id @default(cuid())
+  lineaId          String
+  linea            ProductionLine @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  fecha            DateTime
+  turno            Shift    @default(MANANA)
+  disponibilidad   Float    @default(0)
+  rendimiento      Float    @default(0)
+  calidad          Float    @default(0)
+  oee              Float    @default(0)
+  totalParadasMin  Int      @default(0)
+  kgReal           Float    @default(0)
+  kgTeorico        Float    @default(0)
+  capacidadNominal Float    @default(0)
+  clasificacion    String   @default("BAJO")
+  updatedAt        DateTime @updatedAt
+
+  @@unique([lineaId, fecha, turno])
+  @@map("oee_turno")
+}
+
+// ─── Carnicería (Control de Turno especializado) ─────────
+// Mide la productividad de los carniceros sobre la MATERIA PRIMA BRUTA (Kg MP/HH),
+// no sobre el producto terminado.
+
+model CatalogoCortesCarniceria {
+  id                    String  @id @default(cuid())
+  sku                   String  @unique
+  nombre                String
+  cliente               String?
+  rendimientoTeorico    Float   // % (ej. 47)
+  productividadObjetivo Float   // Kg MP/HH objetivo (60 o 45)
+  activo                Boolean @default(true)
+
+  @@map("catalogo_cortes_carniceria")
+}
+
+model ProgramaCarniceria {
+  id            String   @id @default(cuid())
+  fecha         DateTime
+  dotacion      Int      @default(0)
+  turno         Shift    @default(MANANA)
+  archivoNombre String
+  creadoPor     String
+  creadoEn      DateTime @default(now())
+  cortes        RegistroCorteCarniceria[]
+
+  @@index([fecha, turno])
+  @@map("programas_carniceria")
+}
+
+model RegistroCorteCarniceria {
+  id            String   @id @default(cuid())
+  programaId    String
+  programa      ProgramaCarniceria @relation(fields: [programaId], references: [id], onDelete: Cascade)
+  sku           String
+  nombre        String
+  orden         Int
+  // Programa
+  kgPTPlan      Float    @default(0)
+  kgMPTeorico   Float    @default(0)
+  rendTeorico   Float    @default(0)
+  prodObjetivo  Float    @default(0)
+  hiTeorico     String?
+  htTeorico     String?
+  // Ejecución
+  horaInicio    DateTime?
+  horaTermino   DateTime?
+  kgMPReal      Float?
+  kgPTReal      Float?
+  // Derivados (snapshot)
+  hhReales      Float?
+  prodReal      Float?
+  rendReal      Float?
+  estado        RegistroEstado @default(PENDIENTE)
+  observaciones String?
+  registradoPor String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([programaId])
+  @@map("registros_corte_carniceria")
+}
+
+// ─── Capacidad por turnos (Carnicería) ───────────────────
+// Configuración de turnos (C1/C2/C3) y snapshot diario de capacidad vs pedido.
+
+model ConfiguracionTurnos {
+  id           String   @id @default(cuid())
+  lineaId      String
+  linea        ProductionLine @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  turnoNombre  String   // C1, C2, C3
+  cantPersonas Int      @default(0)
+  // Índice 0=Lun .. 5=Sáb. "" = no trabaja
+  entradas     String[]
+  salidas      String[]
+  hhPorDia     Float[]  // HH netas por persona, por día (Lun..Sáb)
+  colacionMin  Int      @default(30)
+  orden        Int      @default(0)
+  activo       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([lineaId])
+  @@map("configuracion_turnos")
+}
+
+model CapacidadDiaria {
+  id            String          @id @default(cuid())
+  lineaId       String
+  linea         ProductionLine  @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  fecha         DateTime
+  diaSemana     Int             // 1=Lun .. 7=Dom
+  hhDisponibles Float           @default(0)
+  capacidadKgMP Float           @default(0)
+  pedidoKgMP    Float           @default(0)
+  ocupacionPorc Float           @default(0)
+  holguraKgMP   Float           @default(0)
+  estado        CapacidadEstado @default(HOLGURA)
+  prodRealKgHH  Float?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@unique([lineaId, fecha])
+  @@index([lineaId, fecha])
+  @@map("capacidad_diaria")
+}
+
+// ─── Carga de Programa (agregador) ───────────────────────
+// Metadatos de cada carga diaria de Excel. Los datos distribuidos viven en
+// ProgramaCarniceria (Carnicería) y ProgramaDiario/RegistroProduccion (Molienda).
+// NO duplica esos datos; solo referencia la fecha y guarda totales.
+
+model CargaPrograma {
+  id                     String      @id @default(cuid())
+  fecha                  DateTime    @unique
+  archivoNombre          String
+  archivoTamanio         Int         @default(0) // bytes
+  archivoData            String?     // contenido .xlsx en base64 (para descarga)
+  cargadoPor             String
+  cargadoEn              DateTime    @default(now())
+  estado                 EstadoCarga @default(ACTIVO)
+  totalCortesCarniceria  Int         @default(0)
+  totalKgMPCarniceria    Float       @default(0)
+  totalProductosMolienda Int         @default(0)
+  totalBatchesMolienda   Int         @default(0)
+
+  @@map("cargas_programa")
+}
