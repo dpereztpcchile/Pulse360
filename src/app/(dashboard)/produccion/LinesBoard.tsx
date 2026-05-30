@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Gauge, Zap, Package, User } from 'lucide-react'
 import { cn, LINE_STATUS } from '@/lib/utils'
@@ -36,6 +36,13 @@ const STATUS_OPTIONS = ['OPERANDO', 'EN_OBSERVACION', 'DETENIDO'] as const
 export function LinesBoard({ initialLines, role }: { initialLines: Line[]; role: string }) {
   const router = useRouter()
   const [busyId, setBusyId] = useState<string | null>(null)
+
+  // Refresca los datos del tablero periódicamente para reflejar el avance de
+  // los cortes de Carnicería (y demás líneas) sin recargar manualmente.
+  useEffect(() => {
+    const id = setInterval(() => router.refresh(), 20000)
+    return () => clearInterval(id)
+  }, [router])
 
   async function changeStatus(id: string, status: string) {
     setBusyId(id)

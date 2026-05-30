@@ -25,23 +25,28 @@ export default async function ProduccionPage() {
     include: { orders: { where: { date: { gte: start, lte: end } }, select: { realKg: true } } },
   })
 
-  // Productividad real promedio del día (Kg MP/HH) para Carnicería:
-  // promedio ponderado de prodReal de los cortes COMPLETADOS de hoy.
+  // Carnicería: la producción del día deriva de los cortes (RegistroCorteCarniceria),
+  // no de ProductionOrder. Tomamos todos los cortes del programa de hoy.
   const cortesHoy = await prisma.registroCorteCarniceria.findMany({
-    where: { estado: 'COMPLETADO', programa: { fecha: { gte: start, lte: end } } },
-    select: { prodReal: true, hhReales: true, kgMPReal: true },
+    where: { programa: { fecha: { gte: start, lte: end } } },
+    select: { estado: true, prodReal: true, hhReales: true, kgMPReal: true, kgPTReal: true, kgPTPlan: true },
   })
-  const sumHH = cortesHoy.reduce((a, c) => a + (c.hhReales ?? 0), 0)
+  const completados = cortesHoy.filter((c) => c.estado === 'COMPLETADO')
+  const sumHH = completados.reduce((a, c) => a + (c.hhReales ?? 0), 0)
   const carniceriaProd = sumHH > 0
-    ? Math.round((cortesHoy.reduce((a, c) => a + (c.prodReal ?? 0) * (c.hhReales ?? 0), 0) / sumHH) * 10) / 10
+    ? Math.round((completados.reduce((a, c) => a + (c.prodReal ?? 0) * (c.hhReales ?? 0), 0) / sumHH) * 10) / 10
     : null
+
+  // Kg producidos hoy (PT) y plan total del programa, para la barra "Producción vs plan".
+  const carnKgRealPT = Math.round(completados.reduce((a, c) => a + (c.kgPTReal ?? 0), 0))
+  const carnKgPlanPT = Math.round(cortesHoy.reduce((a, c) => a + (c.kgPTPlan ?? 0), 0))
 
   // Resumen de capacidad del día para Carnicería (mismos datos que /capacidad)
   const diaCarn = await getDiaView(todayStr())
 
   // Utilización de capacidad = Kg MP real procesados hoy / Capacidad del día × 100.
   // Sin capacidad configurada → null ("—"); sin cortes completados → 0%.
-  const sumKgMPReal = cortesHoy.reduce((a, c) => a + (c.kgMPReal ?? 0), 0)
+  const sumKgMPReal = completados.reduce((a, c) => a + (c.kgMPReal ?? 0), 0)
   const utilCapacidad = diaCarn && diaCarn.capacidadKgMP > 0
     ? Math.round((sumKgMPReal / diaCarn.capacidadKgMP) * 1000) / 10
     : null
@@ -59,10 +64,10 @@ export default async function ProduccionPage() {
     name: l.name,
     code: l.code,
     status: l.status,
-    dailyPlanKg: l.dailyPlanKg,
+    dailyPlanKg: l.code === 'CARNICERIA' && carnKgPlanPT > 0 ? carnKgPlanPT : l.dailyPlanKg,
     oee: l.oee,
     utilization: l.utilization,
-    dayKg: l.orders.reduce((sum, o) => sum + o.realKg, 0),
+    dayKg: l.code === 'CARNICERIA' ? carnKgRealPT : l.orders.reduce((sum, o) => sum + o.realKg, 0),
     prodRealKgHH: l.code === 'CARNICERIA' ? carniceriaProd : null,
     cap: l.code === 'CARNICERIA' ? capCarniceria : null,
     utilCapacidad: l.code === 'CARNICERIA' ? utilCapacidad : null,
