@@ -5,8 +5,8 @@
 
 # ---- Stage 1: dependencias + build ----
 FROM node:20-alpine AS builder
-# libc6-compat: requerido por algunos binarios nativos (Prisma) en Alpine
-RUN apk add --no-cache libc6-compat
+# libc6-compat openssl: requerido por algunos binarios nativos (Prisma) en Alpine
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 # Instalar dependencias (incluye devDependencies para el build)
@@ -21,7 +21,7 @@ RUN npx prisma generate && npm run build
 
 # ---- Stage 2: runner de producción ----
 FROM node:20-alpine AS runner
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -51,3 +51,4 @@ EXPOSE 3000
 # El entrypoint sincroniza el esquema y arranca el servidor
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["npm", "run", "start"]
+
