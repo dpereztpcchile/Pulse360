@@ -113,14 +113,27 @@ export interface HistoricoResult {
 
 const PERIODO_DAYS: Record<string, number> = { '2sem': 14, mes: 30, '3meses': 90 }
 
-export async function getHistorico(periodo = '2sem', estadoFilter = 'todos'): Promise<HistoricoResult> {
+export interface HistoricoOpts { periodo?: string; desde?: string; hasta?: string; estado?: string }
+
+export async function getHistorico(opts: HistoricoOpts = {}): Promise<HistoricoResult> {
+  const { periodo, desde, hasta, estado: estadoFilter = 'todos' } = opts
   const line = await getCarniceriaLine()
   if (!line) return { kpis: { ocupacionProm: 0, diasEstres: 0, diasAlerta: 0, prodRealProm: null }, rows: [] }
 
-  const days = PERIODO_DAYS[periodo] ?? 14
-  const from = new Date(); from.setHours(0, 0, 0, 0); from.setDate(from.getDate() - days)
+  // Rango: por fecha explícita (desde/hasta) o por período relativo
+  let from: Date
+  let to: Date | undefined
+  if (desde) {
+    from = new Date(`${desde}T00:00:00`)
+  } else {
+    const days = PERIODO_DAYS[periodo ?? '2sem'] ?? 14
+    from = new Date(); from.setHours(0, 0, 0, 0); from.setDate(from.getDate() - days)
+  }
+  if (hasta) to = new Date(`${hasta}T23:59:59.999`)
 
-  const where: { lineaId: string; fecha: { gte: Date }; estado?: CapacidadEstado } = { lineaId: line.id, fecha: { gte: from } }
+  const where: { lineaId: string; fecha: { gte: Date; lte?: Date }; estado?: CapacidadEstado } = {
+    lineaId: line.id, fecha: to ? { gte: from, lte: to } : { gte: from },
+  }
   if (estadoFilter === 'estres') where.estado = 'ESTRES'
   else if (estadoFilter === 'advertencia') where.estado = 'ALERTA'
 

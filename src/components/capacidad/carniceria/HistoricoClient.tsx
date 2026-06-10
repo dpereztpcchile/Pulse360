@@ -7,11 +7,6 @@ import { ESTADO_META, DAY_SHORT } from '@/lib/capacidad/carniceria'
 import { cn } from '@/lib/utils'
 import type { HistoricoResult } from '@/lib/capacidad/service'
 
-const PERIODOS = [
-  { key: '2sem', label: 'Últimas 2 semanas' },
-  { key: 'mes', label: 'Último mes' },
-  { key: '3meses', label: 'Últimos 3 meses' },
-]
 const ESTADOS = [
   { key: 'todos', label: 'Todos' },
   { key: 'estres', label: 'Solo estrés' },
@@ -20,42 +15,49 @@ const ESTADOS = [
 
 const fmt = (n: number) => Math.round(n).toLocaleString('es-CL')
 
-export function HistoricoClient({ initial }: { initial: HistoricoResult }) {
-  const [periodo, setPeriodo] = useState('2sem')
+export function HistoricoClient({ initial, desde: desde0, hasta: hasta0 }: { initial: HistoricoResult; desde: string; hasta: string }) {
+  const [desde, setDesde] = useState(desde0)
+  const [hasta, setHasta] = useState(hasta0)
   const [estado, setEstado] = useState('todos')
   const [data, setData] = useState<HistoricoResult>(initial)
   const [loading, setLoading] = useState(false)
 
-  const load = useCallback((p: string, e: string) => {
+  const load = useCallback((d: string, h: string, e: string) => {
     setLoading(true)
-    fetch(`/api/capacidad/carniceria/historico?periodo=${p}&estado=${e}`)
+    fetch(`/api/capacidad/carniceria/historico?desde=${d}&hasta=${h}&estado=${e}`)
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => setData(d))
+      .then((res) => setData(res))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
-  // No recargar en el primer render (ya tenemos initial para 2sem/todos)
+  // El filtro de estado recarga al instante; el de fechas con el botón "Aplicar".
   const [mounted, setMounted] = useState(false)
   useEffect(() => {
     if (!mounted) { setMounted(true); return }
-    load(periodo, estado)
-  }, [periodo, estado, mounted, load])
+    load(desde, hasta, estado)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [estado])
 
   const { kpis, rows } = data
 
   return (
     <div className="space-y-5">
       {/* Filtros */}
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-[#666]">Período</span>
-          <select value={periodo} onChange={(e) => setPeriodo(e.target.value)}
-            className="bg-dark border border-border-dark rounded-lg px-3 py-1.5 text-sm text-white focus:border-pulse-red outline-none">
-            {PERIODOS.map((p) => <option key={p.key} value={p.key}>{p.label}</option>)}
-          </select>
+      <div className="card p-3 flex flex-wrap items-end gap-3">
+        <div>
+          <label className="block text-[11px] text-[#888] mb-1">Desde</label>
+          <input type="date" value={desde} max={hasta} onChange={(e) => setDesde(e.target.value)}
+            className="bg-bg-dark border border-border-dark rounded-lg px-3 py-1.5 text-sm text-white focus:border-pulse-red outline-none" />
         </div>
-        <div className="inline-flex rounded-lg border border-border-dark overflow-hidden">
+        <div>
+          <label className="block text-[11px] text-[#888] mb-1">Hasta</label>
+          <input type="date" value={hasta} min={desde} onChange={(e) => setHasta(e.target.value)}
+            className="bg-bg-dark border border-border-dark rounded-lg px-3 py-1.5 text-sm text-white focus:border-pulse-red outline-none" />
+        </div>
+        <button onClick={() => load(desde, hasta, estado)}
+          className="px-4 py-1.5 rounded-lg bg-pulse-red text-white text-sm font-semibold hover:bg-pulse-red/90">Aplicar</button>
+        <div className="inline-flex rounded-lg border border-border-dark overflow-hidden ml-auto">
           {ESTADOS.map((e) => (
             <button key={e.key} onClick={() => setEstado(e.key)}
               className={cn('px-3 py-1.5 text-sm font-medium transition-colors',

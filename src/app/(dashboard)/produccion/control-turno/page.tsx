@@ -4,23 +4,19 @@ import { prisma } from '@/lib/prisma'
 import { ProductionTabs } from '@/components/produccion/ProductionTabs'
 import { ResumenTurno } from '@/components/produccion/control-turno/ResumenTurno'
 import { getResumen } from '@/lib/control-turno/service'
+import { appToday } from '@/lib/app-date'
 import { GaugeCircle, CalendarDays } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 const VALID = ['MANANA', 'TARDE', 'NOCHE']
 
-function todayStr() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
-
 export default async function ControlTurnoPage({ searchParams }: { searchParams: { turno?: string } }) {
   const session = await getServerSession(authOptions)
   const user = session?.user?.name ?? 'Usuario'
 
   const turno = VALID.includes(searchParams.turno ?? '') ? searchParams.turno! : 'MANANA'
-  const fecha = todayStr()
+  const fecha = appToday()
 
   const [resumen, plant] = await Promise.all([
     getResumen(fecha, turno),

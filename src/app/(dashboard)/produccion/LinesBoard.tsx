@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Gauge, Zap, Package, User } from 'lucide-react'
+import { Gauge, Zap, User } from 'lucide-react'
 import { cn, LINE_STATUS } from '@/lib/utils'
 import { ESTADO_META } from '@/lib/capacidad/carniceria'
 
@@ -31,11 +31,8 @@ interface Line {
 
 const fmtKg = (n: number) => Math.round(n).toLocaleString('es-CL')
 
-const STATUS_OPTIONS = ['OPERANDO', 'EN_OBSERVACION', 'DETENIDO'] as const
-
-export function LinesBoard({ initialLines, role }: { initialLines: Line[]; role: string }) {
+export function LinesBoard({ initialLines }: { initialLines: Line[] }) {
   const router = useRouter()
-  const [busyId, setBusyId] = useState<string | null>(null)
 
   // Refresca los datos del tablero periódicamente para reflejar el avance de
   // los cortes de Carnicería (y demás líneas) sin recargar manualmente.
@@ -44,25 +41,14 @@ export function LinesBoard({ initialLines, role }: { initialLines: Line[]; role:
     return () => clearInterval(id)
   }, [router])
 
-  async function changeStatus(id: string, status: string) {
-    setBusyId(id)
-    const res = await fetch(`/api/production/lines/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status }),
-    })
-    setBusyId(null)
-    if (res.ok) router.refresh()
-  }
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4">
       {initialLines.map((line) => {
         const cfg = LINE_STATUS[line.status]
         const progress = line.dailyPlanKg > 0 ? Math.min(100, Math.round((line.dayKg / line.dailyPlanKg) * 100)) : 0
         return (
-          <div key={line.id} className="card">
-            {/* Encabezado */}
+          <div key={line.id} className="card flex flex-col">
+            {/* Encabezado: nombre + porcentaje de avance grande */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2.5">
                 {cfg.active && (
@@ -75,9 +61,9 @@ export function LinesBoard({ initialLines, role }: { initialLines: Line[]; role:
                   {line.name}
                 </h3>
               </div>
-              <span className={cfg.badge}>
-                <span className={cn('w-1.5 h-1.5 rounded-full', cfg.dot)} />
-                {cfg.label}
+              <span className={cn('font-rajdhani font-bold leading-none text-4xl',
+                progress >= 75 ? 'text-status-ok' : progress >= 40 ? 'text-status-warn' : progress > 0 ? 'text-pulse-red' : 'text-[#555]')}>
+                {progress}<span className="text-xl text-[#666] font-normal">%</span>
               </span>
             </div>
 
@@ -85,7 +71,6 @@ export function LinesBoard({ initialLines, role }: { initialLines: Line[]; role:
             <div className="mb-4">
               <div className="flex justify-between text-xs text-[#666] mb-1.5">
                 <span>Producción vs plan</span>
-                <span className="font-semibold text-white">{progress}%</span>
               </div>
               <div className="h-2.5 bg-bg-dark rounded-full overflow-hidden">
                 <div
@@ -162,27 +147,12 @@ export function LinesBoard({ initialLines, role }: { initialLines: Line[]; role:
               )
             })()}
 
-            {/* Control de estado (todos los roles pueden cambiarlo) */}
-            <div className="flex items-center gap-2 pt-3 border-t border-border-dark">
-              <Package className="w-4 h-4 text-[#555]" />
-              <span className="text-xs text-[#666]">Cambiar estado:</span>
-              <div className="flex gap-1 ml-auto">
-                {STATUS_OPTIONS.map((s) => (
-                  <button
-                    key={s}
-                    disabled={busyId === line.id || line.status === s}
-                    onClick={() => changeStatus(line.id, s)}
-                    className={cn(
-                      'px-2 py-1 rounded text-xs font-medium transition-colors disabled:cursor-default',
-                      line.status === s
-                        ? cn(LINE_STATUS[s].badge)
-                        : 'text-[#666] hover:bg-border-dark hover:text-white'
-                    )}
-                  >
-                    {LINE_STATUS[s].label}
-                  </button>
-                ))}
-              </div>
+            {/* Estado de la línea — al fondo de la tarjeta */}
+            <div className="mt-auto pt-1">
+              <span className={cfg.badge}>
+                <span className={cn('w-1.5 h-1.5 rounded-full', cfg.dot, cfg.active && 'animate-pulse')} />
+                {cfg.label}
+              </span>
             </div>
           </div>
         )

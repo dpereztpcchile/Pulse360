@@ -42,19 +42,47 @@ export async function POST(req: Request) {
   const { fecha, archivoNombre, archivoTamanio, replace } = body
   const carniceria = Array.isArray(body.carniceria) ? body.carniceria : []
   const molienda = Array.isArray(body.molienda) ? body.molienda : []
-  if (carniceria.length === 0 && molienda.length === 0) {
-    return NextResponse.json({ error: 'El programa no contiene datos válidos.' }, { status: 400 })
+  const ordenes = Array.isArray(body.ordenes) ? body.ordenes : []
+  const hasPrograma = carniceria.length > 0 || molienda.length > 0
+  if (!hasPrograma && ordenes.length === 0) {
+    return NextResponse.json({ error: 'El archivo no contiene datos válidos.' }, { status: 400 })
   }
 
   const { start, end, day } = dayBounds(fecha)
 
-  // Control de duplicados
-  const existing = await prisma.cargaPrograma.findFirst({ where: { fecha: { gte: start, lte: end } } })
-  if (existing && !replace) {
+  // Control de duplicados (solo aplica al programa Carnicería/Molienda)
+  const existing = hasPrograma ? await prisma.cargaPrograma.findFirst({ where: { fecha: { gte: start, lte: end } } }) : null
+  if (hasPrograma && existing && !replace) {
     return NextResponse.json({
       exists: true,
       info: { fecha: existing.fecha, cargadoPor: existing.cargadoPor, cargadoEn: existing.cargadoEn },
     }, { status: 409 })
+  }
+
+  // Órdenes de Fabricación (SAP): upsert por numeroOF (no resetea cantidadCompletada/razón).
+  let ordenesImportadas = 0
+  let ordenesActualizadas = 0
+  if (ordenes.length > 0) {
+    const ofs = ordenes.filter((o: { numeroOF?: string }) => o.numeroOF && String(o.numeroOF).trim())
+    const nums = ofs.map((o: { numeroOF: string }) => String(o.numeroOF))
+    const existentes = new Set(
+      (await prisma.ordenFabricacion.findMany({ where: { numeroOF: { in: nums } }, select: { numeroOF: true } })).map((x) => x.numeroOF),
+    )
+    await prisma.$transaction(ofs.map((o: { numeroOF: string; producto?: string; cantidadPlanificada?: number; unidad?: string | null; fecha?: string | null }) => {
+      const fechaOF = o.fecha ? new Date(o.fecha) : day
+      const datos = { producto: String(o.producto ?? ''), cantidadPlanificada: Number(o.cantidadPlanificada) || 0, unidad: o.unidad ? String(o.unidad) : null, fecha: fechaOF }
+      return prisma.ordenFabricacion.upsert({
+        where: { numeroOF: String(o.numeroOF) },
+        create: { numeroOF: String(o.numeroOF), ...datos },
+        update: datos,
+      })
+    }))
+    for (const n of nums) { if (existentes.has(n)) ordenesActualizadas++; else ordenesImportadas++ }
+  }
+
+  // Archivo SAP de solo OF (sin programa): terminamos aquí.
+  if (!hasPrograma) {
+    return NextResponse.json({ ok: true, resumen: null, ordenesImportadas, ordenesActualizadas }, { status: 201 })
   }
 
   // Líneas y catálogo (lecturas previas al $transaction)
@@ -84,7 +112,7 @@ export async function POST(req: Request) {
   if (carniceria.length > 0) {
     ops.push(prisma.programaCarniceria.create({
       data: {
-        fecha: day, turno: 'MANANA', dotacion: 0, archivoNombre: archivoNombre || 'programa.xlsx', creadoPor: session.user?.name ?? 'Administrador',
+        fecha: day, turno: 'MANANA', dotacion: Math.max(0, Math.round(Number(body.dotacion) || 0)), archivoNombre: archivoNombre || 'programa.xlsx', creadoPor: session.user?.name ?? 'Administrador',
         cortes: {
           create: carniceria.map((c: Record<string, unknown>, i: number) => {
             const sku = c.sku ? String(c.sku) : ''
@@ -97,7 +125,7 @@ export async function POST(req: Request) {
               kgPTPlan: Number(c.kgPTPlan) || 0,
               kgMPTeorico: Number(c.kgMPTeorico) || 0,
               rendTeorico: rend,
-              prodObjetivo: ref?.productividadObjetivo ?? 60,
+              prodObjetivo: Number(c.prodObjetivo) || ref?.productividadObjetivo || 60,
               hiTeorico: c.hiTeorico ? String(c.hiTeorico) : null,
               htTeorico: c.htTeorico ? String(c.htTeorico) : null,
               estado: 'PENDIENTE' as const,
@@ -166,5 +194,7 @@ export async function POST(req: Request) {
       productosMolienda: molienda.length,
       batchesMolienda: totalBatches,
     },
+    ordenesImportadas,
+    ordenesActualizadas,
   }, { status: 201 })
 }

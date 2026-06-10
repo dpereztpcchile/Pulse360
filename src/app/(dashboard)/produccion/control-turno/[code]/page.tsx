@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { ProductionTabs } from '@/components/produccion/ProductionTabs'
@@ -10,15 +11,12 @@ import { getTurnoLine } from '@/lib/control-turno/config'
 import { SinProgramaBanner } from '@/components/carga-programa/SinProgramaBanner'
 import { dayBounds, buildOeeInput, type RegistroConBatches } from '@/lib/control-turno/service'
 import { computeOee } from '@/lib/control-turno/oee'
-import { GaugeCircle, CalendarDays } from 'lucide-react'
+import { appToday } from '@/lib/app-date'
+import { GaugeCircle, CalendarDays, ArrowLeft } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 const VALID = ['MANANA', 'TARDE', 'NOCHE']
-function todayStr() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 const iso = (d: Date | null) => (d ? d.toISOString() : null)
 
 export default async function LinePage({ params, searchParams }: { params: { code: string }; searchParams: { turno?: string } }) {
@@ -31,7 +29,7 @@ export default async function LinePage({ params, searchParams }: { params: { cod
   const canManage = role === 'ADMINISTRADOR' || role === 'SUPERVISOR'
 
   const turno = VALID.includes(searchParams.turno ?? '') ? searchParams.turno! : 'MANANA'
-  const fecha = todayStr()
+  const fecha = appToday()
   const { start, end, day } = dayBounds(fecha)
 
   const line = await prisma.productionLine.findUnique({ where: { code: params.code }, select: { id: true, code: true, name: true } })
@@ -49,8 +47,18 @@ export default async function LinePage({ params, searchParams }: { params: { cod
         id: c.id, sku: c.sku, nombre: c.nombre, orden: c.orden,
         kgPTPlan: c.kgPTPlan, kgMPTeorico: c.kgMPTeorico, rendTeorico: c.rendTeorico, prodObjetivo: c.prodObjetivo,
         hiTeorico: c.hiTeorico, htTeorico: c.htTeorico, horaInicio: iso(c.horaInicio), horaTermino: iso(c.horaTermino),
-        kgMPReal: c.kgMPReal, kgPTReal: c.kgPTReal, hhReales: c.hhReales, prodReal: c.prodReal, rendReal: c.rendReal,
+        kgMPReal: c.kgMPReal, kgPTReal: c.kgPTReal, corteAlRojo: c.corteAlRojo, hhReales: c.hhReales, prodReal: c.prodReal, rendReal: c.rendReal,
         estado: c.estado, observaciones: c.observaciones,
+        // Subproductos / lotes / balance de masas (desktop)
+        mpLote1: c.mpLote1, mpLote2: c.mpLote2, mpLote3: c.mpLote3,
+        mpRows: (c.mpRows as number[] | null) ?? null,
+        corteAlRojoRows: (c.corteAlRojoRows as number[] | null) ?? null,
+        despunte7: c.despunte7, despunte7Rows: (c.despunte7Rows as number[] | null) ?? null,
+        despunte4: c.despunte4, despunte4Rows: (c.despunte4Rows as number[] | null) ?? null,
+        recorteMagro: c.recorteMagro, recorteMagroRows: (c.recorteMagroRows as number[] | null) ?? null,
+        merma: c.merma, mermaRows: (c.mermaRows as number[] | null) ?? null,
+        noConformeKg: c.noConformeKg, noConforme: c.noConforme, motivoNC: c.motivoNC,
+        noConformeRows: (c.noConformeRows as { kg: number; motivo: string }[] | null) ?? null,
       })),
     } : null
 
@@ -63,8 +71,13 @@ export default async function LinePage({ params, searchParams }: { params: { cod
           <p className="text-sm text-[#666] mt-0.5">Control de turno - Carnicería</p>
         </div>
         <ProductionTabs />
-        <div className="flex items-center gap-1.5 text-sm text-[#999]">
-          <CalendarDays className="w-4 h-4 text-pulse-red" /> {fecha}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="flex items-center gap-1.5 text-sm text-[#999]">
+            <CalendarDays className="w-4 h-4 text-pulse-red" /> {fecha}
+          </span>
+          <Link href="/produccion/control-turno" className="btn-secondary text-sm inline-flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" /> Volver a las líneas
+          </Link>
         </div>
         <CarniceriaClient initialPrograma={programa} fecha={fecha} turno={turno} user={user} canManage={canManage} />
       </div>

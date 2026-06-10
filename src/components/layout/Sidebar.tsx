@@ -22,6 +22,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { isModuleBlocked } from '@/lib/blocked-modules'
 
 const NAV_ITEMS = [
   { label: 'Dashboard',         href: '/dashboard',          icon: LayoutDashboard, adminOnly: false },
@@ -110,6 +111,31 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           const badge =
             href === '/materias-primas' && alertCount > 0 ? alertCount :
             href === '/alertas' && criticalAlerts > 0 ? criticalAlerts : 0
+
+          // Módulos en construcción: ítem deshabilitado (no navegable)
+          if (isModuleBlocked(href)) {
+            return (
+              <div
+                key={href}
+                title={collapsed ? `${label} (en construcción)` : undefined}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#555] cursor-not-allowed select-none',
+                  collapsed && 'justify-center'
+                )}
+              >
+                <Icon className="w-5 h-5 shrink-0" strokeWidth={1.8} />
+                {!collapsed && (
+                  <>
+                    <span className="text-sm font-medium truncate flex-1">{label}</span>
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-border-dark text-[#777] uppercase tracking-wide whitespace-nowrap">
+                      En construcción
+                    </span>
+                  </>
+                )}
+              </div>
+            )
+          }
+
           return (
             <Link
               key={href}

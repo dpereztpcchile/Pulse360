@@ -536,7 +536,7 @@ model RegistroCorteCarniceria {
   id            String   @id @default(cuid())
   programaId    String
   programa      ProgramaCarniceria @relation(fields: [programaId], references: [id], onDelete: Cascade)
-  sku           String
+  sku           String?
   nombre        String
   orden         Int
   // Programa
@@ -551,6 +551,30 @@ model RegistroCorteCarniceria {
   horaTermino   DateTime?
   kgMPReal      Float?
   kgPTReal      Float?
+  corteAlRojo   Float?
+  // Vista tablet: lotes de MP, subproductos, no conforme, cadena
+  mpLote1          Float?
+  mpLote2          Float?
+  mpLote3          Float?
+  despunte7        Float?
+  despunte4        Float?
+  despunte4Linea   Float?
+  merma            Float?
+  sobranteDespacho Float?
+  prolijado        Float?
+  recorteMagro     Float?
+  noConforme       Float?
+  motivoNC         String?
+  cadena           String?
+  // Desktop · subproductos acumulables (total Float + detalle de filas Json) y balance de masas
+  mpRows           Json?
+  corteAlRojoRows  Json?
+  despunte7Rows    Json?
+  despunte4Rows    Json?
+  recorteMagroRows Json?
+  mermaRows        Json?
+  noConformeKg     Float?
+  noConformeRows   Json?
   // Derivados (snapshot)
   hhReales      Float?
   prodReal      Float?
@@ -629,4 +653,139 @@ model CargaPrograma {
   totalBatchesMolienda   Int         @default(0)
 
   @@map("cargas_programa")
+}
+
+// Órdenes de Fabricación (OF) cargadas desde el Excel SAP vía Carga de Archivos.
+model OrdenFabricacion {
+  id                  String   @id @default(cuid())
+  numeroOF            String   @unique
+  producto            String
+  cantidadPlanificada Float    @default(0)
+  unidad              String?
+  cantidadCompletada  Float    @default(0)
+  razonQuiebre        String?
+  fecha               DateTime
+  creadoEn            DateTime @default(now())
+
+  @@index([fecha])
+  @@map("ordenes_fabricacion")
+}
+
+// Cierre diario de Carnicería: snapshot guardado cada día (23:50) con los Kg de
+// MATERIA PRIMA REAL procesados, para reportes posteriores.
+model CierreDiarioCarniceria {
+  id                String   @id @default(cuid())
+  fecha             DateTime @unique
+  dotacion          Int      @default(0)
+  totalKgMPReal     Float    @default(0)
+  totalKgMPTeorico  Float    @default(0)
+  cortesTotal       Int      @default(0)
+  cortesCompletados Int      @default(0)
+  hhTotales         Float    @default(0)
+  prodRealPromedio  Float?
+  detalle           Json
+  cerradoEn         DateTime @default(now())
+
+  @@map("cierres_diarios_carniceria")
+}
+
+// ─── Capacidad: configuración de horarios por línea (fuente de verdad) ───
+model Linea {
+  id            String   @id @default(cuid())
+  nombre        String   @unique
+  tipo          String   // "kg_hora" | "kg_hh" | "batch"
+  activa        Boolean  @default(true)
+  orden         Int      @default(0)
+  turnos        Turno[]
+  config        ConfigProductividad?
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("capacidad_lineas")
+}
+
+model Turno {
+  id            String       @id @default(cuid())
+  lineaId       String
+  linea         Linea        @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  nombre        String       // "Mañana" | "Tarde" | "C1" | "C2" | "C3"
+  personas      Int          @default(1)
+  activo        Boolean      @default(true)
+  orden         Int          @default(0)
+  horarioDias   HorarioDia[]
+  creadoEn      DateTime     @default(now())
+  actualizadoEn DateTime     @updatedAt
+
+  @@index([lineaId])
+  @@map("capacidad_turnos")
+}
+
+model HorarioDia {
+  id            String   @id @default(cuid())
+  turnoId       String
+  turno         Turno    @relation(fields: [turnoId], references: [id], onDelete: Cascade)
+  dia           Int      // 1=lunes … 6=sábado, 7=domingo
+  opera         Boolean  @default(true)
+  ingreso       String?  // "07:00"
+  salida        String?  // "15:00"
+  colacion      Float    @default(0.5)
+  HH            Float?   // (salida - ingreso) - colacion
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@unique([turnoId, dia])
+  @@index([turnoId])
+  @@map("capacidad_horarios_dia")
+}
+
+// ─── Saturación: proyección semanal de pedidos (PT) por SKU/día ───
+model ProyeccionSemanal {
+  id            String   @id @default(cuid())
+  semana        String   @unique // "2026-W24"
+  fechaInicio   DateTime
+  fechaFin      DateTime
+  productos     ProyeccionProducto[]
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("proyeccion_semanal")
+}
+
+model ProyeccionProducto {
+  id              String            @id @default(cuid())
+  proyeccionId    String
+  proyeccion      ProyeccionSemanal @relation(fields: [proyeccionId], references: [id], onDelete: Cascade)
+  sku             Int
+  descripcion     String
+  categoria       String   // CARNICERIA | MOLIDAS | VARIEDADES | MILANESAS
+  rendimientoSAP  Float?
+  pedidoLunes     Float    @default(0)
+  pedidoMartes    Float    @default(0)
+  pedidoMiercoles Float    @default(0)
+  pedidoJueves    Float    @default(0)
+  pedidoViernes   Float    @default(0)
+  pedidoSabado    Float    @default(0)
+
+  @@index([proyeccionId])
+  @@map("proyeccion_producto")
+}
+
+model ConfigProductividad {
+  id             String   @id @default(cuid())
+  lineaId        String   @unique
+  linea          Linea    @relation(fields: [lineaId], references: [id], onDelete: Cascade)
+  tipo           String   // "kg_hora" | "kg_hh" | "batch" | "molida"
+  kgPorHora      Float?   // Línea 4, 5, Skin Pack, Milanesas; Molida: kg/h por línea (1.300)
+  kgPorHH        Float?   // Carnicería: kg por persona por hora
+  minsPorBatch   Int?     // Molienda: minutos por batch
+  kgPorBatch     Float?   // Molienda: kg por batch
+  // Molida (L1/L2): productividad por golpes y tiempos no productivos
+  golpesPorMinuto Int?
+  setupMin        Int?    // setup inicio (min/día)
+  setPointMin     Int?    // set point entre formatos (min)
+  formatosDia     Int?    // n° de formatos/SKUs por día
+  actualizadoEn  DateTime @updatedAt
+  actualizadoPor String?  // email del admin
+
+  @@map("capacidad_config_productividad")
 }

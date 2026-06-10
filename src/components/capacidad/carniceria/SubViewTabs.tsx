@@ -1,15 +1,16 @@
 import Link from 'next/link'
-import { CalendarDays, History } from 'lucide-react'
+import { CalendarRange, Settings, TrendingUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function SubViewTabs({ vista }: { vista: 'dia' | 'historico' }) {
+export function SubViewTabs({ vista, isAdmin }: { vista: 'semanal' | 'saturacion' | 'dia' | 'historico' | 'horarios'; isAdmin?: boolean }) {
   const tabs = [
-    { key: 'dia', label: 'Vista del día', href: '/capacidad', icon: CalendarDays },
-    { key: 'historico', label: 'Histórico', href: '/capacidad?vista=historico', icon: History },
+    { key: 'semanal', label: 'Capacidad Semanal', href: '/capacidad', icon: CalendarRange, admin: false },
+    { key: 'saturacion', label: 'Saturación Semanal', href: '/capacidad?vista=saturacion', icon: TrendingUp, admin: false },
+    { key: 'horarios', label: 'Horarios', href: '/capacidad?vista=horarios', icon: Settings, admin: true },
   ] as const
   return (
     <div className="inline-flex rounded-lg border border-border-dark overflow-hidden">
-      {tabs.map((t) => {
+      {tabs.filter((t) => !t.admin || isAdmin).map((t) => {
         const active = vista === t.key
         return (
           <Link

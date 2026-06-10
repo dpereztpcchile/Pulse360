@@ -1,10 +1,9 @@
-import { Settings, Users, Building2, Shield, GaugeCircle } from 'lucide-react'
+import { Settings, Users, Building2, Shield } from 'lucide-react'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getRoleLabel, getRoleBadgeColor } from '@/lib/utils'
 import { cn } from '@/lib/utils'
-import { TurnosConfigClient } from '@/components/capacidad/carniceria/TurnosConfigClient'
 
 const USUARIOS_DEMO = [
   { nombre: 'Carlos Administrador', email: 'admin@pulse360.com',      rol: 'ADMINISTRADOR', activo: true,  ultimoLogin: '28/05/2025 09:12' },
@@ -93,16 +92,6 @@ export default async function ConfiguracionPage() {
             </tbody>
           </table>
         </div>
-      </div>
-
-      {/* Carnicería — Configuración de turnos */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <GaugeCircle className="w-5 h-5 text-pulse-red" />
-          <h2 className="text-lg font-semibold text-white">Carnicería — Configuración de turnos</h2>
-        </div>
-        <p className="text-sm text-[#666] mb-4">Dotación, horarios y HH por día que definen la capacidad de la línea Carnicería.</p>
-        <TurnosConfigClient />
       </div>
     </div>
   )

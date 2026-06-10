@@ -3,13 +3,9 @@ import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import { FileUp } from 'lucide-react'
 import { CargaProgramaClient } from '@/components/carga-programa/CargaProgramaClient'
+import { appToday } from '@/lib/app-date'
 
 export const dynamic = 'force-dynamic'
-
-function todayStr() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-}
 
 export default async function CargaArchivosPage() {
   const session = await getServerSession(authOptions)
@@ -27,7 +23,7 @@ export default async function CargaArchivosPage() {
         <p className="text-sm text-[#666] mt-0.5">Carga centralizada del programa diario (.xlsx) para Carnicería y Molienda</p>
       </div>
 
-      <CargaProgramaClient today={todayStr()} user={session.user?.name ?? 'Administrador'} />
+      <CargaProgramaClient today={appToday()} user={session.user?.name ?? 'Administrador'} />
     </div>
   )
 }

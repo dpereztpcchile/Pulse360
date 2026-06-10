@@ -1,26 +1,37 @@
 #!/bin/sh
 set -e
 
-echo "⏳ Esperando a la base de datos..."
-# Espera activa hasta que Postgres acepte conexiones (máx ~60s)
+echo "Esperando a la base de datos..."
+
 ATTEMPTS=0
-until npx prisma db push --skip-generate >/tmp/prisma.log 2>&1; do
+until node -e "
+const { PrismaClient } = require('@prisma/client');
+const p = new PrismaClient();
+p.\$connect().then(() => p.\$disconnect()).then(() => process.exit(0)).catch(() => process.exit(1));
+" > /dev/null 2>&1; do
   ATTEMPTS=$((ATTEMPTS + 1))
   if [ "$ATTEMPTS" -ge 30 ]; then
-    echo "❌ No se pudo conectar a la base de datos:"
-    cat /tmp/prisma.log
+    echo "No se pudo conectar a la base de datos"
     exit 1
   fi
   echo "   ...reintentando ($ATTEMPTS/30)"
   sleep 2
 done
-echo "✅ Esquema sincronizado con la base de datos"
 
-# Seed opcional: ejecutar una sola vez con RUN_SEED=true
-if [ "$RUN_SEED" = "true" ]; then
-  echo "🌱 Poblando datos de ejemplo..."
-  npm run seed || echo "⚠️  El seed falló o ya había datos (continuando)"
+echo "Base de datos lista"
+
+if [ "$NODE_ENV" = "production" ]; then
+  echo "Aplicando migraciones..."
+  npx prisma migrate deploy
+else
+  echo "Sincronizando esquema..."
+  npx prisma db push --skip-generate
 fi
 
-echo "🚀 Iniciando PULSE 360..."
+if [ "$RUN_SEED" = "true" ]; then
+  echo "Poblando datos de ejemplo..."
+  npm run seed || echo "Seed omitido (ya habia datos)"
+fi
+
+echo "Iniciando PULSE 360..."
 exec "$@"

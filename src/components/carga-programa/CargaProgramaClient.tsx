@@ -1,9 +1,9 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, type ComponentType } from 'react'
 import Link from 'next/link'
 import * as XLSX from 'xlsx'
-import { FileUp, FileSpreadsheet, AlertCircle, CheckCircle2, Calendar, Scissors, Boxes, FolderOpen, Loader2 } from 'lucide-react'
+import { FileUp, FileSpreadsheet, AlertCircle, CheckCircle2, Calendar, Scissors, Boxes, FolderOpen, Loader2, ClipboardList } from 'lucide-react'
 import { parseWorkbook, type ParseResult } from '@/lib/carga-programa/parse'
 
 const fmtKg = (n: number) => Math.round(n).toLocaleString('es-CL')
@@ -25,12 +25,10 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
   const [file, setFile] = useState<File | null>(null)
   const [parsed, setParsed] = useState<ParseResult | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [dragOver, setDragOver] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [success, setSuccess] = useState<string | null>(null)
   const [dupInfo, setDupInfo] = useState<{ cargadoPor: string; cargadoEn: string } | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
 
   void user
   const reset = () => { setFile(null); setParsed(null); setError(null); setSuccess(null); setDupInfo(null) }
@@ -58,7 +56,7 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
     const archivoData = await fileToBase64(file).catch(() => null)
     const res = await fetch('/api/carga-programa', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fecha, archivoNombre: file.name, archivoTamanio: file.size, archivoData, replace, carniceria: parsed.carniceria, molienda: parsed.molienda }),
+      body: JSON.stringify({ fecha, archivoNombre: file.name, archivoTamanio: file.size, archivoData, replace, dotacion: parsed.dotacion, carniceria: parsed.carniceria, molienda: parsed.molienda, ordenes: parsed.ordenes }),
     })
     clearInterval(tick)
     if (res.status === 409) {
@@ -72,7 +70,10 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
     }
     const d = await res.json()
     setProgress(100)
-    setSuccess(`Programa del ${fmtFecha(d.resumen.fecha)} cargado correctamente.  ·  Carnicería: ${d.resumen.cortesCarniceria} cortes — ${fmtKg(d.resumen.kgMPCarniceria)} kg MP  ·  Molienda: ${d.resumen.productosMolienda} productos — ${d.resumen.batchesMolienda} batches`)
+    const partes: string[] = []
+    if (d.resumen) partes.push(`Programa del ${fmtFecha(d.resumen.fecha)}: Carnicería ${d.resumen.cortesCarniceria} cortes — ${fmtKg(d.resumen.kgMPCarniceria)} kg MP · Molienda ${d.resumen.productosMolienda} productos`)
+    if (d.ordenesImportadas > 0 || d.ordenesActualizadas > 0) partes.push(`${d.ordenesImportadas || 0} órdenes importadas, ${d.ordenesActualizadas || 0} actualizadas`)
+    setSuccess(partes.join('  ·  ') || 'Carga completada correctamente.')
     setFile(null); setParsed(null)
     setTimeout(() => { setUploading(false); setProgress(0) }, 600)
   }
@@ -90,19 +91,9 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
           </label>
         </div>
 
-        <div
-          onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => { e.preventDefault(); setDragOver(false); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f) }}
-          onClick={() => inputRef.current?.click()}
-          className={`rounded-xl border-2 border-dashed transition-colors cursor-pointer px-6 py-10 text-center ${dragOver ? 'border-pulse-red bg-pulse-red/5' : 'border-border-dark hover:border-pulse-red/50'}`}
-        >
-          <FileUp className="w-10 h-10 text-pulse-red mx-auto mb-3" />
-          <p className="text-white font-medium">Arrastra el programa del día aquí</p>
-          <p className="text-sm text-[#666] mt-1">o haz clic para seleccionar — solo archivos .xlsx</p>
-          <button type="button" onClick={(e) => { e.stopPropagation(); inputRef.current?.click() }} className="btn-secondary text-sm mt-4">Seleccionar archivo</button>
-          <input ref={inputRef} type="file" accept=".xlsx,.xls" className="hidden"
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = '' }} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <UploadZone icon={FileUp} label="Programa del día" sublabel="Carnicería / Molienda — .xlsx" onFile={handleFile} />
+          <UploadZone icon={ClipboardList} label="Maestro de OF (SAP)" sublabel="Órdenes de Fabricación — .xlsx" onFile={handleFile} />
         </div>
 
         {file && (
@@ -166,47 +157,92 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
   )
 }
 
+function UploadZone({ icon: Icon, label, sublabel, onFile }: { icon: ComponentType<{ className?: string }>; label: string; sublabel: string; onFile: (f: File) => void }) {
+  const ref = useRef<HTMLInputElement>(null)
+  const [over, setOver] = useState(false)
+  return (
+    <div
+      onDragOver={(e) => { e.preventDefault(); setOver(true) }}
+      onDragLeave={() => setOver(false)}
+      onDrop={(e) => { e.preventDefault(); setOver(false); const f = e.dataTransfer.files?.[0]; if (f) onFile(f) }}
+      onClick={() => ref.current?.click()}
+      className={`rounded-xl border-2 border-dashed transition-colors cursor-pointer px-5 py-8 text-center ${over ? 'border-pulse-red bg-pulse-red/5' : 'border-border-dark hover:border-pulse-red/50'}`}
+    >
+      <Icon className="w-9 h-9 text-pulse-red mx-auto mb-2" />
+      <p className="text-white font-medium">{label}</p>
+      <p className="text-xs text-[#666] mt-1">{sublabel}</p>
+      <button type="button" onClick={(e) => { e.stopPropagation(); ref.current?.click() }} className="btn-secondary text-sm mt-3">Seleccionar archivo</button>
+      <input ref={ref} type="file" accept=".xlsx,.xls" className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = '' }} />
+    </div>
+  )
+}
+
 function Preview({ parsed, onCargar, onCancel }: { parsed: ParseResult; onCargar: () => void; onCancel: () => void }) {
   const totMP = parsed.carniceria.reduce((a, c) => a + c.kgMPTeorico, 0)
   const totPT = parsed.carniceria.reduce((a, c) => a + c.kgPTPlan, 0)
   const totBatches = parsed.molienda.reduce((a, m) => a + m.numBatches, 0)
   const totMoler = parsed.molienda.reduce((a, m) => a + m.kgTotal, 0)
+  const totOFPlan = parsed.ordenes.reduce((a, o) => a + o.cantidadPlanificada, 0)
+  const hasCarn = parsed.carniceria.length > 0
+  const hasMol = parsed.molienda.length > 0
+  const hasOF = parsed.ordenes.length > 0
   return (
     <div className="mt-5 border-t border-border-dark pt-5">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-bg-dark rounded-lg p-4 border border-border-dark">
-          <div className="flex items-center gap-2 mb-3"><Scissors className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-white">Carnicería — BISTEC-TROZOS</h3></div>
-          <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-            <div><p className="text-lg font-bold text-white">{parsed.carniceria.length}</p><p className="text-[10px] text-[#666]">cortes</p></div>
-            <div><p className="text-lg font-bold text-white">{fmtKg(totMP)}</p><p className="text-[10px] text-[#666]">kg MP</p></div>
-            <div><p className="text-lg font-bold text-white">{fmtKg(totPT)}</p><p className="text-[10px] text-[#666]">kg PT</p></div>
+        {hasCarn && (
+          <div className="bg-bg-dark rounded-lg p-4 border border-border-dark">
+            <div className="flex items-center gap-2 mb-3"><Scissors className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-white">Carnicería</h3></div>
+            <div className="grid grid-cols-3 gap-2 mb-3 text-center">
+              <div><p className="text-lg font-bold text-white">{parsed.carniceria.length}</p><p className="text-[10px] text-[#666]">cortes</p></div>
+              <div><p className="text-lg font-bold text-white">{fmtKg(totMP)}</p><p className="text-[10px] text-[#666]">kg MP</p></div>
+              <div><p className="text-lg font-bold text-white">{fmtKg(totPT)}</p><p className="text-[10px] text-[#666]">kg PT</p></div>
+            </div>
+            <ul className="text-xs text-[#999] space-y-1">
+              {parsed.carniceria.slice(0, 5).map((c, i) => (
+                <li key={i} className="flex justify-between"><span className="truncate pr-2">{c.nombre}</span><span className="text-[#ccc] shrink-0">{fmtKg(c.kgMPTeorico)} kg MP</span></li>
+              ))}
+              {parsed.carniceria.length > 5 && <li className="text-[#555]">+ {parsed.carniceria.length - 5} más…</li>}
+            </ul>
           </div>
-          <ul className="text-xs text-[#999] space-y-1">
-            {parsed.carniceria.slice(0, 5).map((c, i) => (
-              <li key={i} className="flex justify-between"><span className="truncate pr-2">{c.nombre}</span><span className="text-[#ccc] shrink-0">{fmtKg(c.kgMPTeorico)} kg MP</span></li>
-            ))}
-            {parsed.carniceria.length > 5 && <li className="text-[#555]">+ {parsed.carniceria.length - 5} más…</li>}
-          </ul>
-        </div>
+        )}
 
-        <div className="bg-bg-dark rounded-lg p-4 border border-border-dark">
-          <div className="flex items-center gap-2 mb-3"><Boxes className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-white">Molienda — MOLIDA</h3></div>
-          <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-            <div><p className="text-lg font-bold text-white">{parsed.molienda.length}</p><p className="text-[10px] text-[#666]">productos</p></div>
-            <div><p className="text-lg font-bold text-white">{fmtKg(totMoler)}</p><p className="text-[10px] text-[#666]">kg a moler</p></div>
-            <div><p className="text-lg font-bold text-white">{totBatches}</p><p className="text-[10px] text-[#666]">batches</p></div>
+        {hasMol && (
+          <div className="bg-bg-dark rounded-lg p-4 border border-border-dark">
+            <div className="flex items-center gap-2 mb-3"><Boxes className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-white">Molienda — MOLIDA</h3></div>
+            <div className="grid grid-cols-3 gap-2 mb-3 text-center">
+              <div><p className="text-lg font-bold text-white">{parsed.molienda.length}</p><p className="text-[10px] text-[#666]">productos</p></div>
+              <div><p className="text-lg font-bold text-white">{fmtKg(totMoler)}</p><p className="text-[10px] text-[#666]">kg a moler</p></div>
+              <div><p className="text-lg font-bold text-white">{totBatches}</p><p className="text-[10px] text-[#666]">batches</p></div>
+            </div>
+            <ul className="text-xs text-[#999] space-y-1">
+              {parsed.molienda.slice(0, 5).map((m, i) => (
+                <li key={i} className="flex justify-between"><span className="truncate pr-2">{m.productoNombre}</span><span className="text-[#ccc] shrink-0">{m.numBatches} batches</span></li>
+              ))}
+              {parsed.molienda.length > 5 && <li className="text-[#555]">+ {parsed.molienda.length - 5} más…</li>}
+            </ul>
           </div>
-          <ul className="text-xs text-[#999] space-y-1">
-            {parsed.molienda.slice(0, 5).map((m, i) => (
-              <li key={i} className="flex justify-between"><span className="truncate pr-2">{m.productoNombre}</span><span className="text-[#ccc] shrink-0">{m.numBatches} batches</span></li>
-            ))}
-            {parsed.molienda.length > 5 && <li className="text-[#555]">+ {parsed.molienda.length - 5} más…</li>}
-          </ul>
-        </div>
+        )}
+
+        {hasOF && (
+          <div className="bg-bg-dark rounded-lg p-4 border border-border-dark">
+            <div className="flex items-center gap-2 mb-3"><ClipboardList className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-white">Órdenes de Fabricación (SAP)</h3></div>
+            <div className="grid grid-cols-2 gap-2 mb-3 text-center">
+              <div><p className="text-lg font-bold text-white">{parsed.ordenes.length}</p><p className="text-[10px] text-[#666]">OF</p></div>
+              <div><p className="text-lg font-bold text-white">{fmtKg(totOFPlan)}</p><p className="text-[10px] text-[#666]">cant. planificada</p></div>
+            </div>
+            <ul className="text-xs text-[#999] space-y-1">
+              {parsed.ordenes.slice(0, 5).map((o, i) => (
+                <li key={i} className="flex justify-between gap-2"><span className="truncate"><b className="text-[#bbb]">{o.numeroOF}</b> · {o.producto}</span><span className="text-[#ccc] shrink-0">{fmtKg(o.cantidadPlanificada)}</span></li>
+              ))}
+              {parsed.ordenes.length > 5 && <li className="text-[#555]">+ {parsed.ordenes.length - 5} más…</li>}
+            </ul>
+          </div>
+        )}
       </div>
       <div className="flex gap-3 mt-4">
         <button onClick={onCancel} className="btn-secondary text-sm">Cancelar</button>
-        <button onClick={onCargar} className="btn-primary text-sm flex-1 justify-center">CARGAR PROGRAMA</button>
+        <button onClick={onCargar} className="btn-primary text-sm flex-1 justify-center">CARGAR</button>
       </div>
     </div>
   )
