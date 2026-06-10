@@ -20,13 +20,8 @@ done
 
 echo "Base de datos lista"
 
-if [ "$NODE_ENV" = "production" ]; then
-  echo "Aplicando migraciones..."
-  npx prisma migrate deploy
-else
-  echo "Sincronizando esquema..."
-  npx prisma db push --skip-generate
-fi
+echo "Sincronizando esquema con la base de datos..."
+npx prisma db push --skip-generate
 
 if [ "$RUN_SEED" = "true" ]; then
   echo "Poblando datos de ejemplo..."
