@@ -789,3 +789,113 @@ model ConfigProductividad {
 
   @@map("capacidad_config_productividad")
 }
+enum EstadoEtiquetado {
+  BORRADOR
+  EN_REVISION
+  AUTORIZADO
+  VERIFICADO
+  RECHAZADO
+}
+
+enum RolFirma {
+  MAQUINISTA
+  CALIDAD
+  SUPERVISOR
+  VERIFICADOR
+}
+
+enum ResultadoItem {
+  C
+  NC
+  C_OBS
+}
+
+model RegistroEtiquetado {
+  id               String             @id @default(cuid())
+  codigo           String             @unique
+  estado           EstadoEtiquetado   @default(BORRADOR)
+  fecha            DateTime           @default(now())
+  lineaProceso     String
+  producto         String
+  lote             String
+  fechaElaboracion DateTime
+  fechaVencimiento DateTime
+  fechaFaena       DateTime?
+  frigorifico      String?
+  origen           String?
+  precio           Float?
+  maquinista       String
+  observaciones    String?
+  motivoRechazo    String?
+  creadoPor        String
+  creadoEn         DateTime           @default(now())
+  actualizadoEn    DateTime           @updatedAt
+  fotos            FotoEtiquetado[]
+  checklist        ChecklistItem[]
+  analisisIA       AnalisisIA?
+  firmas           FirmaEtiquetado[]
+
+  @@index([estado])
+  @@index([fecha])
+  @@index([lote])
+}
+
+model FotoEtiquetado {
+  id         String             @id @default(cuid())
+  registroId String
+  registro   RegistroEtiquetado @relation(fields: [registroId], references: [id], onDelete: Cascade)
+  tipo       String
+  url        String
+  base64     String?            @db.Text
+  timestamp  DateTime           @default(now())
+  operador   String
+
+  @@index([registroId])
+}
+
+model ChecklistItem {
+  id          String             @id @default(cuid())
+  registroId  String
+  registro    RegistroEtiquetado @relation(fields: [registroId], references: [id], onDelete: Cascade)
+  itemKey     String
+  itemNombre  String
+  resultado   ResultadoItem
+  resultadoIA ResultadoItem?
+  notaIA      String?
+  override    Boolean            @default(false)
+  notaManual  String?
+  orden       Int
+
+  @@unique([registroId, itemKey])
+  @@index([registroId])
+}
+
+model AnalisisIA {
+  id              String             @id @default(cuid())
+  registroId      String             @unique
+  registro        RegistroEtiquetado @relation(fields: [registroId], references: [id], onDelete: Cascade)
+  confianza       Float
+  procesadoEn     DateTime           @default(now())
+  modeloUsado     String             @default("claude-sonnet-4-20250514")
+  camposExtraidos Json
+  itemsAprobados  Int
+  itemsNC         Int
+  observacionesIA String?
+  tokensUsados    Int?
+}
+
+model FirmaEtiquetado {
+  id            String             @id @default(cuid())
+  registroId    String
+  registro      RegistroEtiquetado @relation(fields: [registroId], references: [id], onDelete: Cascade)
+  rol           RolFirma
+  userId        String
+  nombreUsuario String
+  firmadoEn     DateTime           @default(now())
+  observacion   String?
+  esRechazo     Boolean            @default(false)
+  motivoRechazo String?
+
+  @@unique([registroId, rol])
+  @@index([registroId])
+}
