@@ -156,3 +156,87 @@ export default function MaquinistaTablet() {
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-[#CC0000] rounded-lg flex items-center justify-center text-xl flex-shrink-0">🔍</div>
                 <div><div className="text-sm font-bold text-white">Claude Vision</div><div className="text-[11px] text-[#3a5a7a] mt-0.5">Extrae campos y pre-llena el checklist automáticamente</div></div>
+              </div>
+              <button onClick={() => registro && analizarConIA(registro.id)} disabled={analizando || !!confianzaIA} className={`w-full py-4 rounded-lg font-bold text-base flex items-center justify-center gap-2 ${confianzaIA ? 'bg-[#16a34a] text-white' : analizando ? 'bg-[#0d1827] text-[#4a9eff]' : 'bg-[#CC0000] text-white'}`}>
+                {analizando ? '⟳ Analizando...' : confianzaIA ? `✓ Completado — ${confianzaIA}% confianza` : '🤖 Analizar con IA'}
+              </button>
+            </div>
+            {confianzaIA && registro?.analisisIA && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-[#1a1a1a] border border-[#222] rounded-lg p-3"><div className="text-[9px] text-[#555] mb-1">ÍTEMS APROBADOS</div><div className="text-base font-bold text-[#16a34a]">{registro.analisisIA.itemsAprobados} / {CHECKLIST_ITEMS.length}</div></div>
+                <div className="bg-[#1a1a1a] border border-[#222] rounded-lg p-3"><div className="text-[9px] text-[#555] mb-1">CONFIANZA IA</div><div className="text-base font-bold text-[#16a34a]">{confianzaIA}%</div></div>
+              </div>
+            )}
+          </div>
+          <div className="bg-[#1a1a1a] border-t border-[#1e1e1e] p-4 flex gap-3">
+            <button onClick={() => setPaso(2)} className="flex-1 py-4 rounded-lg border border-[#333] text-[#666] font-bold text-base">← Atrás</button>
+            <button onClick={() => setPaso(4)} disabled={!confianzaIA} className="flex-[2] py-4 rounded-lg bg-[#CC0000] text-white font-bold text-base disabled:opacity-40">Ver checklist →</button>
+          </div>
+        </>
+      )}
+
+      {paso === 4 && (
+        <>
+          <div className="flex-1 p-4 overflow-y-auto">
+            <div className="text-[10px] font-bold tracking-[2px] text-[#CC0000] uppercase mb-3 pb-1 border-b border-[#1e1e1e]">Checklist de validación</div>
+            {registro?.checklist.map(item => {
+              const cls = item.resultado === 'NC' ? 'border-l-[3px] border-l-[#CC0000] bg-[#130505]' : item.resultado === 'C_OBS' ? 'border-l-[3px] border-l-[#d4a017] bg-[#100e00]' : 'border-l-[3px] border-l-[#16a34a]'
+              return (
+                <div key={item.itemKey} className={`bg-[#1a1a1a] border border-[#222] rounded-lg p-3 mb-1.5 flex items-center justify-between ${cls}`}>
+                  <div className="flex-1 mr-2">
+                    <div className="text-sm font-bold text-[#d0d0d0]">{item.itemNombre}</div>
+                    {item.notaIA && <div className="text-[10px] mt-0.5 text-[#555]">{item.notaIA}</div>}
+                  </div>
+                  <div className="flex gap-1.5">
+                    <button onClick={() => actualizarItem(registro.id, item.itemKey as ChecklistKey, 'C')} className={`px-3 py-2 rounded-md font-bold text-sm bg-[#16a34a] text-white ${item.resultado !== 'NC' ? 'outline outline-2 outline-white' : ''}`}>C</button>
+                    <button onClick={() => actualizarItem(registro.id, item.itemKey as ChecklistKey, 'NC')} className={`px-3 py-2 rounded-md font-bold text-sm bg-[#CC0000] text-white ${item.resultado === 'NC' ? 'outline outline-2 outline-white' : ''}`}>NC</button>
+                  </div>
+                </div>
+              )
+            })}
+            <div className="text-[10px] font-bold tracking-[2px] text-[#CC0000] uppercase mt-4 mb-2 pb-1 border-b border-[#1e1e1e]">Observaciones</div>
+            <div className="bg-[#1a1a1a] border border-[#222] rounded-lg p-3">
+              <textarea value={observaciones} onChange={e => setObservaciones(e.target.value)} placeholder="Agrega observaciones..." className="w-full bg-transparent text-[#e0e0e0] text-sm outline-none resize-none min-h-[56px] placeholder:text-[#333]" />
+            </div>
+          </div>
+          <div className="bg-[#1a1a1a] border-t border-[#1e1e1e] p-4 flex gap-3">
+            <button onClick={() => setPaso(3)} className="flex-1 py-4 rounded-lg border border-[#333] text-[#666] font-bold text-base">← Atrás</button>
+            <button onClick={async () => { if (registro) { await guardarChecklist(registro.id, observaciones); setPaso(5) } }} disabled={loading} className="flex-[2] py-4 rounded-lg bg-[#CC0000] text-white font-bold text-base disabled:opacity-40">{loading ? 'Guardando...' : 'Continuar → Enviar'}</button>
+          </div>
+        </>
+      )}
+
+      {paso === 5 && !enviado && (
+        <>
+          <div className="flex-1 p-4">
+            <div className="text-[10px] font-bold tracking-[2px] text-[#CC0000] uppercase mb-3 pb-1 border-b border-[#1e1e1e]">Resumen antes de enviar</div>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className="bg-[#1a1a1a] border border-[#222] rounded-lg p-3 col-span-2"><div className="text-[9px] text-[#555] mb-1">PRODUCTO</div><div className="text-sm font-bold">{datos.producto}</div></div>
+              <div className="bg-[#1a1a1a] border border-[#222] rounded-lg p-3"><div className="text-[9px] text-[#555] mb-1">LOTE</div><div className="text-base font-bold text-[#CC0000]">{datos.lote}</div></div>
+              <div className="bg-[#1a1a1a] border border-[#222] rounded-lg p-3"><div className="text-[9px] text-[#555] mb-1">FOTOS</div><div className="text-sm font-bold text-[#16a34a]">2 / 2 ✓</div></div>
+              <div className="bg-[#1a1a1a] border border-[#222] rounded-lg p-3"><div className="text-[9px] text-[#555] mb-1">CHECKLIST</div><div className="text-sm font-bold"><span className="text-[#16a34a]">{itemsC}C</span>{itemsNC > 0 && <span className="text-[#CC0000] ml-1">{itemsNC}NC</span>}</div></div>
+            </div>
+            <div className="bg-[#060d1a] border border-[#1a3a5c] rounded-lg px-3 py-2 flex gap-2">
+              <span className="text-[#4a9eff]">📤</span>
+              <span className="text-[12px] text-[#4a9eff]">Al enviar, <strong className="text-white">Calidad</strong> y <strong className="text-white">Supervisor</strong> recibirán notificación.</span>
+            </div>
+          </div>
+          <div className="bg-[#1a1a1a] border-t border-[#1e1e1e] p-4 flex gap-3">
+            <button onClick={() => setPaso(4)} className="flex-1 py-4 rounded-lg border border-[#333] text-[#666] font-bold text-base">← Atrás</button>
+            <button onClick={handleEnviar} disabled={loading} className="flex-[2] py-4 rounded-lg bg-[#16a34a] text-white font-bold text-base disabled:opacity-40">{loading ? 'Enviando...' : '✓ Enviar a revisión'}</button>
+          </div>
+        </>
+      )}
+
+      {enviado && (
+        <div className="flex-1 flex flex-col items-center justify-center p-8 gap-4">
+          <div className="w-[72px] h-[72px] bg-[#040e06] border-2 border-[#16a34a] rounded-full flex items-center justify-center text-4xl">✓</div>
+          <div className="text-xl font-bold text-[#16a34a] text-center">Registro enviado</div>
+          <div className="text-sm text-[#555] text-center leading-relaxed">Enviado a <strong className="text-white">Calidad</strong> y <strong className="text-white">Supervisor</strong> para autorización.</div>
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-lg px-4 py-2 text-sm text-[#888]">{registro?.codigo}</div>
+          <button onClick={() => router.push('/tablet/maquinista')} className="w-full py-4 rounded-lg bg-[#CC0000] text-white font-bold text-base mt-2">Nuevo registro</button>
+        </div>
+      )}
+    </div>
+  )
+}
