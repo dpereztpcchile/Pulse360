@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, { params }: { params: { etiquetaId: 
 
   try {
     const fotosConBase64 = await Promise.all(
-      registro.fotos.map(async (foto) => {
+      registro.fotos.map(async (foto: any) => {
         try {
           const { readFile } = await import('fs/promises')
           const { join } = await import('path')
@@ -38,21 +38,21 @@ export async function GET(req: NextRequest, { params }: { params: { etiquetaId: 
       })
     )
 
-    const pdfBuffer = await renderToBuffer(
-      EtiquetadoPDF({
-        registro: {
-          ...registro,
-          fechaElaboracion: registro.fechaElaboracion.toISOString(),
-          fechaVencimiento: registro.fechaVencimiento.toISOString(),
-          fechaFaena: registro.fechaFaena?.toISOString() ?? null,
-          fecha: registro.fecha.toISOString(),
-        },
-        fotos: fotosConBase64.map(f => ({ ...f, timestamp: f.timestamp.toISOString() })),
-        checklist: registro.checklist,
-        analisisIA: registro.analisisIA ? { ...registro.analisisIA, procesadoEn: registro.analisisIA.procesadoEn.toISOString() } : null,
-        firmas: registro.firmas.map(f => ({ ...f, firmadoEn: f.firmadoEn.toISOString() })),
-      })
-    )
+    const pdfData: any = {
+      registro: {
+        ...registro,
+        fechaElaboracion: registro.fechaElaboracion.toISOString(),
+        fechaVencimiento: registro.fechaVencimiento.toISOString(),
+        fechaFaena: registro.fechaFaena?.toISOString() ?? null,
+        fecha: registro.fecha.toISOString(),
+      },
+      fotos: fotosConBase64.map((f: any) => ({ ...f, timestamp: f.timestamp.toISOString() })),
+      checklist: registro.checklist,
+      analisisIA: registro.analisisIA ? { ...registro.analisisIA, procesadoEn: registro.analisisIA.procesadoEn.toISOString() } : null,
+      firmas: registro.firmas.map((f: any) => ({ ...f, firmadoEn: f.firmadoEn.toISOString() })),
+    }
+
+    const pdfBuffer = await renderToBuffer(EtiquetadoPDF(pdfData))
 
     return new NextResponse(pdfBuffer, {
       status: 200,
