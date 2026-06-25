@@ -52,14 +52,15 @@ export async function GET(req: NextRequest, { params }: { params: { etiquetaId: 
       firmas: registro.firmas.map((f: any) => ({ ...f, firmadoEn: f.firmadoEn.toISOString() })),
     }
 
-    const pdfBuffer = await renderToBuffer(EtiquetadoPDF(pdfData))
+    const pdfBuffer = await renderToBuffer(EtiquetadoPDF(pdfData) as any)
+    const pdfArray = new Uint8Array(pdfBuffer)
 
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(pdfArray, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="${registro.codigo}.pdf"`,
-        'Content-Length': pdfBuffer.length.toString(),
+        'Content-Length': pdfArray.length.toString(),
         'Cache-Control': 'no-store',
       },
     })
