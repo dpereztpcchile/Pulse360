@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { writeFile, mkdir } from 'fs/promises'
-import { existsSync } from 'fs'
-import path from 'path'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/lib/auth'
-
-const FOTOS_DIR = process.env.FOTOS_DIR || path.join(process.cwd(), 'public', 'fotos')
-const FOTOS_URL = process.env.FOTOS_URL || '/fotos'
+import { r2Upload } from '@/lib/r2'
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -31,14 +26,13 @@ export async function POST(req: NextRequest) {
 
   const base64Clean = base64.includes(',') ? base64.split(',')[1] : base64
   const ext = 'jpg'
-  const dirRegistro = path.join(FOTOS_DIR, registroId)
-  if (!existsSync(dirRegistro)) await mkdir(dirRegistro, { recursive: true })
-
   const filename = `${tipo.toLowerCase()}_${Date.now()}.${ext}`
-  const filepath = path.join(dirRegistro, filename)
-  await writeFile(filepath, Buffer.from(base64Clean, 'base64'))
+  // Clave del objeto dentro del bucket de R2 (equivalente a una "ruta de carpetas")
+  const r2Key = `fotos/${registroId}/${filename}`
+  await r2Upload(r2Key, Buffer.from(base64Clean, 'base64'), 'image/jpeg')
 
-  const url = `${FOTOS_URL}/${registroId}/${filename}`
+  // URL interna que sirve la foto (autenticada) leyendo el objeto desde R2
+  const url = `/api/fotos/${registroId}/${filename}`
 
   const fotoExistente = await prisma.fotoEtiquetado.findFirst({
     where: { registroId, tipo },
