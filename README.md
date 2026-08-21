@@ -20,7 +20,9 @@ Identidad visual: tipografía **Rajdhani**, **dark mode** por defecto y rojo de 
 
 - **Administrador**: acceso total, gestión de usuarios y configuración.
 - **Supervisor**: edita/cierra NC, configura capacidades, gestiona despachos.
-- **Operador**: crea registros; en mobile ve el dashboard simplificado (líneas + alertas).
+- **Operador**: crea registros; en mobile ve el dashboard simplificado (líneas + alertas). En el módulo de Control de Etiquetado firma como **Maquinista** (tablet).
+- **Calidad**: revisa formularios históricos y valida/autoriza solicitudes de etiquetado (firma "Calidad" en el flujo de revisión).
+- **Verificador**: tercero responsable de la verificación final (jefe de planta o jefe de calidad) en el módulo de Control de Etiquetado.
 
 ---
 

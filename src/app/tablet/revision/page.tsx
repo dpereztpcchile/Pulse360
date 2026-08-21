@@ -8,8 +8,8 @@ type Paso = 1 | 2 | 3 | 4
 const PASOS = ['Resumen', 'Fotos', 'Checklist', 'Autorizar']
 
 function getRolFirma(role?: string) {
-  if (role === 'Calidad') return 'CALIDAD'
-  if (role === 'Supervisor') return 'SUPERVISOR'
+  if (role === 'CALIDAD') return 'CALIDAD'
+  if (role === 'SUPERVISOR') return 'SUPERVISOR'
   return null
 }
 

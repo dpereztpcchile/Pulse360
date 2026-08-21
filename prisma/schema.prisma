@@ -17,6 +17,8 @@ enum UserRole {
   ADMINISTRADOR
   SUPERVISOR
   OPERADOR
+  CALIDAD
+  VERIFICADOR
 }
 
 enum PlantStatus {

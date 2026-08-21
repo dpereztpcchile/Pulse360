@@ -25,6 +25,8 @@ export function getRoleLabel(role: string) {
     ADMINISTRADOR: 'Administrador',
     SUPERVISOR: 'Supervisor',
     OPERADOR: 'Operador',
+    CALIDAD: 'Calidad',
+    VERIFICADOR: 'Verificador',
   }
   return labels[role] ?? role
 }
@@ -34,6 +36,8 @@ export function getRoleBadgeColor(role: string) {
     ADMINISTRADOR: 'bg-pulse-red/20 text-pulse-red border border-pulse-red/30',
     SUPERVISOR: 'bg-status-warn/20 text-status-warn border border-status-warn/30',
     OPERADOR: 'bg-status-ok/20 text-status-ok border border-status-ok/30',
+    CALIDAD: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+    VERIFICADOR: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
   }
   return colors[role] ?? 'bg-gray-500/20 text-gray-400'
 }

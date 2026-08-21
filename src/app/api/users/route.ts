@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/api-auth'
 
-const VALID_ROLES = ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR']
+const VALID_ROLES = ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'CALIDAD', 'VERIFICADOR']
 
 export async function GET() {
   if (!(await requireAdmin())) {
