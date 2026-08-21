@@ -25,12 +25,14 @@ interface Props {
   currentUserId: string
 }
 
-const ROLES = ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR']
+const ROLES = ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'CALIDAD', 'VERIFICADOR']
 
 function roleBadge(role: string) {
   switch (role) {
     case 'ADMINISTRADOR': return 'bg-pulse-red/15 text-pulse-red border border-pulse-red/30'
     case 'SUPERVISOR':    return 'bg-status-warn/15 text-status-warn border border-status-warn/30'
+    case 'CALIDAD':       return 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+    case 'VERIFICADOR':   return 'bg-purple-500/15 text-purple-400 border border-purple-500/30'
     default:              return 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]'
   }
 }

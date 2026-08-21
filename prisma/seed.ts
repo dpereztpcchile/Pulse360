@@ -57,6 +57,8 @@ async function main() {
     { name: 'Juan Pérez',       email: 'operador1@pulse360.cl',   password: passStd,   role: UserRole.OPERADOR },
     { name: 'Ana Torres',       email: 'operador2@pulse360.cl',   password: passStd,   role: UserRole.OPERADOR },
     { name: 'Luis Rojas',       email: 'operador3@pulse360.cl',   password: passStd,   role: UserRole.OPERADOR },
+    { name: 'Camila Fuentes',   email: 'calidad1@pulse360.cl',    password: passStd,   role: UserRole.CALIDAD },
+    { name: 'Roberto Díaz',     email: 'verificador1@pulse360.cl',password: passStd,   role: UserRole.VERIFICADOR },
   ]
 
   for (const u of usuarios) {
@@ -72,6 +74,8 @@ async function main() {
   console.log('   👤 Operador 1:    operador1@pulse360.cl   / Pulse360#2024')
   console.log('   👤 Operador 2:    operador2@pulse360.cl   / Pulse360#2024')
   console.log('   👤 Operador 3:    operador3@pulse360.cl   / Pulse360#2024')
+  console.log('   👤 Calidad:       calidad1@pulse360.cl    / Pulse360#2024')
+  console.log('   👤 Verificador:   verificador1@pulse360.cl/ Pulse360#2024')
 
   // ── Líneas de producción (planta cárnica — layout Control de Turno) ──
   // oeeMin = 70 → la planta dispara alerta cuando el OEE de una línea cae bajo 70%.

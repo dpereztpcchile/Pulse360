@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/api-auth'
 
-const VALID_ROLES = ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR']
+const VALID_ROLES = ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'CALIDAD', 'VERIFICADOR']
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   const session = await requireAdmin()

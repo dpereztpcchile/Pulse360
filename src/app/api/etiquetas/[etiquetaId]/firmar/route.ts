@@ -11,10 +11,16 @@ export async function POST(req: NextRequest, { params }: { params: { etiquetaId:
   const registroId = params.etiquetaId
   const body = await req.json()
 
+  // Mapeo de UserRole (sistema) → RolFirma (módulo de etiquetado).
+  // OPERADOR = maquinista en planta. CALIDAD y VERIFICADOR ya son roles reales
+  // del sistema. ADMINISTRADOR puede firmar como VERIFICADOR (jefe de planta/calidad)
+  // para no bloquear el flujo si aún no existe un usuario VERIFICADOR dedicado.
   const rolMap: Record<string, RolFirma> = {
-    'Admin': 'VERIFICADOR', 'Supervisor': 'SUPERVISOR',
-    'Operador': 'MAQUINISTA', 'Calidad': 'CALIDAD',
-    'Verificador': 'VERIFICADOR', 'Maquinista': 'MAQUINISTA',
+    OPERADOR: 'MAQUINISTA',
+    SUPERVISOR: 'SUPERVISOR',
+    CALIDAD: 'CALIDAD',
+    VERIFICADOR: 'VERIFICADOR',
+    ADMINISTRADOR: 'VERIFICADOR',
   }
   const rolFirma = rolMap[session.user.role]
   if (!rolFirma) return NextResponse.json({ error: 'Rol no habilitado para firmar' }, { status: 403 })
