@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import path from 'path'
 import { getSession } from '@/lib/api-auth'
+import { r2Upload } from '@/lib/r2'
 
 const MAX_BYTES = 5 * 1024 * 1024 // 5 MB
 const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf']
 
-/** Sube un archivo de evidencia a /public/uploads y devuelve su URL pública. */
+/** Sube un archivo de evidencia a Cloudflare R2 y devuelve su URL (protegida) de acceso. */
 export async function POST(req: Request) {
   if (!(await getSession())) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
@@ -27,9 +26,8 @@ export async function POST(req: Request) {
   const bytes = Buffer.from(await file.arrayBuffer())
   const safeName = file.name.replace(/[^\w.\-]/g, '_')
   const fileName = `${Date.now()}-${safeName}`
-  const dir = path.join(process.cwd(), 'public', 'uploads')
-  await mkdir(dir, { recursive: true })
-  await writeFile(path.join(dir, fileName), bytes)
+  const r2Key = `nc-evidencias/${fileName}`
+  await r2Upload(r2Key, bytes, file.type || 'application/octet-stream')
 
-  return NextResponse.json({ url: `/uploads/${fileName}`, name: file.name })
+  return NextResponse.json({ url: `/api/nc/upload/${fileName}`, name: file.name })
 }

@@ -4,6 +4,7 @@ import { renderToBuffer } from '@react-pdf/renderer'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { EtiquetadoPDF } from '@/components/etiquetado/EtiquetadoPDF'
+import { r2Download } from '@/lib/r2'
 
 export async function GET(req: NextRequest, { params }: { params: { etiquetaId: string } }) {
   const session = await getServerSession(authOptions)
@@ -27,11 +28,9 @@ export async function GET(req: NextRequest, { params }: { params: { etiquetaId: 
     const fotosConBase64 = await Promise.all(
       registro.fotos.map(async (foto: any) => {
         try {
-          const { readFile } = await import('fs/promises')
-          const { join } = await import('path')
-          const FOTOS_DIR = process.env.FOTOS_DIR || join(process.cwd(), 'public', 'fotos')
-          const relativePath = foto.url.replace(/^\/fotos\//, '')
-          const buffer = await readFile(join(FOTOS_DIR, relativePath))
+          // foto.url tiene el formato /api/fotos/{registroId}/{filename}
+          const relativePath = foto.url.replace(/^\/api\/fotos\//, '')
+          const { buffer } = await r2Download(`fotos/${relativePath}`)
           const base64 = buffer.toString('base64')
           return { ...foto, base64: `data:image/jpeg;base64,${base64}` }
         } catch { return { ...foto, base64: null } }
