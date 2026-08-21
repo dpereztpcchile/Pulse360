@@ -167,6 +167,9 @@ export default function MaquinistaTablet() {
                 <div className="bg-[#1a1a1a] border border-[#222] rounded-lg p-3"><div className="text-[9px] text-[#555] mb-1">CONFIANZA IA</div><div className="text-base font-bold text-[#16a34a]">{confianzaIA}%</div></div>
               </div>
             )}
+            {!confianzaIA && (
+              <button onClick={() => setPaso(4)} className="w-full text-center text-[11px] text-[#555] underline mt-3">Omitir análisis con IA y llenar el checklist manualmente →</button>
+            )}
           </div>
           <div className="bg-[#1a1a1a] border-t border-[#1e1e1e] p-4 flex gap-3">
             <button onClick={() => setPaso(2)} className="flex-1 py-4 rounded-lg border border-[#333] text-[#666] font-bold text-base">← Atrás</button>
