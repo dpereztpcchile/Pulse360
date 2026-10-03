@@ -28,5 +28,10 @@ if [ "$RUN_SEED" = "true" ]; then
   npm run seed || echo "Seed omitido (ya habia datos)"
 fi
 
+if [ "$RESET_ADMIN" = "true" ]; then
+  echo "RESET_ADMIN=true: eliminando usuarios y creando super administrador..."
+  npm run reset-admin || { echo "ERROR: reset-admin fallo. Revisa RESET_ADMIN_NAME/EMAIL/PASSWORD."; exit 1; }
+fi
+
 echo "Iniciando PULSE 360..."
 exec "$@"
