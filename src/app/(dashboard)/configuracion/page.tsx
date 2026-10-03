@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Settings, Users, Building2, Shield, ArrowRight } from 'lucide-react'
+import { Settings, Users, Building2, Shield, ArrowRight, ShieldCheck } from 'lucide-react'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
@@ -61,6 +61,22 @@ export default async function ConfiguracionPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Permisos por rol */}
+      <div className="card flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-pulse-red/10">
+            <ShieldCheck className="w-5 h-5 text-pulse-red" />
+          </div>
+          <div>
+            <p className="font-semibold text-white">Permisos por rol</p>
+            <p className="text-xs text-[#666]">Define a qué módulos puede acceder cada rol (Supervisor, Operador, Calidad, Verificador, Visitante)</p>
+          </div>
+        </div>
+        <Link href="/admin/permisos" className="btn-primary text-xs py-1.5 flex items-center gap-1.5 shrink-0">
+          Gestionar permisos <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* Tabla de usuarios (vista rápida, solo lectura) */}
