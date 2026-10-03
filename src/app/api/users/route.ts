@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/api-auth'
 import { DEFAULT_PASSWORD } from '@/lib/user-defaults'
 
-const VALID_ROLES = ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'CALIDAD', 'VERIFICADOR']
+const VALID_ROLES = ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'CALIDAD', 'VERIFICADOR', 'VISITANTE']
 
 export async function GET() {
   if (!(await requireAdmin())) {
