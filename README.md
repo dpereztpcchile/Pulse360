@@ -96,6 +96,26 @@ Edita `.env` y pon `RUN_SEED=false`, luego:
 docker compose up -d
 ```
 
+### 5. Reset de usuarios + super administrador inicial (⚠️ destructivo)
+
+Si necesitas **borrar todos los usuarios existentes y empezar de cero** con un único
+super administrador, define en `.env` (o en las variables de entorno de Railway):
+
+```bash
+RESET_ADMIN="true"
+RESET_ADMIN_NAME="Tu Nombre"
+RESET_ADMIN_EMAIL="tu@email.cl"
+RESET_ADMIN_PASSWORD="UnaContraseñaSegura123"
+```
+
+Redespliega (`docker compose up -d` o el redeploy de Railway). Al iniciar, el
+contenedor eliminará **todos** los usuarios y sesiones activas, y creará uno solo
+con rol `ADMINISTRADOR` usando esos 3 datos.
+
+**Después de confirmar que puedes iniciar sesión**, vuelve a poner
+`RESET_ADMIN="false"` y redespliega de nuevo — de lo contrario, el próximo
+redeploy volverá a borrar todos los usuarios (incluido el que acabas de crear).
+
 ### Comandos útiles (Docker)
 
 ```bash

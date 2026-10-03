@@ -40,6 +40,12 @@ services:
       DEFAULT_PLANT: ${DEFAULT_PLANT:-Planta Principal}
       # Poner en "true" la primera vez para cargar datos de ejemplo
       RUN_SEED: ${RUN_SEED:-false}
+      # ⚠️ DESTRUCTIVO: borra todos los usuarios y crea un super administrador.
+      # Ver .env.example para instrucciones.
+      RESET_ADMIN: ${RESET_ADMIN:-false}
+      RESET_ADMIN_NAME: ${RESET_ADMIN_NAME:-}
+      RESET_ADMIN_EMAIL: ${RESET_ADMIN_EMAIL:-}
+      RESET_ADMIN_PASSWORD: ${RESET_ADMIN_PASSWORD:-}
       NODE_ENV: production
       # Cloudflare R2 (almacenamiento de archivos: fotos, evidencias, Excel)
       R2_ACCOUNT_ID: ${R2_ACCOUNT_ID:-}
