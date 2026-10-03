@@ -202,32 +202,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Credenciales de demo */}
-          <div className="mt-6 pt-5 border-t border-border-dark">
-            <p className="text-xs text-[#555] mb-3 font-medium uppercase tracking-wider">
-              Credenciales de demo
-            </p>
-            <div className="space-y-1.5">
-              {[
-                { label: 'Administrador', email: 'admin@pulse360.cl', pass: 'Pulse360#Admin', color: 'text-pulse-red' },
-                { label: 'Supervisor', email: 'supervisor1@pulse360.cl', pass: 'Pulse360#2024', color: 'text-status-warn' },
-                { label: 'Operador', email: 'operador1@pulse360.cl', pass: 'Pulse360#2024', color: 'text-[#999]' },
-              ].map((u) => (
-                <button
-                  key={u.email}
-                  type="button"
-                  disabled={isLocked}
-                  onClick={() => { setEmail(u.email); setPassword(u.pass) }}
-                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-border-dark transition-colors
-                             flex items-center justify-between group disabled:opacity-50"
-                >
-                  <span className={`text-xs font-semibold ${u.color}`}>{u.label}</span>
-                  <span className="text-xs text-[#555] group-hover:text-[#888] font-mono">{u.email}</span>
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
 
         <p className="text-center text-xs text-[#444] mt-6">
