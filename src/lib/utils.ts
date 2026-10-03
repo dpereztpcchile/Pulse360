@@ -27,6 +27,7 @@ export function getRoleLabel(role: string) {
     OPERADOR: 'Operador',
     CALIDAD: 'Calidad',
     VERIFICADOR: 'Verificador',
+    VISITANTE: 'Visitante',
   }
   return labels[role] ?? role
 }
@@ -38,6 +39,7 @@ export function getRoleBadgeColor(role: string) {
     OPERADOR: 'bg-status-ok/20 text-status-ok border border-status-ok/30',
     CALIDAD: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
     VERIFICADOR: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+    VISITANTE: 'bg-gray-500/20 text-gray-400 border border-gray-500/30',
   }
   return colors[role] ?? 'bg-gray-500/20 text-gray-400'
 }
