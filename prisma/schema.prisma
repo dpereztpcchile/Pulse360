@@ -158,6 +158,24 @@ model User {
   @@map("users")
 }
 
+// Permisos de acceso a módulos por rol (matriz rol × módulo).
+// Si no existe una fila para un (role, moduleKey), se usa el valor por
+// defecto definido en src/lib/modules.ts (DEFAULT_PERMISSIONS). El rol
+// ADMINISTRADOR siempre tiene acceso total y no se gestiona desde aquí.
+// El módulo "dashboard" tampoco se gestiona aquí: todo usuario autenticado
+// lo tiene siempre habilitado (evita dejar a un rol sin ninguna pantalla
+// a la que aterrizar tras iniciar sesión).
+model RolePermission {
+  id        String   @id @default(cuid())
+  role      UserRole
+  moduleKey String
+  allowed   Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  @@unique([role, moduleKey])
+  @@map("role_permissions")
+}
+
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique

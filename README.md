@@ -23,6 +23,11 @@ Identidad visual: tipografía **Rajdhani**, **dark mode** por defecto y rojo de 
 - **Operador**: crea registros; en mobile ve el dashboard simplificado (líneas + alertas). En el módulo de Control de Etiquetado firma como **Maquinista** (tablet).
 - **Calidad**: revisa formularios históricos y valida/autoriza solicitudes de etiquetado (firma "Calidad" en el flujo de revisión).
 - **Verificador**: tercero responsable de la verificación final (jefe de planta o jefe de calidad) en el módulo de Control de Etiquetado.
+- **Visitante**: acceso de solo lectura muy restringido. Por defecto solo ve el Dashboard operacional; el Administrador puede habilitarle módulos puntuales desde **Configuración → Permisos por rol**.
+
+### Permisos por rol (matriz rol × módulo)
+
+Desde `/admin/permisos` (enlazado también desde Configuración) el Administrador puede definir a qué módulos tiene acceso cada rol no-administrador: Producción, Materias Primas, Despacho, No Conformidades, Capacidad, Alertas y Reportes. El Dashboard es siempre visible para todos los roles y Usuarios/Configuración/Carga de Archivos siguen siendo exclusivos de Administrador (no se gestionan desde la matriz). Los cambios se aplican la próxima vez que cada usuario afectado inicie sesión (los permisos viajan en el JWT de la sesión, igual que el rol).
 
 ---
 

@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
+import { getAllowedModuleKeys } from './permissions'
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -44,6 +45,12 @@ export const authOptions: NextAuthOptions = {
           data: { lastLoginAt: new Date() },
         })
 
+        // Módulos a los que este rol tiene acceso (matriz de permisos por
+        // rol). Se calcula una vez aquí y viaja en el JWT durante toda la
+        // sesión (8h); si un administrador cambia la matriz, el usuario
+        // afectado verá el cambio reflejado en su próximo inicio de sesión.
+        const allowedModules = Array.from(await getAllowedModuleKeys(user.role))
+
         return {
           id: user.id,
           email: user.email,
@@ -52,6 +59,7 @@ export const authOptions: NextAuthOptions = {
           plantId: user.plantId,
           plantName: user.plant?.name ?? null,
           mustChangePassword: user.mustChangePassword,
+          allowedModules,
         }
       },
     }),
@@ -64,6 +72,7 @@ export const authOptions: NextAuthOptions = {
         token.plantId = user.plantId
         token.plantName = user.plantName
         token.mustChangePassword = user.mustChangePassword
+        token.allowedModules = user.allowedModules
       }
       // Permite refrescar el flag desde el cliente tras cambiar la contraseña
       // (signIn/update con session.mustChangePassword = false).
@@ -79,6 +88,7 @@ export const authOptions: NextAuthOptions = {
         session.user.plantId = token.plantId as string | null
         session.user.plantName = token.plantName as string | null
         session.user.mustChangePassword = token.mustChangePassword as boolean
+        session.user.allowedModules = (token.allowedModules as string[]) ?? []
       }
       return session
     },

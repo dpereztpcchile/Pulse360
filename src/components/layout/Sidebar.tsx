@@ -24,18 +24,22 @@ import {
 import { cn } from '@/lib/utils'
 import { isModuleBlocked } from '@/lib/blocked-modules'
 
+// moduleKey: null => módulo siempre visible (Dashboard) o gestionado solo por
+// adminOnly (Usuarios/Configuración/Carga de Archivos). Si tiene moduleKey,
+// su visibilidad también depende de la matriz de permisos por rol
+// (session.user.allowedModules — ver src/lib/modules.ts).
 const NAV_ITEMS = [
-  { label: 'Dashboard',         href: '/dashboard',          icon: LayoutDashboard, adminOnly: false },
-  { label: 'Producción',        href: '/produccion',         icon: Factory,         adminOnly: false },
-  { label: 'Materias Primas',   href: '/materias-primas',    icon: Package,         adminOnly: false },
-  { label: 'Despacho',          href: '/despacho',           icon: Truck,           adminOnly: false },
-  { label: 'No Conformidades',  href: '/no-conformidades',   icon: AlertTriangle,   adminOnly: false },
-  { label: 'Capacidad',         href: '/capacidad',          icon: Gauge,           adminOnly: false },
-  { label: 'Carga de Archivos', href: '/carga-archivos',     icon: FileUp,          adminOnly: true },
-  { label: 'Alertas',           href: '/alertas',            icon: Bell,            adminOnly: false },
-  { label: 'Reportes',          href: '/reportes',           icon: FileBarChart,    adminOnly: false },
-  { label: 'Usuarios',          href: '/admin/usuarios',     icon: Users,           adminOnly: true },
-  { label: 'Configuración',     href: '/configuracion',      icon: Settings,        adminOnly: true },
+  { label: 'Dashboard',         href: '/dashboard',          icon: LayoutDashboard, adminOnly: false, moduleKey: null },
+  { label: 'Producción',        href: '/produccion',         icon: Factory,         adminOnly: false, moduleKey: 'produccion' },
+  { label: 'Materias Primas',   href: '/materias-primas',    icon: Package,         adminOnly: false, moduleKey: 'materias-primas' },
+  { label: 'Despacho',          href: '/despacho',           icon: Truck,           adminOnly: false, moduleKey: 'despacho' },
+  { label: 'No Conformidades',  href: '/no-conformidades',   icon: AlertTriangle,   adminOnly: false, moduleKey: 'no-conformidades' },
+  { label: 'Capacidad',         href: '/capacidad',          icon: Gauge,           adminOnly: false, moduleKey: 'capacidad' },
+  { label: 'Carga de Archivos', href: '/carga-archivos',     icon: FileUp,          adminOnly: true,  moduleKey: null },
+  { label: 'Alertas',           href: '/alertas',            icon: Bell,            adminOnly: false, moduleKey: 'alertas' },
+  { label: 'Reportes',          href: '/reportes',           icon: FileBarChart,    adminOnly: false, moduleKey: 'reportes' },
+  { label: 'Usuarios',          href: '/admin/usuarios',     icon: Users,           adminOnly: true,  moduleKey: null },
+  { label: 'Configuración',     href: '/configuracion',      icon: Settings,        adminOnly: true,  moduleKey: null },
 ]
 
 interface SidebarProps {
@@ -47,7 +51,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
   const { data: session } = useSession()
   const isAdmin = session?.user?.role === 'ADMINISTRADOR'
-  const navItems = NAV_ITEMS.filter((item) => !item.adminOnly || isAdmin)
+  const allowedModules = session?.user?.allowedModules ?? []
+  const navItems = NAV_ITEMS.filter((item) => {
+    if (item.adminOnly && !isAdmin) return false
+    if (item.moduleKey && !isAdmin && !allowedModules.includes(item.moduleKey)) return false
+    return true
+  })
 
   const [alertCount, setAlertCount] = useState(0)
   useEffect(() => {
