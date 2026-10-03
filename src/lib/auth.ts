@@ -51,17 +51,24 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           plantId: user.plantId,
           plantName: user.plant?.name ?? null,
+          mustChangePassword: user.mustChangePassword,
         }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id
         token.role = user.role
         token.plantId = user.plantId
         token.plantName = user.plantName
+        token.mustChangePassword = user.mustChangePassword
+      }
+      // Permite refrescar el flag desde el cliente tras cambiar la contraseña
+      // (signIn/update con session.mustChangePassword = false).
+      if (trigger === 'update' && session?.mustChangePassword === false) {
+        token.mustChangePassword = false
       }
       return token
     },
@@ -71,6 +78,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string
         session.user.plantId = token.plantId as string | null
         session.user.plantName = token.plantName as string | null
+        session.user.mustChangePassword = token.mustChangePassword as boolean
       }
       return session
     },

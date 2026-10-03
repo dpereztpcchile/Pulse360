@@ -53,9 +53,12 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
   // Modal crear/editar
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<UserRow | null>(null)
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'OPERADOR', plantId: '' })
+  const [form, setForm] = useState({ name: '', email: '', role: 'OPERADOR', plantId: '' })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+
+  // Aviso con la clave por defecto tras crear un usuario nuevo
+  const [created, setCreated] = useState<{ name: string; email: string } | null>(null)
 
   // Modal reset password
   const [resetUser, setResetUser] = useState<UserRow | null>(null)
@@ -73,14 +76,14 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
 
   function openCreate() {
     setEditing(null)
-    setForm({ name: '', email: '', password: '', role: 'OPERADOR', plantId: plants[0]?.id ?? '' })
+    setForm({ name: '', email: '', role: 'OPERADOR', plantId: plants[0]?.id ?? '' })
     setError('')
     setModalOpen(true)
   }
 
   function openEdit(u: UserRow) {
     setEditing(u)
-    setForm({ name: u.name, email: u.email, password: '', role: u.role, plantId: u.plantId ?? '' })
+    setForm({ name: u.name, email: u.email, role: u.role, plantId: u.plantId ?? '' })
     setError('')
     setModalOpen(true)
   }
@@ -112,6 +115,9 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
         return
       }
       setModalOpen(false)
+      if (!editing) {
+        setCreated({ name: form.name, email: form.email })
+      }
       router.refresh()
     } catch {
       setError('Error de conexión')
@@ -328,12 +334,12 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
                              focus:outline-none focus:border-pulse-red transition-colors" />
               </div>
               {!editing && (
-                <div>
-                  <label className="block text-sm font-medium text-[#ccc] mb-1.5">Contraseña</label>
-                  <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    required minLength={8} placeholder="Mínimo 8 caracteres"
-                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm
-                               placeholder-[#555] focus:outline-none focus:border-pulse-red transition-colors" />
+                <div className="flex items-start gap-2 p-3 rounded-lg bg-status-warn/10 border border-status-warn/20 text-xs text-status-warn">
+                  <KeyRound className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>
+                    El usuario se creará con la contraseña por defecto <strong className="font-mono">123456</strong>.
+                    Al iniciar sesión por primera vez, el sistema le pedirá definir una contraseña propia.
+                  </span>
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3">
@@ -382,7 +388,8 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
               </button>
             </div>
             <p className="text-sm text-[#666] mb-4">
-              Nueva contraseña para <span className="text-white font-medium">{resetUser.name}</span>
+              Nueva contraseña para <span className="text-white font-medium">{resetUser.name}</span>.
+              Se le pedirá definir una contraseña propia en su próximo inicio de sesión.
             </p>
 
             {error && (
@@ -405,6 +412,41 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmación de usuario creado con clave por defecto */}
+      {created && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-sm card border border-border-dark shadow-2xl">
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <KeyRound className="w-5 h-5 text-status-ok" /> Usuario creado
+              </h2>
+              <button onClick={() => setCreated(null)} className="text-[#666] hover:text-white transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-[#999] mb-4">
+              Comparte estos datos con <span className="text-white font-medium">{created.name}</span> para su primer ingreso:
+            </p>
+            <div className="space-y-2 mb-5">
+              <div className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2">
+                <p className="text-[10px] text-[#666] uppercase tracking-wider">Email</p>
+                <p className="text-sm font-mono text-white">{created.email}</p>
+              </div>
+              <div className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2">
+                <p className="text-[10px] text-[#666] uppercase tracking-wider">Contraseña temporal</p>
+                <p className="text-sm font-mono text-white">123456</p>
+              </div>
+            </div>
+            <p className="text-xs text-[#555] mb-4">
+              Al iniciar sesión, se le pedirá definir una contraseña propia antes de poder usar el sistema.
+            </p>
+            <button onClick={() => setCreated(null)} className="btn-primary w-full justify-center text-sm">
+              Entendido
+            </button>
           </div>
         </div>
       )}

@@ -9,6 +9,7 @@ declare module 'next-auth' {
       role: string
       plantId: string | null
       plantName: string | null
+      mustChangePassword: boolean
     }
   }
 
@@ -19,6 +20,7 @@ declare module 'next-auth' {
     role: string
     plantId: string | null
     plantName: string | null
+    mustChangePassword: boolean
   }
 }
 
@@ -28,5 +30,6 @@ declare module 'next-auth/jwt' {
     role: string
     plantId: string | null
     plantName: string | null
+    mustChangePassword: boolean
   }
 }
