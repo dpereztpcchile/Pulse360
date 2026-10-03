@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Activity, BarChart3, Eye, EyeOff, Loader2, AlertCircle, Lock } from 'lucide-react'
 
@@ -76,7 +76,12 @@ export default function LoginPage() {
       setLoading(false)
     } else {
       localStorage.removeItem(LOCK_KEY)
-      router.push('/dashboard')
+      const session = await getSession()
+      if (session?.user?.mustChangePassword) {
+        router.push('/cambiar-clave')
+      } else {
+        router.push('/dashboard')
+      }
     }
   }
 

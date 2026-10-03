@@ -139,17 +139,18 @@ model Plant {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  password      String
-  role          UserRole  @default(OPERADOR)
-  active        Boolean   @default(true)
-  plantId       String?
-  plant         Plant?    @relation(fields: [plantId], references: [id])
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  lastLoginAt   DateTime?
+  id                 String    @id @default(cuid())
+  name               String
+  email              String    @unique
+  password           String
+  role               UserRole  @default(OPERADOR)
+  active             Boolean   @default(true)
+  mustChangePassword Boolean   @default(false)
+  plantId            String?
+  plant              Plant?    @relation(fields: [plantId], references: [id])
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  lastLoginAt        DateTime?
 
   sessions Session[]
 

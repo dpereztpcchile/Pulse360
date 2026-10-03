@@ -206,6 +206,18 @@ servicio `systemd`, y coloca **Nginx** como proxy inverso con HTTPS (Let's Encry
 
 > Cambia estas credenciales antes de exponer la plataforma en producción.
 
+## Creación de usuarios y contraseña por defecto
+
+Todo usuario nuevo creado desde **Admin > Usuarios** se crea automáticamente con
+la contraseña temporal **`123456`**. Al iniciar sesión por primera vez (o después
+de que un administrador le resetee la contraseña), el sistema lo redirige
+obligatoriamente a `/cambiar-clave` y no le permite usar ninguna otra pantalla
+hasta que defina una contraseña propia de al menos 8 caracteres.
+
+Esto se controla con el campo `mustChangePassword` en el modelo `User` y se
+aplica en `src/middleware.ts` sobre todas las rutas protegidas (dashboard,
+admin, tablet, etc.).
+
 ---
 
 ## Notas de producción

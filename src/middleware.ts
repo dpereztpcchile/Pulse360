@@ -6,6 +6,12 @@ export default withAuth(
     const token = req.nextauth.token
     const pathname = req.nextUrl.pathname
 
+    // Si el usuario debe cambiar su contraseña (primer ingreso o reset),
+    // se le bloquea el acceso a cualquier ruta protegida hasta que lo haga.
+    if (token?.mustChangePassword && pathname !== '/cambiar-clave') {
+      return NextResponse.redirect(new URL('/cambiar-clave', req.url))
+    }
+
     // Rutas de administrador únicamente
     const adminRoutes = ['/configuracion', '/admin']
     if (adminRoutes.some((r) => pathname.startsWith(r))) {
@@ -43,5 +49,7 @@ export const config = {
     '/reportes/:path*',
     '/configuracion/:path*',
     '/admin/:path*',
+    '/tablet/:path*',
+    '/carga-archivos/:path*',
   ],
 }
