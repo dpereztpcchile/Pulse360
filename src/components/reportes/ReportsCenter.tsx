@@ -16,7 +16,7 @@ const REPORTS: ReportCard[] = [
   { slug: 'produccion',        nombre: 'Producción',         descripcion: 'Producción real vs plan, OEE por línea, paradas y horas productivas.', icon: Factory,       roles: ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR'] },
   { slug: 'materias-primas',   nombre: 'Materias Primas',    descripcion: 'Consumo por insumo, evolución de stock, proveedores y lotes por vencer.', icon: Package,       roles: ['ADMINISTRADOR', 'SUPERVISOR'] },
   { slug: 'despacho',          nombre: 'Despacho',           descripcion: 'Volumen despachado, cumplimiento a tiempo y ranking de clientes.',     icon: Truck,         roles: ['ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR'] },
-  { slug: 'no-conformidades',  nombre: 'No Conformidades',   descripcion: 'NC creadas/cerradas/vencidas, categorías, gravedad y tiempos por área.', icon: AlertTriangle, roles: ['ADMINISTRADOR', 'SUPERVISOR'] },
+  { slug: 'no-conformidades',  nombre: 'No Conformidades',   descripcion: 'Indicadores de NC por Proveedor y Planta: valor NC, razones, proveedores y evolución semanal.', icon: AlertTriangle, roles: ['ADMINISTRADOR', 'SUPERVISOR'] },
   { slug: 'capacidad',         nombre: 'Capacidad vs Demanda', descripcion: 'Ocupación por línea y capacidad vs demanda semana a semana.',          icon: Gauge,         roles: ['ADMINISTRADOR', 'SUPERVISOR'] },
 ]
 
@@ -34,6 +34,12 @@ export function ReportsCenter({ role }: { role: string }) {
   const visible = REPORTS.filter((r) => r.roles.includes(role))
 
   const generate = (slug: string) => {
+    // No Conformidades ya no vive en el Centro de Reportes: tiene su propia
+    // pestaña "Indicadores" dentro del módulo, con datos reales de NcRegistro.
+    if (slug === 'no-conformidades') {
+      router.push('/no-conformidades/indicadores')
+      return
+    }
     router.push(`/reportes/${slug}?from=${from}&to=${to}`)
   }
 

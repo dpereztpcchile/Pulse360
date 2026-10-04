@@ -2,77 +2,49 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSession } from '@/lib/api-auth'
 
-const VALID_CATEGORY = ['CALIDAD', 'INOCUIDAD', 'PROCESO', 'PROVEEDOR']
-const VALID_SEVERITY = ['CRITICA', 'MAYOR', 'MENOR']
-const VALID_STATUS = ['ABIERTA', 'EN_INVESTIGACION', 'ACCION_CORRECTIVA', 'CERRADA']
+const VALID_RESPONSABLE = ['PROVEEDOR', 'PLANTA']
+const VALID_DESTINO = ['VENTA_A_TERCEROS', 'DECOMISO', 'DEVOLUCION', 'RETENIDO', 'OTRO']
+const VALID_ESTADO = ['VENDIDO', 'TRANSFERIDA', 'D_CHILEMINK', 'STANBY']
 
+/**
+ * GET /api/nc — listado de NC (modelo NcRegistro, cargado vía import de Excel).
+ * No existe creación manual: todos los registros provienen de la pestaña
+ * "Carga de archivos" (ver /api/nc/import).
+ *
+ * Filtros soportados: responsable, destino, estadoNc, proveedor, razon,
+ * gestionado, semanaDesde/semanaHasta, ncNumber (búsqueda exacta).
+ */
 export async function GET(req: Request) {
   if (!(await getSession())) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
   const { searchParams } = new URL(req.url)
-  const status = searchParams.get('status')
-  const severity = searchParams.get('severity')
-  const category = searchParams.get('category')
-  const area = searchParams.get('area')
+  const responsable = searchParams.get('responsable')
+  const destino = searchParams.get('destino')
+  const estadoNc = searchParams.get('estadoNc')
+  const proveedor = searchParams.get('proveedor')
+  const razon = searchParams.get('razon')
+  const gestionado = searchParams.get('gestionado')
+  const semanaDesde = searchParams.get('semanaDesde')
+  const semanaHasta = searchParams.get('semanaHasta')
+  const ncNumber = searchParams.get('ncNumber')
 
   const where: Record<string, unknown> = {}
-  if (status && VALID_STATUS.includes(status)) where.status = status
-  if (severity && VALID_SEVERITY.includes(severity)) where.severity = severity
-  if (category && VALID_CATEGORY.includes(category)) where.category = category
-  if (area) where.area = { contains: area, mode: 'insensitive' }
+  if (responsable && VALID_RESPONSABLE.includes(responsable)) where.responsable = responsable
+  if (destino && VALID_DESTINO.includes(destino)) where.destino = destino
+  if (estadoNc && VALID_ESTADO.includes(estadoNc)) where.estadoNc = estadoNc
+  if (proveedor) where.proveedor = { contains: proveedor, mode: 'insensitive' }
+  if (razon) where.razon = { contains: razon, mode: 'insensitive' }
+  if (gestionado === 'true' || gestionado === 'false') where.gestionado = gestionado === 'true'
+  if (ncNumber) where.ncNumber = Number(ncNumber)
+  if (semanaDesde || semanaHasta) {
+    where.semana = {
+      ...(semanaDesde ? { gte: Number(semanaDesde) } : {}),
+      ...(semanaHasta ? { lte: Number(semanaHasta) } : {}),
+    }
+  }
 
-  const ncs = await prisma.nonConformity.findMany({ where, orderBy: { ncNumber: 'desc' } })
+  const ncs = await prisma.ncRegistro.findMany({ where, orderBy: { ncNumber: 'desc' } })
   return NextResponse.json(ncs)
-}
-
-/** Crear NC: todos los roles. Registra el cambio de estado inicial (→ ABIERTA). */
-export async function POST(req: Request) {
-  const session = await getSession()
-  if (!session) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
-
-  const body = await req.json()
-  const { area, category, severity, title, description, responsible, dueDate, evidenceUrl, evidenceName } = body
-
-  if (!area?.trim() || !title?.trim() || !description?.trim() || !responsible?.trim()) {
-    return NextResponse.json({ error: 'Área, título, descripción y responsable son obligatorios' }, { status: 400 })
-  }
-  if (!VALID_CATEGORY.includes(category)) {
-    return NextResponse.json({ error: 'Categoría inválida' }, { status: 400 })
-  }
-  if (!VALID_SEVERITY.includes(severity)) {
-    return NextResponse.json({ error: 'Gravedad inválida' }, { status: 400 })
-  }
-  if (!dueDate) {
-    return NextResponse.json({ error: 'La fecha límite es obligatoria' }, { status: 400 })
-  }
-
-  const year = new Date().getFullYear()
-  const count = await prisma.nonConformity.count()
-  const ncNumber = `NC-${year}-${String(count + 1).padStart(4, '0')}`
-
-  const nc = await prisma.nonConformity.create({
-    data: {
-      ncNumber,
-      area: area.trim(),
-      category,
-      severity,
-      title: title.trim(),
-      description: description.trim(),
-      responsible: responsible.trim(),
-      dueDate: new Date(dueDate),
-      evidenceUrl: evidenceUrl?.trim() || null,
-      evidenceName: evidenceName?.trim() || null,
-      createdBy: session.user.name ?? null,
-      status: 'ABIERTA',
-      history: {
-        create: { toStatus: 'ABIERTA', changedBy: session.user.name ?? 'Sistema', note: 'No conformidad creada' },
-      },
-    },
-  })
-
-  return NextResponse.json({ id: nc.id, ncNumber: nc.ncNumber }, { status: 201 })
 }
