@@ -20,6 +20,32 @@ done
 
 echo "Base de datos lista"
 
+# Limpieza de datos huérfanos antes del "db push": el schema actual (desde
+# PULSE360-nc) eliminó el valor NO_CONFORMIDADES del enum AlertModule. Si la
+# base de producción todavía tiene filas de "alerts" con ese valor (generadas
+# por versiones anteriores de la app), Postgres rechaza el
+# "ALTER TYPE ... DROP VALUE" con "invalid input value for enum" y ningún
+# flag de Prisma puede evitarlo (--accept-data-loss solo cubre borrado de
+# tablas/columnas, no valores de enum todavía en uso). Se borran esas filas
+# con SQL crudo (cast a texto) ANTES del push, usando el Prisma Client ya
+# generado con el schema NUEVO (por eso no se puede filtrar por el enum
+# tipado, que ya no conoce ese valor).
+echo "Limpiando datos huerfanos de versiones anteriores del esquema..."
+node -e "
+const { PrismaClient } = require('@prisma/client');
+const p = new PrismaClient();
+(async () => {
+  try {
+    const n = await p.\$executeRawUnsafe(\"DELETE FROM alerts WHERE module::text = 'NO_CONFORMIDADES'\");
+    if (n > 0) console.log('   Eliminadas ' + n + ' alertas huerfanas de NO_CONFORMIDADES (modulo ya removido)');
+  } catch (e) {
+    console.log('   (sin datos huerfanos que limpiar: ' + e.message + ')');
+  } finally {
+    await p.\$disconnect();
+  }
+})();
+" || echo "   Limpieza omitida (tabla/columna no existe aun, probablemente primer deploy)"
+
 echo "Sincronizando esquema con la base de datos..."
 # --accept-data-loss: este proyecto no usa prisma migrate (no hay carpeta de
 # migraciones), sino "db push" directo en cada deploy. Sin esta flag, "db push"
