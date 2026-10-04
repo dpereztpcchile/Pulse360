@@ -137,35 +137,42 @@ export function formatTime(date: Date | string) {
 
 // ── No Conformidades ──
 
-export const NC_CATEGORY = {
-  CALIDAD:   { label: 'Calidad',   cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
-  INOCUIDAD: { label: 'Inocuidad', cls: 'bg-purple-500/10 text-purple-400 border border-purple-500/20' },
-  PROCESO:   { label: 'Proceso',   cls: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' },
+export const NC_RESPONSABLE = {
   PROVEEDOR: { label: 'Proveedor', cls: 'bg-orange-500/10 text-orange-400 border border-orange-500/20' },
+  PLANTA:    { label: 'Planta',    cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
 } as const
-export type NcCategoryKey = keyof typeof NC_CATEGORY
+export type NcResponsableKey = keyof typeof NC_RESPONSABLE
 
-export const NC_SEVERITY = {
-  CRITICA: { label: 'Crítica', cls: 'bg-pulse-red/10 text-pulse-red border border-pulse-red/20',     dot: 'bg-pulse-red' },
-  MAYOR:   { label: 'Mayor',   cls: 'bg-status-warn/10 text-status-warn border border-status-warn/20', dot: 'bg-status-warn' },
-  MENOR:   { label: 'Menor',   cls: 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]',               dot: 'bg-[#999]' },
+export const NC_DESTINO = {
+  VENTA_A_TERCEROS: { label: 'Venta a terceros', cls: 'bg-status-ok/10 text-status-ok border border-status-ok/20' },
+  DECOMISO:         { label: 'Decomiso',         cls: 'bg-pulse-red/10 text-pulse-red border border-pulse-red/20' },
+  DEVOLUCION:       { label: 'Devolución',       cls: 'bg-status-warn/10 text-status-warn border border-status-warn/20' },
+  RETENIDO:         { label: 'Retenido',         cls: 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]' },
+  OTRO:             { label: 'Otro',             cls: 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]' },
 } as const
-export type NcSeverityKey = keyof typeof NC_SEVERITY
+export type NcDestinoKey = keyof typeof NC_DESTINO
 
-export const NC_STATUS = {
-  ABIERTA:           { label: 'Abierta',            cls: 'bg-pulse-red/10 text-pulse-red border border-pulse-red/20' },
-  EN_INVESTIGACION:  { label: 'En investigación',   cls: 'bg-status-warn/10 text-status-warn border border-status-warn/20' },
-  ACCION_CORRECTIVA: { label: 'Acción correctiva',  cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
-  CERRADA:           { label: 'Cerrada',            cls: 'bg-status-ok/10 text-status-ok border border-status-ok/20' },
+export const NC_ESTADO = {
+  VENDIDO:      { label: 'Vendido',      cls: 'bg-status-ok/10 text-status-ok border border-status-ok/20' },
+  TRANSFERIDA:  { label: 'Transferida',  cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
+  D_CHILEMINK:  { label: 'D. Chilemink', cls: 'bg-purple-500/10 text-purple-400 border border-purple-500/20' },
+  STANBY:       { label: 'Standby',      cls: 'bg-status-warn/10 text-status-warn border border-status-warn/20' },
 } as const
-export type NcStatusKey = keyof typeof NC_STATUS
+export type NcEstadoKey = keyof typeof NC_ESTADO
 
-export const NC_STATUS_ORDER: NcStatusKey[] = ['ABIERTA', 'EN_INVESTIGACION', 'ACCION_CORRECTIVA', 'CERRADA']
+// Productos que son insumos de envase/embalaje, no producto cárnico.
+// Se usa para el filtro opcional "excluir insumos de envase" en Indicadores.
+export const NC_PRODUCTOS_ENVASE = new Set([
+  'BANDEJA F40', 'BANDEJA F50', 'BANDEJAS H38', 'ETIQUETA B. ASIENTO', 'ETIQUETA ESCALOPA G.',
+  'ETIQUETA LOMO LISO S.', 'ETIQUETAS 10%', 'ETIQUETAS 4%', 'ETIQUETAS 7%', 'FILM BISTEC',
+  'FILM DEBANADERA', 'FILM DESGRASADOS', 'FILM MOLIDA', 'FILM SKIN PACK', 'PAPEL CERESINADO',
+  'STICKERS SIN ADITIVO', 'STICKERS SMASH', 'DETERGENTE', 'BOLSA FUELLE AZUL', 'BOLSA FUELLE TRANS.',
+  'ACIDO LACTICO', 'ANTIOXIDANTE CMD', 'HEMOGLOBINA C', 'ETIQUETA 4% 500',
+])
 
-/** Una NC está vencida si pasó la fecha límite y no está cerrada. */
-export function ncIsOverdue(dueDate: Date | string, status: string) {
-  if (status === 'CERRADA') return false
-  return new Date(dueDate).getTime() < Date.now()
+/** True si el producto de la NC es un insumo de envase/embalaje (no producto cárnico). */
+export function ncEsInsumoEnvase(producto: string) {
+  return NC_PRODUCTOS_ENVASE.has(producto.trim().toUpperCase())
 }
 
 // ── Capacidad vs Demanda ──
@@ -240,7 +247,6 @@ export const ALERT_MODULE = {
   PRODUCCION:       { label: 'Producción',       cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
   MATERIAS_PRIMAS:  { label: 'Materias Primas',  cls: 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' },
   DESPACHO:         { label: 'Despacho',         cls: 'bg-purple-500/10 text-purple-400 border border-purple-500/20' },
-  NO_CONFORMIDADES: { label: 'No Conformidades', cls: 'bg-orange-500/10 text-orange-400 border border-orange-500/20' },
   CAPACIDAD:        { label: 'Capacidad',        cls: 'bg-teal-500/10 text-teal-400 border border-teal-500/20' },
 } as const
 export type AlertModuleKey = keyof typeof ALERT_MODULE

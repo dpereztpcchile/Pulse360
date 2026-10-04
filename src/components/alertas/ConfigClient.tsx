@@ -17,8 +17,6 @@ export interface AlertConfigShape {
   enableTempRange: boolean
   enableDispatchDelay: boolean
   enableDispatchNoTransporter: boolean
-  enableNcCritical: boolean
-  enableNcOverdue: boolean
   enableCapacityOver: boolean
 }
 
@@ -33,8 +31,6 @@ const TOGGLES: { key: keyof AlertConfigShape; label: string; module: string }[] 
   { key: 'enableTempRange', label: 'Temperatura fuera de rango', module: 'Materias Primas' },
   { key: 'enableDispatchDelay', label: 'Guía con retraso', module: 'Despacho' },
   { key: 'enableDispatchNoTransporter', label: 'Despacho sin transportista', module: 'Despacho' },
-  { key: 'enableNcCritical', label: 'NC crítica abierta', module: 'No Conformidades' },
-  { key: 'enableNcOverdue', label: 'NC vencida sin cerrar', module: 'No Conformidades' },
   { key: 'enableCapacityOver', label: 'Línea con ocupación alta', module: 'Capacidad' },
 ]
 

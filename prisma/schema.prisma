@@ -61,31 +61,33 @@ enum DispatchStatus {
   ENTREGADO
 }
 
-enum NcCategory {
-  CALIDAD
-  INOCUIDAD
-  PROCESO
+// No Conformidades: quién originó el rechazo del producto.
+enum NcResponsable {
   PROVEEDOR
+  PLANTA
 }
 
-enum NcSeverity {
-  CRITICA
-  MAYOR
-  MENOR
+// No Conformidades: destino final dado al producto afectado.
+enum NcDestino {
+  VENTA_A_TERCEROS
+  DECOMISO
+  DEVOLUCION
+  RETENIDO
+  OTRO
 }
 
-enum NcStatus {
-  ABIERTA
-  EN_INVESTIGACION
-  ACCION_CORRECTIVA
-  CERRADA
+// No Conformidades: disposición final de la NC (vacío = aún sin resolver).
+enum NcEstado {
+  VENDIDO
+  TRANSFERIDA
+  D_CHILEMINK
+  STANBY
 }
 
 enum AlertModule {
   PRODUCCION
   MATERIAS_PRIMAS
   DESPACHO
-  NO_CONFORMIDADES
   CAPACIDAD
 }
 
@@ -236,41 +238,50 @@ model ProductionOrder {
   @@map("production_orders")
 }
 
-model NonConformity {
-  id               String     @id @default(cuid())
-  ncNumber         String     @unique
-  area             String
-  category         NcCategory
-  severity         NcSeverity
-  status           NcStatus   @default(ABIERTA)
-  title            String
-  description      String
-  rootCause        String?
-  correctiveAction String?
-  responsible      String
-  dueDate          DateTime
-  evidenceUrl      String?
-  evidenceName     String?
-  createdBy        String?
-  closedAt         DateTime?
-  history          NcStatusChange[]
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+// No Conformidades — registro de rechazo de producto con impacto comercial.
+// Se carga por importación masiva de Excel ("Seguimiento NC"), semana a semana.
+// ncNumber es el identificador único del Excel (columna "N. DE NC") y se usa
+// para deduplicar: una fila con un ncNumber ya existente NUNCA se reimporta
+// ni se sobrescribe (los datos históricos no cambian, solo se agregan nuevos).
+model NcRegistro {
+  id       String   @id @default(cuid())
+  ncNumber Int      @unique // "N. DE NC" del Excel
 
-  @@map("non_conformities")
-}
+  fecha  DateTime // fecha de creación de la NC
+  semana Int // N° de semana (ISO/Excel WEEKNUM)
 
-model NcStatusChange {
-  id         String        @id @default(cuid())
-  ncId       String
-  nc         NonConformity @relation(fields: [ncId], references: [id], onDelete: Cascade)
-  fromStatus NcStatus?
-  toStatus   NcStatus
-  changedBy  String
-  note       String?
-  createdAt  DateTime      @default(now())
+  producto String
+  razon    String // motivo: DFD, MAL OLOR, CONTAMINACIÓN, etc. (lista fija)
 
-  @@map("nc_status_changes")
+  cantidadKg         Float
+  valorProductoOC    Float? // valor unitario según Orden de Compra
+  valorNcOC          Float? // cantidadKg × valorProductoOC (impacto bruto)
+  destino            NcDestino
+  precioVentaTercero Float? // $/kg al que se vende a terceros según destino
+  valorVentaNc       Float? // monto recaudado si se vendió a terceros
+  costoPlanta        Float? // pérdida neta (valorNcOC - valorVentaNc)
+
+  responsable NcResponsable
+  sif         String?
+  proveedor   String?
+  oc          String? // N° de Orden de Compra
+
+  estadoNc          NcEstado?
+  fechaDisposicion  DateTime?
+  camara            String?
+
+  // true si hay coordinación con el proveedor para devolución del dinero.
+  // Las NC gestionadas se excluyen de todos los indicadores/análisis,
+  // pero se mantienen en el listado como dato histórico.
+  gestionado Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([semana])
+  @@index([responsable])
+  @@index([proveedor])
+  @@map("nc_registros")
 }
 
 model Dispatch {
@@ -418,8 +429,6 @@ model AlertConfig {
   enableTempRange             Boolean @default(true)
   enableDispatchDelay         Boolean @default(true)
   enableDispatchNoTransporter Boolean @default(true)
-  enableNcCritical            Boolean @default(true)
-  enableNcOverdue             Boolean @default(true)
   enableCapacityOver          Boolean @default(true)
   updatedAt          DateTime @updatedAt
 

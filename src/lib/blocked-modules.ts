@@ -3,7 +3,6 @@
 export const BLOCKED_MODULES = [
   '/materias-primas',
   '/despacho',
-  '/no-conformidades',
   '/alertas',
 ] as const
 

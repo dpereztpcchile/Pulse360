@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, AlertTriangle, ClipboardX } from 'lucide-react'
+import { ArrowLeft, ClipboardX } from 'lucide-react'
 import { CarniceriaTable } from './CarniceriaTable'
 import { EnvasadoTable } from './EnvasadoTable'
 import { MoliendaView, type BatchActionPayload } from './MoliendaView'
@@ -20,7 +20,7 @@ function estadoFromBatches(batches: BatchDTO[]): Estado {
 }
 
 export function LineDetailClient({
-  line, fecha, turno, user, canManage, initialRegistros, initialParadas, initialOee, ncCount,
+  line, fecha, turno, user, canManage, initialRegistros, initialParadas, initialOee,
 }: {
   line: LineInfo
   fecha: string
@@ -30,7 +30,6 @@ export function LineDetailClient({
   initialRegistros: RegistroDTO[]
   initialParadas: { motivo: string; duracionMin: number }[]
   initialOee: OeeView | null
-  ncCount: number
 }) {
   const [registros, setRegistros] = useState<RegistroDTO[]>(initialRegistros)
   const [oee, setOee] = useState<OeeView | null>(initialOee)
@@ -100,13 +99,6 @@ export function LineDetailClient({
           </button>
         )}
       </div>
-
-      {ncCount > 0 && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-pulse-red/10 border border-pulse-red/20 text-sm text-pulse-red">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          {ncCount} no conformidad{ncCount > 1 ? 'es' : ''} registrada{ncCount > 1 ? 's' : ''} hoy para esta línea.
-        </div>
-      )}
 
       {line.variant === 'CARNICERIA' && <CarniceriaTable registros={registros} busyId={busyId} onAction={onAction} />}
       {line.variant === 'ENVASADO' && <EnvasadoTable registros={registros} busyId={busyId} onAction={onAction} />}

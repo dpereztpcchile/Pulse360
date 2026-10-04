@@ -84,7 +84,7 @@ export default async function LinePage({ params, searchParams }: { params: { cod
     )
   }
 
-  const [registrosRaw, paradasRaw, ncs] = await Promise.all([
+  const [registrosRaw, paradasRaw] = await Promise.all([
     prisma.registroProduccion.findMany({
       where: { lineaId: line.id, fecha: { gte: start, lte: end }, turno: turno as never },
       include: { batches: { orderBy: { numeroBatch: 'asc' } } },
@@ -93,10 +93,6 @@ export default async function LinePage({ params, searchParams }: { params: { cod
     prisma.paradaTurno.findMany({
       where: { lineaId: line.id, fecha: { gte: start, lte: end }, turno: turno as never },
       orderBy: { createdAt: 'asc' },
-    }),
-    prisma.nonConformity.findMany({
-      where: { createdAt: { gte: start, lte: end }, status: { not: 'CERRADA' } },
-      select: { area: true, title: true, description: true },
     }),
   ])
 
@@ -124,8 +120,6 @@ export default async function LinePage({ params, searchParams }: { params: { cod
       kgBatch: b.kgBatch, duracionMinutos: b.duracionMinutos, observacion: b.observacion, estado: b.estado,
     })),
   }))
-
-  const ncCount = ncs.filter((nc) => `${nc.area} ${nc.title} ${nc.description}`.toLowerCase().includes(line.name.toLowerCase())).length
 
   void day
 
@@ -158,7 +152,6 @@ export default async function LinePage({ params, searchParams }: { params: { cod
         initialRegistros={registros}
         initialParadas={paradasRaw.map((p) => ({ motivo: p.motivo, duracionMin: p.duracionMin }))}
         initialOee={oeeView}
-        ncCount={ncCount}
       />
     </div>
   )

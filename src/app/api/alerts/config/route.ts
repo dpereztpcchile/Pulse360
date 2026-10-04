@@ -6,7 +6,7 @@ import { getOrCreateConfig } from '@/lib/alerts'
 const TOGGLE_FIELDS = [
   'enableLineStopped', 'enableOeeLow', 'enableShiftNoRecord', 'enableStockLow',
   'enableExpiry', 'enableTempRange', 'enableDispatchDelay', 'enableDispatchNoTransporter',
-  'enableNcCritical', 'enableNcOverdue', 'enableCapacityOver',
+  'enableCapacityOver',
 ] as const
 
 /** Devuelve la configuración de umbrales + OEE mínimo por línea. Solo Administrador. */
