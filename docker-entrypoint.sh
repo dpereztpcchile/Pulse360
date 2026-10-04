@@ -21,7 +21,13 @@ done
 echo "Base de datos lista"
 
 echo "Sincronizando esquema con la base de datos..."
-npx prisma db push --skip-generate
+# --accept-data-loss: este proyecto no usa prisma migrate (no hay carpeta de
+# migraciones), sino "db push" directo en cada deploy. Sin esta flag, "db push"
+# se niega a correr en modo no interactivo (como en Railway) cuando el nuevo
+# schema implica borrar una tabla/columna con datos (p.ej. al reemplazar un
+# modelo viejo por uno nuevo, como ocurrió con NonConformity -> NcRegistro).
+# Eso hacía fallar el entrypoint completo y el deploy quedaba en estado failed.
+npx prisma db push --skip-generate --accept-data-loss
 
 if [ "$RUN_SEED" = "true" ]; then
   echo "Poblando datos de ejemplo..."
