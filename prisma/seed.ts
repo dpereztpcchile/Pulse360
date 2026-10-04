@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, PlantStatus, LineStatus, Shift, OrderStatus, MaterialCategory, DispatchStatus, NcCategory, NcSeverity, NcStatus, AlertModule, AlertSeverity, AlertStatus, RegistroEstado, CapacidadEstado } from '@prisma/client'
+import { PrismaClient, UserRole, PlantStatus, LineStatus, Shift, OrderStatus, MaterialCategory, DispatchStatus, NcResponsable, NcDestino, NcEstado, AlertModule, AlertSeverity, AlertStatus, RegistroEstado, CapacidadEstado } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -22,8 +22,7 @@ async function main() {
   await prisma.alertConfig.deleteMany()
   await prisma.demandPlan.deleteMany()
   await prisma.lineCapacity.deleteMany()
-  await prisma.ncStatusChange.deleteMany()
-  await prisma.nonConformity.deleteMany()
+  await prisma.ncRegistro.deleteMany()
   await prisma.dispatch.deleteMany()
   await prisma.materialConsumption.deleteMany()
   await prisma.materialReceipt.deleteMany()
@@ -195,84 +194,67 @@ async function main() {
   }
   console.log(`✅ Guías de despacho creadas: ${despachosData.length}`)
 
-  // ── No Conformidades (planta cárnica) ──
-  const ncDay = (offset: number) => { const d = new Date(); d.setDate(d.getDate() + offset); d.setHours(12, 0, 0, 0); return d }
-  const ncsData = [
-    {
-      ncNumber: 'NC-2026-0001', area: 'Refrigeración', category: NcCategory.INOCUIDAD, severity: NcSeverity.CRITICA,
-      status: NcStatus.EN_INVESTIGACION, title: 'Temperatura de cámara frigorífica fuera de rango',
-      description: 'La cámara de producto terminado registró +4°C cuando el límite es ≤2°C durante el turno noche. Producto trasladado a cámara de respaldo y bajo evaluación.',
-      rootCause: 'Falla en compresor de cámara.',
-      correctiveAction: null, responsible: 'Pedro Soto', dueDate: ncDay(3), createdBy: 'Supervisor 1', createdAt: ncDay(-3),
-      history: [
-        { toStatus: NcStatus.ABIERTA, changedBy: 'Supervisor 1', note: 'No conformidad creada', createdAt: ncDay(-3) },
-        { fromStatus: NcStatus.ABIERTA, toStatus: NcStatus.EN_INVESTIGACION, changedBy: 'Supervisor 1', note: 'Asignado a mantención para revisión del compresor', createdAt: ncDay(-2) },
-      ],
-    },
-    {
-      ncNumber: 'NC-2026-0002', area: 'Calidad', category: NcCategory.CALIDAD, severity: NcSeverity.MAYOR,
-      status: NcStatus.ACCION_CORRECTIVA, title: 'Lote de carne molida con exceso de grasa',
-      description: 'El lote de Carne Molida Corriente 1kg presentó % de grasa por sobre la especificación (28% vs. 20% objetivo) en el muestreo de control de proceso.',
-      rootCause: 'Variación en materia prima (recorte 70/30 con mayor proporción de grasa).',
-      correctiveAction: 'Reformulación del blend de molienda y ajuste del control de recepción de recortes por % de grasa.',
-      responsible: 'Ana Torres', dueDate: ncDay(6), createdBy: 'Supervisor 2', createdAt: ncDay(-5),
-      history: [
-        { toStatus: NcStatus.ABIERTA, changedBy: 'Supervisor 2', note: 'No conformidad creada', createdAt: ncDay(-5) },
-        { fromStatus: NcStatus.ABIERTA, toStatus: NcStatus.EN_INVESTIGACION, changedBy: 'Supervisor 2', note: null, createdAt: ncDay(-4) },
-        { fromStatus: NcStatus.EN_INVESTIGACION, toStatus: NcStatus.ACCION_CORRECTIVA, changedBy: 'Supervisor 2', note: 'Causa identificada, ejecutando acción correctiva', createdAt: ncDay(-2) },
-      ],
-    },
-    {
-      ncNumber: 'NC-2026-0003', area: 'Envasado', category: NcCategory.PROCESO, severity: NcSeverity.MAYOR,
-      status: NcStatus.ABIERTA, title: 'Etiquetado incorrecto en Bistec de Paleta',
-      description: 'Se detectó peso neto erróneo impreso en etiquetas de Bistec de Paleta 1kg (indicaba 900g). Lote retenido para reetiquetado.',
-      rootCause: null, correctiveAction: null, responsible: 'Luis Rojas', dueDate: ncDay(4), createdBy: 'Operador 3', createdAt: ncDay(-1),
-      history: [
-        { toStatus: NcStatus.ABIERTA, changedBy: 'Operador 3', note: 'No conformidad creada', createdAt: ncDay(-1) },
-      ],
-    },
-    {
-      ncNumber: 'NC-2026-0004', area: 'Recepción MP', category: NcCategory.PROVEEDOR, severity: NcSeverity.CRITICA,
-      status: NcStatus.ABIERTA, title: 'Recepción de materia prima con temperatura de ingreso fuera de rango',
-      description: 'Media Res Vacuno recibida a 8°C (debe ser ≤4°C). Lote aislado y notificado al proveedor para evaluación de aceptación/rechazo.',
-      rootCause: null, correctiveAction: null, responsible: 'Ana Torres', dueDate: ncDay(-1), createdBy: 'Operador 2', createdAt: ncDay(-2),
-      history: [
-        { toStatus: NcStatus.ABIERTA, changedBy: 'Operador 2', note: 'No conformidad creada', createdAt: ncDay(-2) },
-      ],
-    },
-    {
-      ncNumber: 'NC-2026-0005', area: 'Producción', category: NcCategory.PROCESO, severity: NcSeverity.MENOR,
-      status: NcStatus.CERRADA, title: 'Rotura de bolsa de vacío en línea Skin',
-      description: 'Se detectaron bolsas de vacío con sello deficiente en la línea Skin, generando pérdida de vacío en aproximadamente 30 unidades.',
-      rootCause: 'Variación de temperatura en la barra selladora tras cambio de turno.',
-      correctiveAction: 'Recalibración de la selladora y reproceso de las unidades afectadas. Verificación de sello añadida al checklist de inicio de turno.',
-      responsible: 'Juan Pérez', dueDate: ncDay(-4), createdBy: 'Supervisor 2', createdAt: ncDay(-9), closedAt: ncDay(-4),
-      history: [
-        { toStatus: NcStatus.ABIERTA, changedBy: 'Supervisor 2', note: 'No conformidad creada', createdAt: ncDay(-9) },
-        { fromStatus: NcStatus.ABIERTA, toStatus: NcStatus.EN_INVESTIGACION, changedBy: 'Supervisor 2', note: null, createdAt: ncDay(-7) },
-        { fromStatus: NcStatus.EN_INVESTIGACION, toStatus: NcStatus.ACCION_CORRECTIVA, changedBy: 'Supervisor 2', note: 'Causa identificada', createdAt: ncDay(-6) },
-        { fromStatus: NcStatus.ACCION_CORRECTIVA, toStatus: NcStatus.CERRADA, changedBy: 'Administrador', note: 'Verificada eficacia, sin reincidencia', createdAt: ncDay(-4) },
-      ],
-    },
-    {
-      ncNumber: 'NC-2026-0006', area: 'Despacho', category: NcCategory.PROCESO, severity: NcSeverity.MENOR,
-      status: NcStatus.CERRADA, title: 'Retraso en despacho a Jumbo por falta de cajas',
-      description: 'El despacho a Jumbo se retrasó 1.5 horas por quiebre de stock de Caja Cartón 10kg en bodega de embalaje.',
-      rootCause: 'Error operacional en el control de stock mínimo de embalaje.',
-      correctiveAction: 'Reposición de cajas y ajuste del punto de reorden de embalaje en el sistema.',
-      responsible: 'Pedro Soto', dueDate: ncDay(-2), createdBy: 'Supervisor 1', createdAt: ncDay(-6), closedAt: ncDay(-2),
-      history: [
-        { toStatus: NcStatus.ABIERTA, changedBy: 'Supervisor 1', note: 'No conformidad creada', createdAt: ncDay(-6) },
-        { fromStatus: NcStatus.ABIERTA, toStatus: NcStatus.EN_INVESTIGACION, changedBy: 'Supervisor 1', note: null, createdAt: ncDay(-5) },
-        { fromStatus: NcStatus.EN_INVESTIGACION, toStatus: NcStatus.ACCION_CORRECTIVA, changedBy: 'Supervisor 1', note: 'Reposición en curso', createdAt: ncDay(-3) },
-        { fromStatus: NcStatus.ACCION_CORRECTIVA, toStatus: NcStatus.CERRADA, changedBy: 'Administrador', note: 'Punto de reorden ajustado', createdAt: ncDay(-2) },
-      ],
-    },
-  ]
-  for (const { history, ...nc } of ncsData) {
-    await prisma.nonConformity.create({ data: { ...nc, history: { create: history } } })
+  // ── No Conformidades (NC) — modelo basado en SEGUIMIENTO NC.xlsx ──
+  // ncNumber = "N. DE NC" real del Excel (dedup key). Semana = ISO WEEKNUM.
+  // Ejemplos de ambos grupos de análisis (RESPONSABLE: Proveedor / Planta),
+  // incluyendo un insumo de envase (prueba del filtro configurable) y una NC
+  // "gestionada" (excluida de indicadores, visible solo en el histórico).
+  const ncFecha = (offset: number) => { const d = new Date(); d.setDate(d.getDate() + offset); d.setHours(12, 0, 0, 0); return d }
+  const weekNum = (d: Date) => {
+    const onejan = new Date(d.getFullYear(), 0, 1)
+    return Math.ceil(((d.getTime() - onejan.getTime()) / 86400000 + onejan.getDay() + 1) / 7)
   }
-  console.log(`✅ No conformidades creadas: ${ncsData.length}`)
+  const ncRegistrosData = [
+    { ncNumber: 1501, fecha: ncFecha(-10), producto: 'ASIENTO DE PICNIC', razon: 'DFD (PH ALTO)',
+      cantidadKg: 420, valorProductoOC: 2850, valorNcOC: 1197000, destino: NcDestino.VENTA_A_TERCEROS,
+      precioVentaTercero: 1900, valorVentaNc: 798000, costoPlanta: 399000,
+      responsable: NcResponsable.PROVEEDOR, sif: 'SIF-213', proveedor: 'MINERVA FOODS', oc: 'OC-44210',
+      estadoNc: NcEstado.VENDIDO, fechaDisposicion: ncFecha(-8), camara: 'C-2', gestionado: false },
+    { ncNumber: 1502, fecha: ncFecha(-9), producto: 'LOMO LISO', razon: 'CONTAMINACIÓN',
+      cantidadKg: 180, valorProductoOC: 4200, valorNcOC: 756000, destino: NcDestino.DECOMISO,
+      precioVentaTercero: null, valorVentaNc: 0, costoPlanta: 756000,
+      responsable: NcResponsable.PROVEEDOR, sif: 'SIF-213', proveedor: 'JBS', oc: 'OC-44231',
+      estadoNc: NcEstado.STANBY, fechaDisposicion: null, camara: 'C-1', gestionado: false },
+    { ncNumber: 1503, fecha: ncFecha(-7), producto: 'ESCALOPA', razon: 'MAL OLOR',
+      cantidadKg: 95, valorProductoOC: 3600, valorNcOC: 342000, destino: NcDestino.VENTA_A_TERCEROS,
+      precioVentaTercero: 2100, valorVentaNc: 199500, costoPlanta: 142500,
+      responsable: NcResponsable.PROVEEDOR, sif: 'SIF-301', proveedor: 'TOP FOOD', oc: 'OC-44255',
+      estadoNc: NcEstado.VENDIDO, fechaDisposicion: ncFecha(-5), camara: 'C-2', gestionado: false },
+    { ncNumber: 1504, fecha: ncFecha(-6), producto: 'POSTA NEGRA', razon: 'PROD. CAMBIADO',
+      cantidadKg: 260, valorProductoOC: 3100, valorNcOC: 806000, destino: NcDestino.DEVOLUCION,
+      precioVentaTercero: null, valorVentaNc: 0, costoPlanta: 806000,
+      responsable: NcResponsable.PROVEEDOR, sif: 'SIF-213', proveedor: 'MINERVA FOODS', oc: 'OC-44267',
+      estadoNc: NcEstado.TRANSFERIDA, fechaDisposicion: ncFecha(-4), camara: 'C-1', gestionado: true },
+    { ncNumber: 1505, fecha: ncFecha(-5), producto: 'BANDEJA F40', razon: 'DEFECTUOSA',
+      cantidadKg: 50, valorProductoOC: 180, valorNcOC: 9000, destino: NcDestino.DECOMISO,
+      precioVentaTercero: null, valorVentaNc: 0, costoPlanta: 9000,
+      responsable: NcResponsable.PROVEEDOR, sif: null, proveedor: 'INTERANDINA', oc: 'OC-44280',
+      estadoNc: NcEstado.STANBY, fechaDisposicion: null, camara: null, gestionado: false },
+    { ncNumber: 1506, fecha: ncFecha(-12), producto: 'CARNE MOLIDA ESPECIAL', razon: 'VIDA UTIL',
+      cantidadKg: 340, valorProductoOC: 2600, valorNcOC: 884000, destino: NcDestino.VENTA_A_TERCEROS,
+      precioVentaTercero: 1700, valorVentaNc: 578000, costoPlanta: 306000,
+      responsable: NcResponsable.PLANTA, sif: 'SIF-213', proveedor: null, oc: null,
+      estadoNc: NcEstado.VENDIDO, fechaDisposicion: ncFecha(-10), camara: 'C-3', gestionado: false },
+    { ncNumber: 1507, fecha: ncFecha(-11), producto: 'BISTEC DE PALETA', razon: 'CAIDA A PISO',
+      cantidadKg: 60, valorProductoOC: 3300, valorNcOC: 198000, destino: NcDestino.DECOMISO,
+      precioVentaTercero: null, valorVentaNc: 0, costoPlanta: 198000,
+      responsable: NcResponsable.PLANTA, sif: 'SIF-213', proveedor: null, oc: null,
+      estadoNc: NcEstado.D_CHILEMINK, fechaDisposicion: ncFecha(-9), camara: 'C-2', gestionado: false },
+    { ncNumber: 1508, fecha: ncFecha(-8), producto: 'RECORTE MAGRO', razon: 'OPERACIONAL',
+      cantidadKg: 410, valorProductoOC: 2200, valorNcOC: 902000, destino: NcDestino.VENTA_A_TERCEROS,
+      precioVentaTercero: 1600, valorVentaNc: 656000, costoPlanta: 246000,
+      responsable: NcResponsable.PLANTA, sif: 'SIF-213', proveedor: null, oc: null,
+      estadoNc: NcEstado.VENDIDO, fechaDisposicion: ncFecha(-6), camara: 'C-3', gestionado: false },
+    { ncNumber: 1509, fecha: ncFecha(-4), producto: 'MOLIENDA CARNE VACUNO', razon: 'EXCESO GRASA',
+      cantidadKg: 230, valorProductoOC: 2400, valorNcOC: 552000, destino: NcDestino.RETENIDO,
+      precioVentaTercero: null, valorVentaNc: 0, costoPlanta: 552000,
+      responsable: NcResponsable.PLANTA, sif: 'SIF-213', proveedor: null, oc: null,
+      estadoNc: NcEstado.STANBY, fechaDisposicion: null, camara: 'C-1', gestionado: false },
+  ]
+  await prisma.ncRegistro.createMany({
+    data: ncRegistrosData.map((nc) => ({ ...nc, semana: weekNum(nc.fecha) })),
+  })
+  console.log(`✅ No conformidades (NcRegistro) creadas: ${ncRegistrosData.length}`)
 
   // ── Capacidad: configuración por línea ──
   // kgPerHour = capacidad nominal del catálogo Control de Turno.
@@ -343,10 +325,6 @@ async function main() {
       title: 'Stock bajo: Recorte Vacuno 90/10', description: 'El stock cayó bajo el mínimo previo a la recepción del lote.',
       responsible: 'Encargado de Bodega', acknowledgedBy: 'Pedro Soto', acknowledgedAt: hAgo(72),
       resolvedBy: 'Carlos Reyes', resolutionNote: 'Ingreso de lote regularizó el inventario.', createdAt: hAgo(73), resolvedAt: hAgo(70.5) },
-    { sourceKey: `HIST:NC:CRITICAL_OPEN:past1`, module: AlertModule.NO_CONFORMIDADES, type: 'NC_CRITICA_ABIERTA', severity: AlertSeverity.CRITICA,
-      title: 'NC crítica abierta: NC-2026-0098', description: 'Desviación crítica de temperatura en cámara frigorífica.',
-      responsible: 'Pedro Soto', acknowledgedBy: 'María González', acknowledgedAt: hAgo(20),
-      resolvedBy: 'María González', resolutionNote: 'NC cerrada tras reparación de compresor verificada.', createdAt: hAgo(20.2), resolvedAt: hAgo(19.5) },
     { sourceKey: `HIST:CAP:OVER:${L('L4')}`, module: AlertModule.CAPACIDAD, type: 'OCUPACION_ALTA', severity: AlertSeverity.ADVERTENCIA,
       title: 'Línea sobrecargada: Línea 4', description: 'Ocupación de 96% en la semana anterior.',
       responsible: 'Planificación', acknowledgedBy: 'Carlos Reyes', acknowledgedAt: hAgo(120),

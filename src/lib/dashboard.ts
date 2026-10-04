@@ -63,7 +63,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const startToday = new Date(now); startToday.setHours(0, 0, 0, 0)
   const endToday = new Date(startToday); endToday.setDate(endToday.getDate() + 1)
 
-  const [lines, ordersToday, dispatchesToday, materials, openNcs] = await Promise.all([
+  const [lines, ordersToday, dispatchesToday, materials] = await Promise.all([
     prisma.productionLine.findMany({
       orderBy: { code: 'asc' },
       include: {
@@ -74,7 +74,6 @@ export async function getDashboardData(): Promise<DashboardData> {
     prisma.productionOrder.findMany({ where: { date: { gte: startToday, lt: endToday } } }),
     prisma.dispatch.findMany({ where: { estimatedAt: { gte: startToday, lt: endToday } } }),
     prisma.material.findMany(),
-    prisma.nonConformity.findMany({ where: { status: { not: 'CERRADA' } } }),
   ])
 
   // ── Producción del día ──
@@ -145,9 +144,6 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
   for (const m of belowMin) {
     alerts.push({ type: 'warn', msg: `Stock bajo mínimo: ${m.name} (${Math.round(m.currentStock)} ${m.unit})`, time: hhmm(m.updatedAt) })
-  }
-  for (const nc of openNcs.filter((n) => n.dueDate < now)) {
-    alerts.push({ type: 'stop', msg: `NC vencida ${nc.ncNumber}: ${nc.title}`, time: hhmm(nc.createdAt) })
   }
   alerts.sort((a, b) => (a.type === 'stop' ? -1 : 1) - (b.type === 'stop' ? -1 : 1))
   const activeAlerts = alerts.filter((a) => a.type !== 'ok').length

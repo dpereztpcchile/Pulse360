@@ -286,60 +286,12 @@ export async function getDispatchReport(opts: { from: Date; to: Date }): Promise
 // ═══════════════════════════════════════════════════════════
 // D) REPORTE DE NO CONFORMIDADES
 // ═══════════════════════════════════════════════════════════
-
-export interface NcReport {
-  meta: ReportMeta
-  kpis: { created: number; closed: number; overdue: number }
-  byCategory: { name: string; value: number }[]
-  bySeverity: { name: string; value: number }[]
-  avgResolutionByArea: { area: string; days: number; count: number }[]
-  areaRanking: { area: string; count: number }[]
-}
-
-const NC_CATEGORY_LABEL: Record<string, string> = { CALIDAD: 'Calidad', INOCUIDAD: 'Inocuidad', PROCESO: 'Proceso', PROVEEDOR: 'Proveedor' }
-const NC_SEVERITY_LABEL: Record<string, string> = { CRITICA: 'Crítica', MAYOR: 'Mayor', MENOR: 'Menor' }
-
-export async function getNcReport(opts: { from: Date; to: Date }): Promise<NcReport> {
-  const { from, to } = opts
-  const now = new Date()
-  const [plant, inPeriod, closedInPeriod] = await Promise.all([
-    getPlantName(),
-    prisma.nonConformity.findMany({ where: { createdAt: { gte: from, lte: to } } }),
-    prisma.nonConformity.findMany({ where: { status: 'CERRADA', closedAt: { gte: from, lte: to } } }),
-  ])
-
-  const created = inPeriod.length
-  const closed = closedInPeriod.length
-  const overdue = inPeriod.filter((n) => n.status !== 'CERRADA' && new Date(n.dueDate) < now).length
-
-  const catMap = new Map<string, number>()
-  const sevMap = new Map<string, number>()
-  const areaCount = new Map<string, number>()
-  for (const n of inPeriod) {
-    catMap.set(n.category, (catMap.get(n.category) ?? 0) + 1)
-    sevMap.set(n.severity, (sevMap.get(n.severity) ?? 0) + 1)
-    areaCount.set(n.area, (areaCount.get(n.area) ?? 0) + 1)
-  }
-  const byCategory = Array.from(catMap.entries()).map(([k, v]) => ({ name: NC_CATEGORY_LABEL[k] ?? k, value: v }))
-  const bySeverity = ['CRITICA', 'MAYOR', 'MENOR'].map((k) => ({ name: NC_SEVERITY_LABEL[k], value: sevMap.get(k) ?? 0 }))
-
-  // Tiempo promedio de resolución por área (sobre NC cerradas en el período)
-  const areaRes = new Map<string, { totalDays: number; count: number }>()
-  for (const n of closedInPeriod) {
-    if (!n.closedAt) continue
-    const days = (n.closedAt.getTime() - n.createdAt.getTime()) / 86_400_000
-    const cur = areaRes.get(n.area) ?? { totalDays: 0, count: 0 }
-    cur.totalDays += days; cur.count += 1
-    areaRes.set(n.area, cur)
-  }
-  const avgResolutionByArea = Array.from(areaRes.entries())
-    .map(([area, v]) => ({ area, days: round1(v.totalDays / v.count), count: v.count }))
-    .sort((a, b) => b.days - a.days)
-
-  const areaRanking = Array.from(areaCount.entries()).map(([area, count]) => ({ area, count })).sort((a, b) => b.count - a.count)
-
-  return { meta: meta(plant, from, to), kpis: { created, closed, overdue }, byCategory, bySeverity, avgResolutionByArea, areaRanking }
-}
+// Nota: el reporte de NC basado en el antiguo modelo NonConformity
+// (categoría/gravedad/status workflow) fue retirado junto con ese modelo.
+// El análisis de No Conformidades ahora vive en el propio módulo, en la
+// pestaña "Indicadores" (ver src/lib/nc/indicadores.ts y
+// /api/nc/indicadores), que trabaja sobre el modelo real NcRegistro
+// (importado desde el Excel "SEGUIMIENTO NC.xlsx").
 
 // ═══════════════════════════════════════════════════════════
 // E) REPORTE DE CAPACIDAD VS DEMANDA

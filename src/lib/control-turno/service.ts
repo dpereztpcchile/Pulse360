@@ -144,7 +144,6 @@ export interface ResumenLinea {
   estado: 'Sin programa' | 'Pendiente' | 'En proceso' | 'Completada' | 'Detenida'
   totalRegistros: number
   completados: number
-  ncCount: number
 }
 
 /** Resumen de turno: una fila por cada línea del catálogo Control de Turno. */
@@ -177,12 +176,6 @@ export async function getResumen(fechaStr?: string | null, turno = 'MANANA'): Pr
     include: { cortes: true },
   })
 
-  // NC creadas hoy (integración: alerta por línea)
-  const ncs = await prisma.nonConformity.findMany({
-    where: { createdAt: { gte: start, lte: end }, status: { not: 'CERRADA' } },
-    select: { area: true, title: true, description: true },
-  })
-
   return LINE_CATALOG.map((cat) => {
     const line = lineByCode[cat.code]
     const lineId = line?.id ?? null
@@ -200,13 +193,12 @@ export async function getResumen(fechaStr?: string | null, turno = 'MANANA'): Pr
       else if (completadosC.length === cortes.length) estadoC = 'Completada'
       else if (enProcesoC) estadoC = 'En proceso'
       else estadoC = 'Pendiente'
-      const ncCountC = ncs.filter((nc) => `${nc.area} ${nc.title} ${nc.description}`.toLowerCase().includes(cat.name.toLowerCase())).length
       return {
         code: cat.code, name: cat.name, lineId, variant: cat.variant, oeeEnabled: false,
         hasProgram: cortes.length > 0, kgPlan: Math.round(kgPlanC), kgReal: Math.round(kgRealC),
         cumplimientoPct: kgPlanC > 0 ? Math.round((kgRealC / kgPlanC) * 1000) / 10 : 0,
         oee: null, clasificacion: null, estado: estadoC,
-        totalRegistros: cortes.length, completados: completadosC.length, ncCount: ncCountC,
+        totalRegistros: cortes.length, completados: completadosC.length,
       }
     }
 
@@ -224,11 +216,6 @@ export async function getResumen(fechaStr?: string | null, turno = 'MANANA'): Pr
     else if (enProceso) estado = 'En proceso'
     else estado = 'Pendiente'
 
-    const ncCount = ncs.filter((nc) => {
-      const hay = `${nc.area} ${nc.title} ${nc.description}`.toLowerCase()
-      return hay.includes(cat.name.toLowerCase())
-    }).length
-
     return {
       code: cat.code,
       name: cat.name,
@@ -244,7 +231,6 @@ export async function getResumen(fechaStr?: string | null, turno = 'MANANA'): Pr
       estado,
       totalRegistros: regs.length,
       completados,
-      ncCount,
     }
   })
 }

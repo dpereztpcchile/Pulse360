@@ -16,8 +16,6 @@ export interface EffectiveConfig {
   enableTempRange: boolean
   enableDispatchDelay: boolean
   enableDispatchNoTransporter: boolean
-  enableNcCritical: boolean
-  enableNcOverdue: boolean
   enableCapacityOver: boolean
 }
 
@@ -34,8 +32,6 @@ const DEFAULT_CONFIG: EffectiveConfig = {
   enableTempRange: true,
   enableDispatchDelay: true,
   enableDispatchNoTransporter: true,
-  enableNcCritical: true,
-  enableNcOverdue: true,
   enableCapacityOver: true,
 }
 
@@ -70,7 +66,7 @@ export async function generateAlerts(): Promise<void> {
   const startToday = new Date(now); startToday.setHours(0, 0, 0, 0)
   const endToday = new Date(startToday); endToday.setDate(endToday.getDate() + 1)
 
-  const [lines, materials, dispatches, ncs] = await Promise.all([
+  const [lines, materials, dispatches] = await Promise.all([
     prisma.productionLine.findMany({
       include: {
         capacity: true,
@@ -81,7 +77,6 @@ export async function generateAlerts(): Promise<void> {
       include: { receipts: { orderBy: { createdAt: 'desc' }, take: 1 } },
     }),
     prisma.dispatch.findMany({ where: { status: { in: ['PREPARANDO', 'LISTO'] } } }),
-    prisma.nonConformity.findMany({ where: { status: { not: 'CERRADA' } } }),
   ])
 
   const desired: DesiredAlert[] = []
@@ -180,28 +175,6 @@ export async function generateAlerts(): Promise<void> {
         title: `Despacho sin transportista: ${d.guideNumber}`,
         description: `La guía ${d.guideNumber} (${d.client}) está pendiente y no tiene transportista asignado.`,
         responsible: 'Coordinador de Despacho',
-      })
-    }
-  }
-
-  // ── NO CONFORMIDADES ──
-  for (const nc of ncs) {
-    if (cfg.enableNcCritical && nc.severity === 'CRITICA') {
-      desired.push({
-        sourceKey: `NC:CRITICAL_OPEN:${nc.id}`,
-        module: 'NO_CONFORMIDADES', type: 'NC_CRITICA_ABIERTA', severity: 'CRITICA',
-        title: `NC crítica abierta: ${nc.ncNumber}`,
-        description: `${nc.title} — no conformidad crítica sin cerrar (estado: ${nc.status}).`,
-        responsible: nc.responsible,
-      })
-    }
-    if (cfg.enableNcOverdue && new Date(nc.dueDate).getTime() < now.getTime()) {
-      desired.push({
-        sourceKey: `NC:OVERDUE:${nc.id}`,
-        module: 'NO_CONFORMIDADES', type: 'NC_VENCIDA', severity: 'CRITICA',
-        title: `NC vencida: ${nc.ncNumber}`,
-        description: `${nc.title} — superó su fecha límite y aún no se cierra.`,
-        responsible: nc.responsible,
       })
     }
   }
