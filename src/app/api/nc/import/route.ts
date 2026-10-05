@@ -7,6 +7,27 @@ import { parseNcWorkbook, type NcRowParsed } from '@/lib/nc/parse'
 const MAX_BYTES = 15 * 1024 * 1024 // 15 MB
 
 /**
+ * Type guard para el valor de `formData.get('file')`, sin depender de la
+ * clase global `File` del DOM. En la imagen de Docker de producción
+ * (node:18-slim) `File` NO existe como global (se agregó a Node recién en
+ * la v20), así que `file instanceof File` lanza `ReferenceError: File is
+ * not defined` y la ruta completa crashea con 500 — esto pasaba en
+ * Railway pero no en entornos de desarrollo/CI con Node 20+, donde sí
+ * está disponible. Se valida por "forma" (duck typing) en su lugar:
+ * un File de verdad (o un Blob con nombre) siempre expone `arrayBuffer()`,
+ * `size` y `name`.
+ */
+function isUploadedFile(v: FormDataEntryValue | null): v is File {
+  return (
+    v != null &&
+    typeof v === 'object' &&
+    typeof (v as { arrayBuffer?: unknown }).arrayBuffer === 'function' &&
+    typeof (v as { size?: unknown }).size === 'number' &&
+    typeof (v as { name?: unknown }).name === 'string'
+  )
+}
+
+/**
  * Importación masiva de NC desde "SEGUIMIENTO NC.xlsx".
  *
  * Semántica de carga semanal (confirmada por el usuario): el archivo subido
@@ -26,7 +47,7 @@ export async function POST(req: Request) {
 
   const formData = await req.formData()
   const file = formData.get('file')
-  if (!(file instanceof File)) {
+  if (!isUploadedFile(file)) {
     return NextResponse.json({ error: 'No se recibió ningún archivo' }, { status: 400 })
   }
   if (file.size > MAX_BYTES) {
@@ -123,7 +144,7 @@ export async function PUT(req: Request) {
 
   const formData = await req.formData()
   const file = formData.get('file')
-  if (!(file instanceof File)) {
+  if (!isUploadedFile(file)) {
     return NextResponse.json({ error: 'No se recibió ningún archivo' }, { status: 400 })
   }
   if (file.size > MAX_BYTES) {
