@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { AlertTriangle, ClipboardList, CheckCircle2, CalendarDays, Search } from 'lucide-react'
+import { AlertTriangle, ClipboardList, CheckCircle2, CalendarDays, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import { KPICard } from '@/components/ui/KPICard'
 import {
   cn, NC_RESPONSABLE, NC_DESTINO, NC_ESTADO, formatDate,
@@ -30,6 +30,42 @@ const DESTINOS: NcDestinoKey[] = ['VENTA_A_TERCEROS', 'DECOMISO', 'DEVOLUCION', 
 
 const fmtMoney = (v: number | null) => v == null ? '—' : `$${Math.round(v).toLocaleString('es-CL')}`
 
+type SortKey = 'ncNumber' | 'fecha' | 'semana' | 'producto' | 'razon' | 'cantidadKg' | 'valorNcOC'
+  | 'destino' | 'responsable' | 'proveedor' | 'estadoNc' | 'gestionado'
+type SortDir = 'asc' | 'desc'
+
+const SORT_COLUMNS: { key: SortKey; label: string; align?: 'right' | 'center' }[] = [
+  { key: 'ncNumber', label: 'N° NC' },
+  { key: 'fecha', label: 'Fecha' },
+  { key: 'semana', label: 'Sem.' },
+  { key: 'producto', label: 'Producto' },
+  { key: 'razon', label: 'Razón' },
+  { key: 'cantidadKg', label: 'Cant. (kg)', align: 'right' },
+  { key: 'valorNcOC', label: 'Valor NC (OC)', align: 'right' },
+  { key: 'destino', label: 'Destino' },
+  { key: 'responsable', label: 'Responsable' },
+  { key: 'proveedor', label: 'Proveedor' },
+  { key: 'estadoNc', label: 'Estado NC' },
+  { key: 'gestionado', label: 'Gestionada', align: 'center' },
+]
+
+function sortValue(n: Nc, key: SortKey): string | number {
+  switch (key) {
+    case 'ncNumber': return n.ncNumber
+    case 'fecha': return n.fecha
+    case 'semana': return n.semana
+    case 'producto': return n.producto.toLowerCase()
+    case 'razon': return n.razon.toLowerCase()
+    case 'cantidadKg': return n.cantidadKg
+    case 'valorNcOC': return n.valorNcOC ?? -Infinity
+    case 'destino': return NC_DESTINO[n.destino].label
+    case 'responsable': return NC_RESPONSABLE[n.responsable].label
+    case 'proveedor': return n.proveedor?.toLowerCase() ?? ''
+    case 'estadoNc': return n.estadoNc ? NC_ESTADO[n.estadoNc].label : ''
+    case 'gestionado': return n.gestionado ? 1 : 0
+  }
+}
+
 export function NcClient({
   initialNcs, kpis,
 }: {
@@ -41,9 +77,20 @@ export function NcClient({
   const [fDestino, setFDestino] = useState<'TODOS' | NcDestinoKey>('TODOS')
   const [fGestionado, setFGestionado] = useState<'TODOS' | 'SI' | 'NO'>('TODOS')
   const [fBusqueda, setFBusqueda] = useState('')
+  const [sortKey, setSortKey] = useState<SortKey>('fecha')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
 
   const filtered = useMemo(() => {
-    return initialNcs.filter((n) => {
+    const result = initialNcs.filter((n) => {
       if (fResponsable !== 'TODOS' && n.responsable !== fResponsable) return false
       if (fDestino !== 'TODOS' && n.destino !== fDestino) return false
       if (fGestionado === 'SI' && !n.gestionado) return false
@@ -55,7 +102,16 @@ export function NcClient({
       }
       return true
     })
-  }, [initialNcs, fResponsable, fDestino, fGestionado, fBusqueda])
+    const dir = sortDir === 'asc' ? 1 : -1
+    result.sort((a, b) => {
+      const va = sortValue(a, sortKey)
+      const vb = sortValue(b, sortKey)
+      if (va < vb) return -1 * dir
+      if (va > vb) return 1 * dir
+      return 0
+    })
+    return result
+  }, [initialNcs, fResponsable, fDestino, fGestionado, fBusqueda, sortKey, sortDir])
 
   const hasFilters = fResponsable !== 'TODOS' || fDestino !== 'TODOS' || fGestionado !== 'TODOS' || fBusqueda
 
@@ -111,18 +167,35 @@ export function NcClient({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
-                <th className="px-4 py-3 text-left font-medium">N° NC</th>
-                <th className="px-4 py-3 text-left font-medium">Fecha</th>
-                <th className="px-4 py-3 text-left font-medium">Sem.</th>
-                <th className="px-4 py-3 text-left font-medium">Producto</th>
-                <th className="px-4 py-3 text-left font-medium">Razón</th>
-                <th className="px-4 py-3 text-right font-medium">Cant. (kg)</th>
-                <th className="px-4 py-3 text-right font-medium">Valor NC (OC)</th>
-                <th className="px-4 py-3 text-left font-medium">Destino</th>
-                <th className="px-4 py-3 text-left font-medium">Responsable</th>
-                <th className="px-4 py-3 text-left font-medium">Proveedor</th>
-                <th className="px-4 py-3 text-left font-medium">Estado NC</th>
-                <th className="px-4 py-3 text-center font-medium">Gestionada</th>
+                {SORT_COLUMNS.map(({ key, label, align }) => {
+                  const active = sortKey === key
+                  return (
+                    <th
+                      key={key}
+                      className={cn(
+                        'px-4 py-3 font-medium select-none',
+                        align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left'
+                      )}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSort(key)}
+                        className={cn(
+                          'inline-flex items-center gap-1 hover:text-white transition-colors',
+                          align === 'right' && 'flex-row-reverse',
+                          active && 'text-white'
+                        )}
+                      >
+                        {label}
+                        {active ? (
+                          sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                        ) : (
+                          <ArrowUpDown className="w-3 h-3 opacity-40" />
+                        )}
+                      </button>
+                    </th>
+                  )
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-border-dark">

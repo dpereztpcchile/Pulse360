@@ -6,8 +6,8 @@ import { List, Upload, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const TABS = [
-  { label: 'Listado', href: '/no-conformidades', icon: List },
   { label: 'Carga de archivos', href: '/no-conformidades/carga', icon: Upload },
+  { label: 'Listado', href: '/no-conformidades', icon: List },
   { label: 'Indicadores', href: '/no-conformidades/indicadores', icon: BarChart3 },
 ]
 
