@@ -64,10 +64,6 @@ export function NcIndicadoresClient() {
   const [data, setData] = useState<IndicadoresData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  // Controla si ya se aplicó la selección por defecto del último mes disponible
-  // (solo debe ocurrir una vez al entrar a la vista Proveedor, no cada vez que
-  // el usuario limpia los filtros manualmente).
-  const defaultMesAplicado = useRef(false)
 
   const cargar = useCallback(async () => {
     setLoading(true); setError(null)
@@ -80,14 +76,6 @@ export function NcIndicadoresClient() {
       if (!res.ok) throw new Error('No se pudieron cargar los indicadores.')
       const d = await res.json()
       setData(d)
-      // Al entrar por primera vez a Proveedor, preseleccionar el último mes
-      // disponible (el más reciente del histórico) para no mostrar de entrada
-      // todo el rango completo de datos.
-      if (!defaultMesAplicado.current && d.grupo === 'PROVEEDOR' && d.mesesDisponibles?.length > 0) {
-        defaultMesAplicado.current = true
-        const ultimoMes = d.mesesDisponibles[d.mesesDisponibles.length - 1]
-        setMesesSel(new Set([ultimoMes]))
-      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al cargar indicadores.')
     } finally {
