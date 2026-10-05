@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import {
-  Factory, Truck, Filter, ClipboardList, Coins, HandCoins, BarChart3, X,
+  Factory, Truck, Filter, ClipboardList, Coins, HandCoins, BarChart3, X, ChevronDown,
 } from 'lucide-react'
 import { Kpi, IconKpi, SectionCard, DataTable, ReportState } from '@/components/reportes/ui'
 import {
@@ -64,6 +64,10 @@ export function NcIndicadoresClient() {
   const [data, setData] = useState<IndicadoresData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Controla si ya se aplicó la selección por defecto del último mes disponible
+  // (solo debe ocurrir una vez al entrar a la vista Proveedor, no cada vez que
+  // el usuario limpia los filtros manualmente).
+  const defaultMesAplicado = useRef(false)
 
   const cargar = useCallback(async () => {
     setLoading(true); setError(null)
@@ -76,6 +80,14 @@ export function NcIndicadoresClient() {
       if (!res.ok) throw new Error('No se pudieron cargar los indicadores.')
       const d = await res.json()
       setData(d)
+      // Al entrar por primera vez a Proveedor, preseleccionar el último mes
+      // disponible (el más reciente del histórico) para no mostrar de entrada
+      // todo el rango completo de datos.
+      if (!defaultMesAplicado.current && d.grupo === 'PROVEEDOR' && d.mesesDisponibles?.length > 0) {
+        defaultMesAplicado.current = true
+        const ultimoMes = d.mesesDisponibles[d.mesesDisponibles.length - 1]
+        setMesesSel(new Set([ultimoMes]))
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Error al cargar indicadores.')
     } finally {
@@ -172,10 +184,8 @@ function GrupoButton({ icon: Icon, label, active, onClick }: {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Panel lateral "SEGMENTADORES" — selección múltiple de semanas y meses.
-// El mockup muestra dos selectores de meses independientes ("RAZON" y
-// "CAUSANTES NC"); por ahora se usa un único selector de meses global que
-// filtra todo el grupo (simplificación consciente — ver notas de diseño).
+// Panel lateral "SEGMENTADORES" — selección múltiple de semanas y meses,
+// cada uno como lista desplegable con checkboxes (en vez de grilla de botones).
 // ═══════════════════════════════════════════════════════════
 function Segmentadores({ semanasDisponibles, mesesDisponibles, semanasSel, mesesSel, onToggleSemana, onToggleMes }: {
   semanasDisponibles: number[]
@@ -185,6 +195,18 @@ function Segmentadores({ semanasDisponibles, mesesDisponibles, semanasSel, meses
   onToggleSemana: (s: number) => void
   onToggleMes: (m: string) => void
 }) {
+  const semanasLabel = semanasSel.size === 0
+    ? 'Todas las semanas'
+    : semanasSel.size === 1
+      ? `Semana ${Array.from(semanasSel)[0]}`
+      : `${semanasSel.size} semanas seleccionadas`
+
+  const mesesLabel = mesesSel.size === 0
+    ? 'Todos los meses'
+    : mesesSel.size === 1
+      ? mesLabel(Array.from(mesesSel)[0])
+      : `${mesesSel.size} meses seleccionados`
+
   return (
     <div className="card p-4 space-y-5 self-start lg:sticky lg:top-4">
       <div className="flex items-center gap-2 text-sm font-semibold text-white">
@@ -193,43 +215,84 @@ function Segmentadores({ semanasDisponibles, mesesDisponibles, semanasSel, meses
 
       <div>
         <p className="text-xs uppercase tracking-wide text-[#999] mb-2">Monto por semanas</p>
-        {semanasDisponibles.length === 0 ? (
-          <p className="text-xs text-[#555]">Sin semanas en el histórico</p>
-        ) : (
-          <div className="grid grid-cols-4 gap-1.5">
-            {semanasDisponibles.map((s) => (
-              <button key={s} onClick={() => onToggleSemana(s)}
-                className={cn('text-xs py-1.5 rounded border transition-colors',
-                  semanasSel.has(s)
-                    ? 'bg-pulse-red text-white border-pulse-red'
-                    : 'bg-bg-dark text-[#999] border-border-dark hover:border-pulse-red hover:text-white')}>
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
+        <MultiSelectDropdown
+          label={semanasLabel}
+          disabled={semanasDisponibles.length === 0}
+        >
+          {semanasDisponibles.map((s) => (
+            <DropdownCheckboxItem key={s} checked={semanasSel.has(s)} onChange={() => onToggleSemana(s)}>
+              Semana {s}
+            </DropdownCheckboxItem>
+          ))}
+        </MultiSelectDropdown>
       </div>
 
       <div>
         <p className="text-xs uppercase tracking-wide text-[#999] mb-0.5">Razón / Causantes NC</p>
         <p className="text-[10px] text-[#555] mb-2">Meses (FECHA)</p>
-        {mesesDisponibles.length === 0 ? (
-          <p className="text-xs text-[#555]">Sin meses en el histórico</p>
-        ) : (
-          <div className="flex flex-col gap-1.5">
-            {mesesDisponibles.map((m) => (
-              <button key={m} onClick={() => onToggleMes(m)}
-                className={cn('text-xs py-1.5 px-2 rounded border text-left transition-colors capitalize',
-                  mesesSel.has(m)
-                    ? 'bg-pulse-red text-white border-pulse-red'
-                    : 'bg-bg-dark text-[#999] border-border-dark hover:border-pulse-red hover:text-white')}>
-                {mesLabel(m)}
-              </button>
-            ))}
-          </div>
-        )}
+        <MultiSelectDropdown
+          label={mesesLabel}
+          disabled={mesesDisponibles.length === 0}
+        >
+          {mesesDisponibles.map((m) => (
+            <DropdownCheckboxItem key={m} checked={mesesSel.has(m)} onChange={() => onToggleMes(m)}>
+              <span className="capitalize">{mesLabel(m)}</span>
+            </DropdownCheckboxItem>
+          ))}
+        </MultiSelectDropdown>
       </div>
     </div>
+  )
+}
+
+/** Lista desplegable reutilizable para selección múltiple (checkboxes dentro). */
+function MultiSelectDropdown({ label, disabled, children }: {
+  label: string
+  disabled?: boolean
+  children: ReactNode
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [open])
+
+  if (disabled) {
+    return <p className="text-xs text-[#555]">Sin opciones en el histórico</p>
+  }
+
+  return (
+    <div className="relative" ref={ref}>
+      <button type="button" onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-2 text-xs py-2 px-3 rounded border border-border-dark bg-bg-dark text-white hover:border-pulse-red transition-colors">
+        <span className="truncate">{label}</span>
+        <ChevronDown className={cn('w-3.5 h-3.5 shrink-0 text-[#999] transition-transform', open && 'rotate-180')} />
+      </button>
+      {open && (
+        <div className="absolute z-20 mt-1 w-full max-h-64 overflow-y-auto rounded border border-border-dark bg-[#111] shadow-xl py-1">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DropdownCheckboxItem({ checked, onChange, children }: {
+  checked: boolean
+  onChange: () => void
+  children: ReactNode
+}) {
+  return (
+    <label className="flex items-center gap-2 text-xs py-1.5 px-3 cursor-pointer select-none hover:bg-white/5 text-[#ccc]">
+      <input type="checkbox" checked={checked} onChange={onChange} className="accent-pulse-red w-3.5 h-3.5 shrink-0" />
+      <span className={cn(checked && 'text-white font-medium')}>{children}</span>
+    </label>
   )
 }
 
