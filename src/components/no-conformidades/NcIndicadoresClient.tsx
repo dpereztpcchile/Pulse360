@@ -44,6 +44,8 @@ interface IndicadoresPlanta {
   porSemanaRazon: { semana: number; razon: string; valorNcOC: number; cantidad: number }[]
   porRazon: { razon: string; valorNcOC: number; cantidad: number }[]
   porSemana: { semana: number; valorNcOC: number; cantidad: number }[]
+  semanasDisponibles: number[]
+  mesesDisponibles: string[]
 }
 
 type IndicadoresData = IndicadoresProveedor | IndicadoresPlanta
@@ -109,10 +111,9 @@ export function NcIndicadoresClient() {
   }
   const limpiarFiltros = () => { setSemanasSel(new Set()); setMesesSel(new Set()) }
 
-  const semanasDisponibles = data?.grupo === 'PROVEEDOR' ? data.semanasDisponibles : []
-  const mesesDisponibles = data?.grupo === 'PROVEEDOR' ? data.mesesDisponibles : []
+  const semanasDisponibles = data?.semanasDisponibles ?? []
+  const mesesDisponibles = data?.mesesDisponibles ?? []
   const hayFiltrosActivos = semanasSel.size > 0 || mesesSel.size > 0 || excluirEnvase
-  const esProveedor = data?.grupo === 'PROVEEDOR'
 
   return (
     <div className="space-y-5">
@@ -129,7 +130,7 @@ export function NcIndicadoresClient() {
           Excluir insumos de envase/embalaje
         </label>
 
-        {esProveedor && (
+        {data && (
           <SegmentadoresInline
             semanasDisponibles={semanasDisponibles}
             mesesDisponibles={mesesDisponibles}

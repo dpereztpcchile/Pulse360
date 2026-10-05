@@ -205,6 +205,8 @@ export interface IndicadoresPlanta {
   porSemanaRazon: { semana: number; razon: string; valorNcOC: number; cantidad: number }[]
   porRazon: { razon: string; valorNcOC: number; cantidad: number }[]
   porSemana: { semana: number; valorNcOC: number; cantidad: number }[]
+  semanasDisponibles: number[]
+  mesesDisponibles: string[]
 }
 
 export async function getIndicadoresPlanta(filtros: IndicadoresFiltros = {}): Promise<IndicadoresPlanta> {
@@ -249,5 +251,10 @@ export async function getIndicadoresPlanta(filtros: IndicadoresFiltros = {}): Pr
     .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC) }))
     .sort((a, b) => a.semana - b.semana)
 
-  return { totalNc, totalValorNcOC, totalValorVentaNc, porSemanaRazon, porRazon, porSemana }
+  const { semanasDisponibles, mesesDisponibles } = await fetchOpcionesSegmentador('PLANTA', filtros.excluirEnvase)
+
+  return {
+    totalNc, totalValorNcOC, totalValorVentaNc, porSemanaRazon, porRazon, porSemana,
+    semanasDisponibles, mesesDisponibles,
+  }
 }
