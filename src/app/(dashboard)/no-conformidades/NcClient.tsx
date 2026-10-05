@@ -1,12 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { AlertTriangle, ClipboardList, CheckCircle2, CalendarDays, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
-import { KPICard } from '@/components/ui/KPICard'
+import { CheckCircle2, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import { ColumnFilterPopover, type FilterOption } from '@/components/no-conformidades/ColumnFilterPopover'
 import {
-  cn, NC_RESPONSABLE, NC_DESTINO, NC_ESTADO, formatDate,
-  type NcResponsableKey, type NcDestinoKey, type NcEstadoKey,
+  cn, NC_RESPONSABLE, NC_DESTINO, formatDate,
+  type NcResponsableKey, type NcDestinoKey,
 } from '@/lib/utils'
 
 interface Nc {
@@ -22,7 +21,6 @@ interface Nc {
   destino: NcDestinoKey
   responsable: NcResponsableKey
   proveedor: string | null
-  estadoNc: NcEstadoKey | null
   gestionado: boolean
 }
 
@@ -30,7 +28,7 @@ const NULL_VALUE = '__NULL__'
 const fmtMoney = (v: number | null) => (v == null ? '—' : `$${Math.round(v).toLocaleString('es-CL')}`)
 
 // ── Columnas filtrables (categóricas): valor crudo + etiqueta legible por fila ──
-type FilterableKey = 'producto' | 'razon' | 'destino' | 'responsable' | 'proveedor' | 'estadoNc' | 'gestionado'
+type FilterableKey = 'producto' | 'razon' | 'destino' | 'responsable' | 'proveedor' | 'gestionado'
 
 function rawValue(n: Nc, key: FilterableKey): string {
   switch (key) {
@@ -39,7 +37,6 @@ function rawValue(n: Nc, key: FilterableKey): string {
     case 'destino': return n.destino
     case 'responsable': return n.responsable
     case 'proveedor': return n.proveedor ?? NULL_VALUE
-    case 'estadoNc': return n.estadoNc ?? NULL_VALUE
     case 'gestionado': return n.gestionado ? '1' : '0'
   }
 }
@@ -51,7 +48,6 @@ function valueLabel(key: FilterableKey, value: string): string {
     case 'destino': return NC_DESTINO[value as NcDestinoKey].label
     case 'responsable': return NC_RESPONSABLE[value as NcResponsableKey].label
     case 'proveedor': return value === NULL_VALUE ? '— Sin proveedor' : value
-    case 'estadoNc': return value === NULL_VALUE ? '— Sin estado' : NC_ESTADO[value as NcEstadoKey].label
     case 'gestionado': return value === '1' ? 'Gestionada' : 'Activa'
   }
 }
@@ -67,7 +63,7 @@ const monthLabel = (key: string) => {
 
 // ── Ordenamiento ──
 type SortKey = 'ncNumber' | 'fecha' | 'semana' | 'producto' | 'razon' | 'cantidadKg' | 'valorNcOC'
-  | 'destino' | 'responsable' | 'proveedor' | 'estadoNc' | 'gestionado'
+  | 'destino' | 'responsable' | 'proveedor' | 'gestionado'
 type SortDir = 'asc' | 'desc'
 
 function sortValue(n: Nc, key: SortKey): string | number {
@@ -82,7 +78,6 @@ function sortValue(n: Nc, key: SortKey): string | number {
     case 'destino': return NC_DESTINO[n.destino].label
     case 'responsable': return NC_RESPONSABLE[n.responsable].label
     case 'proveedor': return n.proveedor?.toLowerCase() ?? ''
-    case 'estadoNc': return n.estadoNc ? NC_ESTADO[n.estadoNc].label : ''
     case 'gestionado': return n.gestionado ? 1 : 0
   }
 }
@@ -106,18 +101,15 @@ const COLUMNS: ColumnDef[] = [
   { key: 'destino', label: 'Destino', filterKey: 'destino' },
   { key: 'responsable', label: 'Responsable', filterKey: 'responsable' },
   { key: 'proveedor', label: 'Proveedor', filterKey: 'proveedor', searchable: true },
-  { key: 'estadoNc', label: 'Estado NC', filterKey: 'estadoNc' },
   { key: 'gestionado', label: 'Gestionada', align: 'center', filterKey: 'gestionado' },
 ]
 
 const FILTERABLE_KEYS = COLUMNS.map((c) => c.filterKey).filter((k): k is FilterableKey => !!k)
 
 export function NcClient({
-  initialNcs, kpis,
+  initialNcs,
 }: {
   initialNcs: Nc[]
-  kpis: { totalNc: number; activas: number; gestionadas: number; esteMes: number }
-  role: string
 }) {
   const [filters, setFilters] = useState<Record<FilterableKey, Set<string> | null>>(
     () => Object.fromEntries(FILTERABLE_KEYS.map((k) => [k, null])) as Record<FilterableKey, Set<string> | null>
@@ -209,14 +201,6 @@ export function NcClient({
 
   return (
     <div className="space-y-5">
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <KPICard title="Total NC" value={kpis.totalNc} unit="" icon={ClipboardList} status="neutral" />
-        <KPICard title="Activas (no gestionadas)" value={kpis.activas} unit="" icon={AlertTriangle} status={kpis.activas > 0 ? 'warn' : 'ok'} />
-        <KPICard title="Gestionadas" value={kpis.gestionadas} unit="" icon={CheckCircle2} status="ok" />
-        <KPICard title="Este mes" value={kpis.esteMes} unit="" icon={CalendarDays} status="neutral" />
-      </div>
-
       <p className="text-xs text-[#666]">
         Esta vista es solo de lectura: todas las NC se cargan desde el Excel en la pestaña{' '}
         <span className="text-white font-medium">Carga de archivos</span>. Las NC marcadas como{' '}
@@ -313,7 +297,7 @@ export function NcClient({
             </thead>
             <tbody className="divide-y divide-border-dark">
               {filtered.length === 0 && (
-                <tr><td colSpan={12} className="px-4 py-10 text-center text-[#555]">Sin no conformidades que coincidan</td></tr>
+                <tr><td colSpan={11} className="px-4 py-10 text-center text-[#555]">Sin no conformidades que coincidan</td></tr>
               )}
               {filtered.map((n) => (
                 <tr key={n.id} className={cn('transition-colors', n.gestionado ? 'opacity-60' : 'hover:bg-border-dark/30')}>
@@ -335,13 +319,6 @@ export function NcClient({
                     </span>
                   </td>
                   <td className="px-4 py-3 text-[#999]">{n.proveedor ?? '—'}</td>
-                  <td className="px-4 py-3">
-                    {n.estadoNc ? (
-                      <span className={cn('inline-flex px-2 py-0.5 rounded-full text-xs font-semibold', NC_ESTADO[n.estadoNc].cls)}>
-                        {NC_ESTADO[n.estadoNc].label}
-                      </span>
-                    ) : <span className="text-[#555]">—</span>}
-                  </td>
                   <td className="px-4 py-3 text-center">
                     {n.gestionado ? <CheckCircle2 className="w-4 h-4 text-status-ok inline" /> : <span className="text-[#555]">—</span>}
                   </td>
