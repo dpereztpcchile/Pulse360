@@ -1,10 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { CheckCircle2, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
+import { CheckCircle2, ArrowUp, ArrowDown, ArrowUpDown, Beef } from 'lucide-react'
 import { ColumnFilterPopover, type FilterOption } from '@/components/no-conformidades/ColumnFilterPopover'
 import {
-  cn, NC_RESPONSABLE, NC_DESTINO, formatDate,
+  cn, NC_RESPONSABLE, NC_DESTINO, formatDate, ncEsInsumoEnvase,
   type NcResponsableKey, type NcDestinoKey,
 } from '@/lib/utils'
 
@@ -119,6 +119,7 @@ export function NcClient({
   const [openFilter, setOpenFilter] = useState<FilterableKey | 'fecha' | null>(null)
   const [sortKey, setSortKey] = useState<SortKey>('fecha')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
+  const [soloCarnicos, setSoloCarnicos] = useState(false)
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -132,6 +133,7 @@ export function NcClient({
   /** Aplica todos los filtros activos excepto el indicado (para calcular opciones "progresivas" tipo Excel). */
   function applyFilters(rows: Nc[], excludeKey?: FilterableKey | 'period'): Nc[] {
     return rows.filter((n) => {
+      if (soloCarnicos && ncEsInsumoEnvase(n.producto)) return false
       for (const key of FILTERABLE_KEYS) {
         if (key === excludeKey) continue
         const sel = filters[key]
@@ -157,7 +159,7 @@ export function NcClient({
     })
     return result
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialNcs, filters, periodMode, periodSelected, sortKey, sortDir])
+  }, [initialNcs, filters, periodMode, periodSelected, sortKey, sortDir, soloCarnicos])
 
   function optionsFor(key: FilterableKey): { options: FilterOption[]; allValues: Set<string> } {
     const preRows = applyFilters(initialNcs, key)
@@ -190,11 +192,12 @@ export function NcClient({
   }
 
   const activeFilterCount =
-    FILTERABLE_KEYS.filter((k) => filters[k] !== null).length + (periodSelected !== null ? 1 : 0)
+    FILTERABLE_KEYS.filter((k) => filters[k] !== null).length + (periodSelected !== null ? 1 : 0) + (soloCarnicos ? 1 : 0)
 
   function limpiarFiltros() {
     setFilters(Object.fromEntries(FILTERABLE_KEYS.map((k) => [k, null])) as Record<FilterableKey, Set<string> | null>)
     setPeriodSelected(null)
+    setSoloCarnicos(false)
   }
 
   const periodOpts = periodOptions()
@@ -206,9 +209,25 @@ export function NcClient({
         <span className="text-white font-medium">Carga de archivos</span>. Las NC marcadas como{' '}
         <span className="text-white font-medium">gestionadas</span> (devolución coordinada con el proveedor) se excluyen de los Indicadores, pero quedan visibles aquí como histórico.
         {' '}Usa el ícono <span className="text-white font-medium">▼</span> de cada columna para filtrar, y haz clic en el nombre de la columna para ordenar.
+        {' '}Usa <span className="text-white font-medium">Solo productos cárnicos</span> para excluir insumos de envase/embalaje (etiquetas, film, bandejas, etc.) del listado.
       </p>
 
       <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setSoloCarnicos((v) => !v)}
+          title="Excluye insumos de envase/embalaje (etiquetas, film, bandejas, etc.), dejando solo NC de producto cárnico"
+          className={cn(
+            'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors',
+            soloCarnicos
+              ? 'bg-pulse-red/10 border-pulse-red text-pulse-red'
+              : 'border-border-dark text-[#999] hover:text-white hover:border-[#555]'
+          )}
+        >
+          <Beef className="w-3.5 h-3.5" />
+          Solo productos cárnicos
+        </button>
+
         {activeFilterCount > 0 && (
           <button onClick={limpiarFiltros} className="text-xs text-[#999] hover:text-white transition-colors underline underline-offset-2">
             Limpiar {activeFilterCount} filtro{activeFilterCount === 1 ? '' : 's'}
