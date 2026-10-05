@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
   Factory, Truck, Filter, ClipboardList, Coins, HandCoins, BarChart3, X,
 } from 'lucide-react'
 import { Kpi, IconKpi, SectionCard, DataTable, ReportState } from '@/components/reportes/ui'
 import {
-  BrandDonut, MoneyLineChart, MoneyBars, StackedBars, MiniHorizontalBars,
+  BrandDonut, MoneyLineChart, MoneyBars, MiniHorizontalBars,
 } from '@/components/reportes/ReportCharts'
 import { cn } from '@/lib/utils'
 
@@ -247,11 +247,6 @@ function ProveedorView({ data }: { data: IndicadoresProveedor }) {
 
   const top3Proveedores = data.porProveedor.slice(0, 3)
 
-  // "Principales productos causantes de NC": top productos por cantidad total,
-  // apilados por razón (se toman las 2 razones más frecuentes del grupo para
-  // mantener la lectura simple, igual al mockup con DFD/MAL OLOR).
-  const { stackedData, stackedSeries } = useMemo(() => buildProductosStack(data.porProductoRazon), [data.porProductoRazon])
-
   return (
     <div className="space-y-5">
       {/* 4 KPI cards estilo mockup */}
@@ -291,23 +286,6 @@ function ProveedorView({ data }: { data: IndicadoresProveedor }) {
           ))}
         </div>
       </SectionCard>
-
-      {/* Principales productos causantes de NC */}
-      <SectionCard title="Principales productos causantes de NC">
-        <StackedBars data={stackedData} xKey="producto" series={stackedSeries} />
-      </SectionCard>
-
-      <SectionCard title="Detalle por proveedor y razón">
-        <DataTable
-          columns={[
-            { key: 'proveedor', label: 'Proveedor' },
-            { key: 'razon', label: 'Razón' },
-            { key: 'cantidad', label: 'N° NC', align: 'right' },
-            { key: 'valorNcOC', label: 'Valor NC (OC)', align: 'right', render: (v) => fmtMoney(Number(v)) },
-          ]}
-          rows={data.porProveedorRazon}
-        />
-      </SectionCard>
     </div>
   )
 }
@@ -345,43 +323,6 @@ function ProveedorMiniCard({ proveedor, detalle, totalNc }: {
       </div>
     </div>
   )
-}
-
-/** Pivotea porProductoRazon → filas por producto con una columna por cada una
- *  de las 2 razones más frecuentes del grupo, para el gráfico de barras apiladas. */
-function buildProductosStack(porProductoRazon: { producto: string; razon: string; cantidad: number; valorNcOC: number }[]) {
-  const COLORS = ['#3B82F6', '#F59E0B', '#22C55E', '#999999']
-
-  const totalPorRazon = new Map<string, number>()
-  for (const r of porProductoRazon) {
-    totalPorRazon.set(r.razon, (totalPorRazon.get(r.razon) ?? 0) + r.cantidad)
-  }
-  const topRazones = Array.from(totalPorRazon.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 2)
-    .map(([razon]) => razon)
-
-  const totalPorProducto = new Map<string, number>()
-  for (const r of porProductoRazon) {
-    totalPorProducto.set(r.producto, (totalPorProducto.get(r.producto) ?? 0) + r.cantidad)
-  }
-  const topProductos = Array.from(totalPorProducto.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([producto]) => producto)
-
-  const stackedData = topProductos.map((producto) => {
-    const row: Record<string, string | number> = { producto }
-    for (const razon of topRazones) {
-      const match = porProductoRazon.find((r) => r.producto === producto && r.razon === razon)
-      row[razon] = match ? match.cantidad : 0
-    }
-    return row
-  })
-
-  const stackedSeries = topRazones.map((razon, i) => ({ key: razon, name: razon, color: COLORS[i % COLORS.length] }))
-
-  return { stackedData, stackedSeries }
 }
 
 function PlantaView({ data }: { data: IndicadoresPlanta }) {
