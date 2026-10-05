@@ -112,10 +112,11 @@ export function NcIndicadoresClient() {
   const semanasDisponibles = data?.grupo === 'PROVEEDOR' ? data.semanasDisponibles : []
   const mesesDisponibles = data?.grupo === 'PROVEEDOR' ? data.mesesDisponibles : []
   const hayFiltrosActivos = semanasSel.size > 0 || mesesSel.size > 0 || excluirEnvase
+  const esProveedor = data?.grupo === 'PROVEEDOR'
 
   return (
     <div className="space-y-5">
-      {/* Selector de grupo */}
+      {/* Selector de grupo + segmentadores + acciones */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex rounded-lg border border-border-dark overflow-hidden">
           <GrupoButton icon={Truck} label="Proveedor" active={grupo === 'PROVEEDOR'} onClick={() => cambiarGrupo('PROVEEDOR')} />
@@ -128,6 +129,17 @@ export function NcIndicadoresClient() {
           Excluir insumos de envase/embalaje
         </label>
 
+        {esProveedor && (
+          <SegmentadoresInline
+            semanasDisponibles={semanasDisponibles}
+            mesesDisponibles={mesesDisponibles}
+            semanasSel={semanasSel}
+            mesesSel={mesesSel}
+            onToggleSemana={toggleSemana}
+            onToggleMes={toggleMes}
+          />
+        )}
+
         {hayFiltrosActivos && (
           <button onClick={limpiarFiltros} className="ml-auto flex items-center gap-1 text-xs text-[#666] hover:text-white">
             <X className="w-3.5 h-3.5" /> Limpiar filtros
@@ -138,19 +150,7 @@ export function NcIndicadoresClient() {
       {loading && <ReportState loading error={null} />}
       {!loading && error && <ReportState loading={false} error={error} />}
 
-      {!loading && !error && data && data.grupo === 'PROVEEDOR' && (
-        <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5">
-          <Segmentadores
-            semanasDisponibles={semanasDisponibles}
-            mesesDisponibles={mesesDisponibles}
-            semanasSel={semanasSel}
-            mesesSel={mesesSel}
-            onToggleSemana={toggleSemana}
-            onToggleMes={toggleMes}
-          />
-          <ProveedorView data={data} />
-        </div>
-      )}
+      {!loading && !error && data && data.grupo === 'PROVEEDOR' && <ProveedorView data={data} />}
       {!loading && !error && data && data.grupo === 'PLANTA' && <PlantaView data={data} />}
     </div>
   )
@@ -172,10 +172,11 @@ function GrupoButton({ icon: Icon, label, active, onClick }: {
 }
 
 // ═══════════════════════════════════════════════════════════
-// Panel lateral "SEGMENTADORES" — selección múltiple de semanas y meses,
-// cada uno como lista desplegable con checkboxes (en vez de grilla de botones).
+// "SEGMENTADORES" en línea — selección múltiple de semanas y meses,
+// cada uno como lista desplegable compacta ubicada en la fila superior
+// (junto al selector de grupo y "Limpiar filtros").
 // ═══════════════════════════════════════════════════════════
-function Segmentadores({ semanasDisponibles, mesesDisponibles, semanasSel, mesesSel, onToggleSemana, onToggleMes }: {
+function SegmentadoresInline({ semanasDisponibles, mesesDisponibles, semanasSel, mesesSel, onToggleSemana, onToggleMes }: {
   semanasDisponibles: number[]
   mesesDisponibles: string[]
   semanasSel: Set<number>
@@ -196,48 +197,36 @@ function Segmentadores({ semanasDisponibles, mesesDisponibles, semanasSel, meses
       : `${mesesSel.size} meses seleccionados`
 
   return (
-    <div className="card p-4 space-y-5 self-start lg:sticky lg:top-4">
-      <div className="flex items-center gap-2 text-sm font-semibold text-white">
-        <Filter className="w-4 h-4" /> SEGMENTADORES
-      </div>
+    <div className="flex items-center gap-2">
+      <span className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-[#999]">
+        <Filter className="w-3.5 h-3.5" /> SEGMENTADORES:
+      </span>
 
-      <div>
-        <p className="text-xs uppercase tracking-wide text-[#999] mb-2">Monto por semanas</p>
-        <MultiSelectDropdown
-          label={semanasLabel}
-          disabled={semanasDisponibles.length === 0}
-        >
-          {semanasDisponibles.map((s) => (
-            <DropdownCheckboxItem key={s} checked={semanasSel.has(s)} onChange={() => onToggleSemana(s)}>
-              Semana {s}
-            </DropdownCheckboxItem>
-          ))}
-        </MultiSelectDropdown>
-      </div>
+      <MultiSelectDropdown label={semanasLabel} disabled={semanasDisponibles.length === 0} widthClass="w-44">
+        {semanasDisponibles.map((s) => (
+          <DropdownCheckboxItem key={s} checked={semanasSel.has(s)} onChange={() => onToggleSemana(s)}>
+            Semana {s}
+          </DropdownCheckboxItem>
+        ))}
+      </MultiSelectDropdown>
 
-      <div>
-        <p className="text-xs uppercase tracking-wide text-[#999] mb-0.5">Razón / Causantes NC</p>
-        <p className="text-[10px] text-[#555] mb-2">Meses (FECHA)</p>
-        <MultiSelectDropdown
-          label={mesesLabel}
-          disabled={mesesDisponibles.length === 0}
-        >
-          {mesesDisponibles.map((m) => (
-            <DropdownCheckboxItem key={m} checked={mesesSel.has(m)} onChange={() => onToggleMes(m)}>
-              <span className="capitalize">{mesLabel(m)}</span>
-            </DropdownCheckboxItem>
-          ))}
-        </MultiSelectDropdown>
-      </div>
+      <MultiSelectDropdown label={mesesLabel} disabled={mesesDisponibles.length === 0} widthClass="w-44">
+        {mesesDisponibles.map((m) => (
+          <DropdownCheckboxItem key={m} checked={mesesSel.has(m)} onChange={() => onToggleMes(m)}>
+            <span className="capitalize">{mesLabel(m)}</span>
+          </DropdownCheckboxItem>
+        ))}
+      </MultiSelectDropdown>
     </div>
   )
 }
 
 /** Lista desplegable reutilizable para selección múltiple (checkboxes dentro). */
-function MultiSelectDropdown({ label, disabled, children }: {
+function MultiSelectDropdown({ label, disabled, children, widthClass = 'w-full' }: {
   label: string
   disabled?: boolean
   children: ReactNode
+  widthClass?: string
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -252,11 +241,11 @@ function MultiSelectDropdown({ label, disabled, children }: {
   }, [open])
 
   if (disabled) {
-    return <p className="text-xs text-[#555]">Sin opciones en el histórico</p>
+    return <p className={cn('text-xs text-[#555] py-2 px-3', widthClass)}>Sin opciones</p>
   }
 
   return (
-    <div className="relative" ref={ref}>
+    <div className={cn('relative', widthClass)} ref={ref}>
       <button type="button" onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center justify-between gap-2 text-xs py-2 px-3 rounded border border-border-dark bg-bg-dark text-white hover:border-pulse-red transition-colors">
         <span className="truncate">{label}</span>
