@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { AlertTriangle, ClipboardList, CheckCircle2, CalendarDays, Search, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { AlertTriangle, ClipboardList, CheckCircle2, CalendarDays, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 import { KPICard } from '@/components/ui/KPICard'
+import { ColumnFilterPopover, type FilterOption } from '@/components/no-conformidades/ColumnFilterPopover'
 import {
   cn, NC_RESPONSABLE, NC_DESTINO, NC_ESTADO, formatDate,
   type NcResponsableKey, type NcDestinoKey, type NcEstadoKey,
@@ -25,29 +26,49 @@ interface Nc {
   gestionado: boolean
 }
 
-const RESPONSABLES: NcResponsableKey[] = ['PROVEEDOR', 'PLANTA']
-const DESTINOS: NcDestinoKey[] = ['VENTA_A_TERCEROS', 'DECOMISO', 'DEVOLUCION', 'RETENIDO', 'OTRO']
+const NULL_VALUE = '__NULL__'
+const fmtMoney = (v: number | null) => (v == null ? '—' : `$${Math.round(v).toLocaleString('es-CL')}`)
 
-const fmtMoney = (v: number | null) => v == null ? '—' : `$${Math.round(v).toLocaleString('es-CL')}`
+// ── Columnas filtrables (categóricas): valor crudo + etiqueta legible por fila ──
+type FilterableKey = 'producto' | 'razon' | 'destino' | 'responsable' | 'proveedor' | 'estadoNc' | 'gestionado'
 
+function rawValue(n: Nc, key: FilterableKey): string {
+  switch (key) {
+    case 'producto': return n.producto
+    case 'razon': return n.razon
+    case 'destino': return n.destino
+    case 'responsable': return n.responsable
+    case 'proveedor': return n.proveedor ?? NULL_VALUE
+    case 'estadoNc': return n.estadoNc ?? NULL_VALUE
+    case 'gestionado': return n.gestionado ? '1' : '0'
+  }
+}
+
+function valueLabel(key: FilterableKey, value: string): string {
+  switch (key) {
+    case 'producto': return value
+    case 'razon': return value
+    case 'destino': return NC_DESTINO[value as NcDestinoKey].label
+    case 'responsable': return NC_RESPONSABLE[value as NcResponsableKey].label
+    case 'proveedor': return value === NULL_VALUE ? '— Sin proveedor' : value
+    case 'estadoNc': return value === NULL_VALUE ? '— Sin estado' : NC_ESTADO[value as NcEstadoKey].label
+    case 'gestionado': return value === '1' ? 'Gestionada' : 'Activa'
+  }
+}
+
+// ── Filtro de período (semana o mes), vive en el encabezado "Fecha" ──
+type PeriodMode = 'semana' | 'mes'
+const monthKey = (iso: string) => iso.slice(0, 7) // "YYYY-MM"
+const monthLabel = (key: string) => {
+  const d = new Date(`${key}-01T00:00:00Z`)
+  const s = new Intl.DateTimeFormat('es-CL', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(d)
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+// ── Ordenamiento ──
 type SortKey = 'ncNumber' | 'fecha' | 'semana' | 'producto' | 'razon' | 'cantidadKg' | 'valorNcOC'
   | 'destino' | 'responsable' | 'proveedor' | 'estadoNc' | 'gestionado'
 type SortDir = 'asc' | 'desc'
-
-const SORT_COLUMNS: { key: SortKey; label: string; align?: 'right' | 'center' }[] = [
-  { key: 'ncNumber', label: 'N° NC' },
-  { key: 'fecha', label: 'Fecha' },
-  { key: 'semana', label: 'Sem.' },
-  { key: 'producto', label: 'Producto' },
-  { key: 'razon', label: 'Razón' },
-  { key: 'cantidadKg', label: 'Cant. (kg)', align: 'right' },
-  { key: 'valorNcOC', label: 'Valor NC (OC)', align: 'right' },
-  { key: 'destino', label: 'Destino' },
-  { key: 'responsable', label: 'Responsable' },
-  { key: 'proveedor', label: 'Proveedor' },
-  { key: 'estadoNc', label: 'Estado NC' },
-  { key: 'gestionado', label: 'Gestionada', align: 'center' },
-]
 
 function sortValue(n: Nc, key: SortKey): string | number {
   switch (key) {
@@ -66,6 +87,31 @@ function sortValue(n: Nc, key: SortKey): string | number {
   }
 }
 
+interface ColumnDef {
+  key: SortKey
+  label: string
+  align?: 'right' | 'center'
+  filterKey?: FilterableKey
+  searchable?: boolean
+}
+
+const COLUMNS: ColumnDef[] = [
+  { key: 'ncNumber', label: 'N° NC' },
+  { key: 'fecha', label: 'Fecha' }, // filtro de período se agrega aparte, en esta misma celda
+  { key: 'semana', label: 'Sem.' },
+  { key: 'producto', label: 'Producto', filterKey: 'producto', searchable: true },
+  { key: 'razon', label: 'Razón', filterKey: 'razon', searchable: true },
+  { key: 'cantidadKg', label: 'Cant. (kg)', align: 'right' },
+  { key: 'valorNcOC', label: 'Valor NC (OC)', align: 'right' },
+  { key: 'destino', label: 'Destino', filterKey: 'destino' },
+  { key: 'responsable', label: 'Responsable', filterKey: 'responsable' },
+  { key: 'proveedor', label: 'Proveedor', filterKey: 'proveedor', searchable: true },
+  { key: 'estadoNc', label: 'Estado NC', filterKey: 'estadoNc' },
+  { key: 'gestionado', label: 'Gestionada', align: 'center', filterKey: 'gestionado' },
+]
+
+const FILTERABLE_KEYS = COLUMNS.map((c) => c.filterKey).filter((k): k is FilterableKey => !!k)
+
 export function NcClient({
   initialNcs, kpis,
 }: {
@@ -73,10 +119,12 @@ export function NcClient({
   kpis: { totalNc: number; activas: number; gestionadas: number; esteMes: number }
   role: string
 }) {
-  const [fResponsable, setFResponsable] = useState<'TODOS' | NcResponsableKey>('TODOS')
-  const [fDestino, setFDestino] = useState<'TODOS' | NcDestinoKey>('TODOS')
-  const [fGestionado, setFGestionado] = useState<'TODOS' | 'SI' | 'NO'>('TODOS')
-  const [fBusqueda, setFBusqueda] = useState('')
+  const [filters, setFilters] = useState<Record<FilterableKey, Set<string> | null>>(
+    () => Object.fromEntries(FILTERABLE_KEYS.map((k) => [k, null])) as Record<FilterableKey, Set<string> | null>
+  )
+  const [periodMode, setPeriodMode] = useState<PeriodMode>('semana')
+  const [periodSelected, setPeriodSelected] = useState<Set<string> | null>(null)
+  const [openFilter, setOpenFilter] = useState<FilterableKey | 'fecha' | null>(null)
   const [sortKey, setSortKey] = useState<SortKey>('fecha')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
 
@@ -89,19 +137,24 @@ export function NcClient({
     }
   }
 
-  const filtered = useMemo(() => {
-    const result = initialNcs.filter((n) => {
-      if (fResponsable !== 'TODOS' && n.responsable !== fResponsable) return false
-      if (fDestino !== 'TODOS' && n.destino !== fDestino) return false
-      if (fGestionado === 'SI' && !n.gestionado) return false
-      if (fGestionado === 'NO' && n.gestionado) return false
-      if (fBusqueda) {
-        const q = fBusqueda.toLowerCase()
-        const hay = `${n.ncNumber} ${n.producto} ${n.razon} ${n.proveedor ?? ''}`.toLowerCase()
-        if (!hay.includes(q)) return false
+  /** Aplica todos los filtros activos excepto el indicado (para calcular opciones "progresivas" tipo Excel). */
+  function applyFilters(rows: Nc[], excludeKey?: FilterableKey | 'period'): Nc[] {
+    return rows.filter((n) => {
+      for (const key of FILTERABLE_KEYS) {
+        if (key === excludeKey) continue
+        const sel = filters[key]
+        if (sel !== null && !sel.has(rawValue(n, key))) return false
+      }
+      if (excludeKey !== 'period' && periodSelected !== null) {
+        const v = periodMode === 'semana' ? String(n.semana) : monthKey(n.fecha)
+        if (!periodSelected.has(v)) return false
       }
       return true
     })
+  }
+
+  const filtered = useMemo(() => {
+    const result = applyFilters(initialNcs)
     const dir = sortDir === 'asc' ? 1 : -1
     result.sort((a, b) => {
       const va = sortValue(a, sortKey)
@@ -111,9 +164,48 @@ export function NcClient({
       return 0
     })
     return result
-  }, [initialNcs, fResponsable, fDestino, fGestionado, fBusqueda, sortKey, sortDir])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialNcs, filters, periodMode, periodSelected, sortKey, sortDir])
 
-  const hasFilters = fResponsable !== 'TODOS' || fDestino !== 'TODOS' || fGestionado !== 'TODOS' || fBusqueda
+  function optionsFor(key: FilterableKey): { options: FilterOption[]; allValues: Set<string> } {
+    const preRows = applyFilters(initialNcs, key)
+    const counts = new Map<string, number>()
+    for (const n of preRows) {
+      const v = rawValue(n, key)
+      counts.set(v, (counts.get(v) ?? 0) + 1)
+    }
+    const options = Array.from(counts.entries())
+      .map(([value, count]) => ({ value, label: valueLabel(key, value), count }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'es'))
+    return { options, allValues: new Set(counts.keys()) }
+  }
+
+  function periodOptions(): { options: FilterOption[]; allValues: Set<string> } {
+    const preRows = applyFilters(initialNcs, 'period')
+    const counts = new Map<string, number>()
+    for (const n of preRows) {
+      const v = periodMode === 'semana' ? String(n.semana) : monthKey(n.fecha)
+      counts.set(v, (counts.get(v) ?? 0) + 1)
+    }
+    const options = Array.from(counts.entries())
+      .map(([value, count]) => ({
+        value,
+        label: periodMode === 'semana' ? `Semana ${value}` : monthLabel(value),
+        count,
+      }))
+      .sort((a, b) => (periodMode === 'semana' ? Number(a.value) - Number(b.value) : a.value.localeCompare(b.value)))
+    return { options, allValues: new Set(counts.keys()) }
+  }
+
+  const activeFilterCount =
+    FILTERABLE_KEYS.filter((k) => filters[k] !== null).length + (periodSelected !== null ? 1 : 0)
+
+  function limpiarFiltros() {
+    setFilters(Object.fromEntries(FILTERABLE_KEYS.map((k) => [k, null])) as Record<FilterableKey, Set<string> | null>)
+    setPeriodSelected(null)
+  }
+
+  const periodOpts = periodOptions()
 
   return (
     <div className="space-y-5">
@@ -129,34 +221,14 @@ export function NcClient({
         Esta vista es solo de lectura: todas las NC se cargan desde el Excel en la pestaña{' '}
         <span className="text-white font-medium">Carga de archivos</span>. Las NC marcadas como{' '}
         <span className="text-white font-medium">gestionadas</span> (devolución coordinada con el proveedor) se excluyen de los Indicadores, pero quedan visibles aquí como histórico.
+        {' '}Usa el ícono <span className="text-white font-medium">▼</span> de cada columna para filtrar, y haz clic en el nombre de la columna para ordenar.
       </p>
 
-      {/* Filtros */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#666]" />
-          <input value={fBusqueda} onChange={(e) => setFBusqueda(e.target.value)} placeholder="Buscar N° NC, producto, razón o proveedor"
-            className="pl-9 pr-3 py-2 w-72 rounded-lg bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
-        </div>
-        <select value={fResponsable} onChange={(e) => setFResponsable(e.target.value as 'TODOS' | NcResponsableKey)}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
-          <option value="TODOS">Todos los responsables</option>
-          {RESPONSABLES.map((r) => <option key={r} value={r}>{NC_RESPONSABLE[r].label}</option>)}
-        </select>
-        <select value={fDestino} onChange={(e) => setFDestino(e.target.value as 'TODOS' | NcDestinoKey)}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
-          <option value="TODOS">Todos los destinos</option>
-          {DESTINOS.map((d) => <option key={d} value={d}>{NC_DESTINO[d].label}</option>)}
-        </select>
-        <select value={fGestionado} onChange={(e) => setFGestionado(e.target.value as 'TODOS' | 'SI' | 'NO')}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
-          <option value="TODOS">Gestionadas y activas</option>
-          <option value="SI">Solo gestionadas</option>
-          <option value="NO">Solo activas</option>
-        </select>
-        {hasFilters && (
-          <button onClick={() => { setFBusqueda(''); setFResponsable('TODOS'); setFDestino('TODOS'); setFGestionado('TODOS') }}
-            className="text-xs text-[#666] hover:text-white transition-colors">Limpiar filtros</button>
+      <div className="flex items-center gap-3">
+        {activeFilterCount > 0 && (
+          <button onClick={limpiarFiltros} className="text-xs text-[#999] hover:text-white transition-colors underline underline-offset-2">
+            Limpiar {activeFilterCount} filtro{activeFilterCount === 1 ? '' : 's'}
+          </button>
         )}
         <span className="text-xs text-[#666] ml-auto">{filtered.length} de {initialNcs.length} NC</span>
       </div>
@@ -167,8 +239,10 @@ export function NcClient({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
-                {SORT_COLUMNS.map(({ key, label, align }) => {
+                {COLUMNS.map(({ key, label, align, filterKey, searchable }) => {
                   const active = sortKey === key
+                  const isFecha = key === 'fecha'
+                  const { options, allValues } = filterKey ? optionsFor(filterKey) : { options: [], allValues: new Set<string>() }
                   return (
                     <th
                       key={key}
@@ -177,22 +251,61 @@ export function NcClient({
                         align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : 'text-left'
                       )}
                     >
-                      <button
-                        type="button"
-                        onClick={() => toggleSort(key)}
-                        className={cn(
-                          'inline-flex items-center gap-1 hover:text-white transition-colors',
-                          align === 'right' && 'flex-row-reverse',
-                          active && 'text-white'
+                      <div className={cn('inline-flex items-center gap-1.5', align === 'right' && 'flex-row-reverse')}>
+                        <button
+                          type="button"
+                          onClick={() => toggleSort(key)}
+                          className={cn('inline-flex items-center gap-1 hover:text-white transition-colors', active && 'text-white')}
+                        >
+                          {label}
+                          {active ? (
+                            sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                          ) : (
+                            <ArrowUpDown className="w-3 h-3 opacity-40" />
+                          )}
+                        </button>
+
+                        {filterKey && (
+                          <ColumnFilterPopover
+                            options={options}
+                            allValues={allValues}
+                            selected={filters[filterKey]}
+                            onChange={(next) => setFilters((f) => ({ ...f, [filterKey]: next }))}
+                            open={openFilter === filterKey}
+                            onOpenChange={(o) => setOpenFilter(o ? filterKey : null)}
+                            searchable={searchable}
+                          />
                         )}
-                      >
-                        {label}
-                        {active ? (
-                          sortDir === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
-                        ) : (
-                          <ArrowUpDown className="w-3 h-3 opacity-40" />
+
+                        {isFecha && (
+                          <ColumnFilterPopover
+                            options={periodOpts.options}
+                            allValues={periodOpts.allValues}
+                            selected={periodSelected}
+                            onChange={setPeriodSelected}
+                            open={openFilter === 'fecha'}
+                            onOpenChange={(o) => setOpenFilter(o ? 'fecha' : null)}
+                            header={
+                              <div className="flex rounded-md border border-border-dark overflow-hidden mb-2 text-[11px]">
+                                <button
+                                  type="button"
+                                  onClick={() => { setPeriodMode('semana'); setPeriodSelected(null) }}
+                                  className={cn('flex-1 py-1 transition-colors', periodMode === 'semana' ? 'bg-pulse-red text-white' : 'text-[#999] hover:text-white')}
+                                >
+                                  Semana
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => { setPeriodMode('mes'); setPeriodSelected(null) }}
+                                  className={cn('flex-1 py-1 transition-colors', periodMode === 'mes' ? 'bg-pulse-red text-white' : 'text-[#999] hover:text-white')}
+                                >
+                                  Mes
+                                </button>
+                              </div>
+                            }
+                          />
                         )}
-                      </button>
+                      </div>
                     </th>
                   )
                 })}
