@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { FileSpreadsheet, FileText, Loader2 } from 'lucide-react'
+import { FileSpreadsheet, FileText, Loader2, LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /** Tarjeta KPI con el estilo del dashboard. */
@@ -16,6 +16,27 @@ export function Kpi({ label, value, sub, accent }: {
       <p className="text-xs uppercase tracking-wide text-[#666]">{label}</p>
       <p className={cn('kpi-value mt-1', accent ? 'text-pulse-red' : 'text-white')}>{value}</p>
       {sub && <p className="text-xs text-[#666] mt-0.5">{sub}</p>}
+    </div>
+  )
+}
+
+/** Tarjeta KPI estilo mockup: icono + valor grande + caption en mayúsculas. */
+export function IconKpi({ icon: Icon, value, caption, children }: {
+  icon: LucideIcon
+  value?: ReactNode
+  caption: string
+  /** Contenido custom en lugar de `value` (ej. tabla mini de 2 filas). */
+  children?: ReactNode
+}) {
+  return (
+    <div className="card p-4 flex items-start gap-3">
+      <div className="shrink-0 w-10 h-10 rounded-lg bg-white/90 flex items-center justify-center">
+        <Icon className="w-5 h-5 text-[#111]" strokeWidth={2} />
+      </div>
+      <div className="flex-1 min-w-0">
+        {children ? children : <p className="text-2xl font-bold text-white leading-tight">{value}</p>}
+        <p className="text-[11px] uppercase tracking-wide text-[#999] mt-1 leading-tight">{caption}</p>
+      </div>
     </div>
   )
 }
