@@ -206,6 +206,88 @@ export function BrandDonut({ data, colors, height = 280 }: {
 }
 
 // ═══════════════════════════════════════════════════════════
+// Donut con callouts externos: caja con borde mostrando $ y % en dos líneas,
+// conectada al segmento mediante una línea quebrada (ej. "PARTICIPACIÓN NC").
+// ═══════════════════════════════════════════════════════════
+const PARTICIPACION_RADIAN = Math.PI / 180
+
+interface ParticipacionLabelProps {
+  cx: number
+  cy: number
+  midAngle: number
+  outerRadius: number
+  value: number
+  percent?: number
+  fill: string
+}
+
+function renderParticipacionLabel(props: unknown) {
+  const { cx, cy, midAngle, outerRadius, value, percent, fill } = props as ParticipacionLabelProps
+  const sin = Math.sin(-PARTICIPACION_RADIAN * midAngle)
+  const cos = Math.cos(-PARTICIPACION_RADIAN * midAngle)
+  const sx = cx + (outerRadius + 6) * cos
+  const sy = cy + (outerRadius + 6) * sin
+  const mx = cx + (outerRadius + 24) * cos
+  const my = cy + (outerRadius + 24) * sin
+  const ex = mx + (cos >= 0 ? 1 : -1) * 22
+  const ey = my
+  const boxW = 96
+  const boxH = 36
+  const boxX = cos >= 0 ? ex : ex - boxW
+  const boxY = ey - boxH / 2
+  const pctLabel = `${Math.round((percent ?? 0) * 100)}%`
+  return (
+    <g>
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke="#666666" fill="none" />
+      <circle cx={sx} cy={sy} r={2.5} fill={fill} stroke="none" />
+      <rect x={boxX} y={boxY} width={boxW} height={boxH} rx={4} fill="#111111" stroke="#ffffff" strokeWidth={1} />
+      <text x={boxX + boxW / 2} y={boxY + 15} textAnchor="middle" fill="#ffffff" fontSize={11} fontFamily="Rajdhani" fontWeight={600}>
+        {fmtMoney(value)}
+      </text>
+      <text x={boxX + boxW / 2} y={boxY + 28} textAnchor="middle" fill="#cccccc" fontSize={11} fontFamily="Rajdhani">
+        {pctLabel}
+      </text>
+    </g>
+  )
+}
+
+export function ParticipacionDonut({ data, colors = ['#71798E', '#D9B36F'], height = 300 }: {
+  data: { name: string; value: number }[]
+  colors?: string[]
+  height?: number
+}) {
+  const filtered = data.filter((d) => d.value > 0)
+  if (filtered.length === 0) {
+    return <div className="h-[300px] flex items-center justify-center text-[#666] text-sm">Sin datos en el período</div>
+  }
+  return (
+    <ResponsiveContainer width="100%" height={height}>
+      <PieChart margin={{ top: 20, right: 70, left: 70, bottom: 20 }}>
+        <Pie
+          data={filtered}
+          dataKey="value"
+          nameKey="name"
+          cx="50%"
+          cy="50%"
+          innerRadius={55}
+          outerRadius={85}
+          paddingAngle={2}
+          stroke="#1A1A1A"
+          strokeWidth={2}
+          label={renderParticipacionLabel}
+          labelLine={false}
+        >
+          {filtered.map((_, i) => (
+            <Cell key={i} fill={colors[i % colors.length]} />
+          ))}
+        </Pie>
+        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
+      </PieChart>
+    </ResponsiveContainer>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════
 // Línea con etiquetas $ sobre cada punto (ej. "MONTO GENERADO (SEMANAS)")
 // ═══════════════════════════════════════════════════════════
 export function MoneyLineChart({ data, xKey, yKey, color = '#CC0000', height = 260 }: {
@@ -286,13 +368,13 @@ export function StackedBars({ data, xKey, series, height = 260 }: {
       <BarChart data={data as never[]} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
         <CartesianGrid {...gridProps} vertical={false} />
         <XAxis dataKey={xKey} {...axisProps} interval={0} />
-        <YAxis {...axisProps} allowDecimals={false} />
-        <Tooltip {...tooltipProps} cursor={{ fill: '#ffffff08' }} formatter={(v) => fmtNum(v)} />
+        <YAxis {...axisProps} allowDecimals={false} width={70} tickFormatter={(v) => fmtMoney(v)} />
+        <Tooltip {...tooltipProps} cursor={{ fill: '#ffffff08' }} formatter={(v) => fmtMoney(v)} />
         <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
         {series.map((s, i) => (
           <Bar key={s.key} dataKey={s.key} name={s.name} stackId="stack" fill={s.color}
             radius={i === series.length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}>
-            <LabelList dataKey={s.key} position="inside" formatter={(v: unknown) => (Number(v) > 0 ? fmtNum(v) : '')}
+            <LabelList dataKey={s.key} position="inside" formatter={(v: unknown) => (Number(v) > 0 ? fmtMoney(v) : '')}
               style={{ fill: '#fff', fontSize: 11, fontFamily: 'Rajdhani', fontWeight: 600 }} />
           </Bar>
         ))}

@@ -201,7 +201,15 @@ export async function getIndicadoresProveedor(filtros: IndicadoresFiltros = {}):
 export interface IndicadoresPlanta {
   totalNc: number
   totalValorNcOC: number
-  totalValorVentaNc: number
+  /** "Monto recaudado por V.T.": suma de VALOR VENTA NC para las NC vendidas a terceros (mismo criterio que Proveedor). */
+  montoRecaudadoVentaTercero: number
+  /** Pérdida neta del período: valor generado por NC menos lo recaudado por venta a terceros. */
+  impacto: number
+  /** % del valor generado por NC que se logró recuperar vía venta a terceros. */
+  retornoPct: number
+  /** Participación del valor NC (OC) total entre Planta y Proveedor, bajo los mismos filtros activos
+   *  (para contextualizar qué proporción del impacto económico corresponde a cada responsable). */
+  participacion: { planta: number; proveedor: number }
   porSemanaRazon: { semana: number; razon: string; valorNcOC: number; cantidad: number }[]
   porRazon: { razon: string; valorNcOC: number; cantidad: number }[]
   porSemana: { semana: number; valorNcOC: number; cantidad: number }[]
@@ -214,7 +222,17 @@ export async function getIndicadoresPlanta(filtros: IndicadoresFiltros = {}): Pr
 
   const totalNc = rows.length
   const totalValorNcOC = round(sum(rows.map((r) => r.valorNcOC ?? 0)))
-  const totalValorVentaNc = round(sum(rows.map((r) => r.valorVentaNc ?? 0)))
+  const montoRecaudadoVentaTercero = round(
+    sum(rows.filter((r) => r.destino === 'VENTA_A_TERCEROS').map((r) => r.valorVentaNc ?? 0)),
+  )
+  const impacto = round(totalValorNcOC - montoRecaudadoVentaTercero)
+  const retornoPct = pct(montoRecaudadoVentaTercero, totalValorNcOC)
+
+  // Participación: se recalcula el total de Proveedor bajo los mismos filtros activos
+  // (semanas/meses/excluirEnvase) para poder comparar ambos responsables en el donut.
+  const rowsProveedor = await fetchRegistros('PROVEEDOR', filtros)
+  const totalValorNcOCProveedor = round(sum(rowsProveedor.map((r) => r.valorNcOC ?? 0)))
+  const participacion = { planta: totalValorNcOC, proveedor: totalValorNcOCProveedor }
 
   const keySR = (r: NcRegistro) => `${r.semana}|||${r.razon}`
   const mapSR = new Map<string, { semana: number; razon: string; valorNcOC: number; cantidad: number }>()
@@ -254,7 +272,7 @@ export async function getIndicadoresPlanta(filtros: IndicadoresFiltros = {}): Pr
   const { semanasDisponibles, mesesDisponibles } = await fetchOpcionesSegmentador('PLANTA', filtros.excluirEnvase)
 
   return {
-    totalNc, totalValorNcOC, totalValorVentaNc, porSemanaRazon, porRazon, porSemana,
-    semanasDisponibles, mesesDisponibles,
+    totalNc, totalValorNcOC, montoRecaudadoVentaTercero, impacto, retornoPct, participacion,
+    porSemanaRazon, porRazon, porSemana, semanasDisponibles, mesesDisponibles,
   }
 }

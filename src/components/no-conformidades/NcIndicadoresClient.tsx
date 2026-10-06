@@ -4,9 +4,9 @@ import { useEffect, useState, useCallback, useRef, ReactNode } from 'react'
 import {
   Factory, Truck, Filter, ClipboardList, Coins, HandCoins, BarChart3, X, ChevronDown,
 } from 'lucide-react'
-import { Kpi, IconKpi, SectionCard, DataTable, ReportState } from '@/components/reportes/ui'
+import { IconKpi, SectionCard, ReportState } from '@/components/reportes/ui'
 import {
-  BrandDonut, MoneyLineChart, MoneyBars, MiniHorizontalBars,
+  BrandDonut, ParticipacionDonut, MoneyLineChart, MoneyBars, MiniHorizontalBars, StackedBars,
 } from '@/components/reportes/ReportCharts'
 import { cn } from '@/lib/utils'
 
@@ -40,7 +40,10 @@ interface IndicadoresPlanta {
   grupo: 'PLANTA'
   totalNc: number
   totalValorNcOC: number
-  totalValorVentaNc: number
+  montoRecaudadoVentaTercero: number
+  impacto: number
+  retornoPct: number
+  participacion: { planta: number; proveedor: number }
   porSemanaRazon: { semana: number; razon: string; valorNcOC: number; cantidad: number }[]
   porRazon: { razon: string; valorNcOC: number; cantidad: number }[]
   porSemana: { semana: number; valorNcOC: number; cantidad: number }[]
@@ -366,42 +369,111 @@ function ProveedorMiniCard({ proveedor, detalle, totalNc }: {
   )
 }
 
+// Paleta fija para las series de razón del stacked bar "NC Manejo interno Planta",
+// cicla en el mismo orden para el gráfico, la leyenda y la tabla de valores.
+const RAZON_STACK_COLORS = ['#60A5FA', '#F2C94C', '#9CA3AF', '#F2994A', '#4C5FD5', '#22C55E', '#CC0000', '#A855F7']
+
 function PlantaView({ data }: { data: IndicadoresPlanta }) {
   if (data.totalNc === 0) {
     return <div className="card p-10 text-center text-[#666] text-sm">Sin NC de Planta en el período seleccionado.</div>
   }
 
-  const porRazonDonut = data.porRazon.map((r) => ({ name: r.razon, value: r.valorNcOC }))
-  const porSemanaBars = data.porSemana.map((s) => ({ semana: `S${s.semana}`, valorNcOC: s.valorNcOC }))
+  const participacionDonut = [
+    { name: 'PLANTA', value: data.participacion.planta },
+    { name: 'PROVEEDOR', value: data.participacion.proveedor },
+  ]
+
+  // Razones en el orden de mayor a menor valor total (ya vienen así desde el backend).
+  const razones = data.porRazon.map((r) => r.razon)
+  const semanas = data.porSemana.map((s) => s.semana)
+
+  // Pivot semana × razón → una serie por razón, para el stacked bar.
+  const valorPorSemanaYRazon = new Map<string, number>()
+  for (const r of data.porSemanaRazon) {
+    valorPorSemanaYRazon.set(`${r.semana}|||${r.razon}`, r.valorNcOC)
+  }
+  const stackedData = semanas.map((s) => {
+    const row: Record<string, string | number> = { semana: `${s}` }
+    for (const razon of razones) {
+      row[razon] = valorPorSemanaYRazon.get(`${s}|||${razon}`) ?? 0
+    }
+    return row
+  })
+  const stackedSeries = razones.map((razon, i) => ({
+    key: razon, name: razon, color: RAZON_STACK_COLORS[i % RAZON_STACK_COLORS.length],
+  }))
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Kpi label="Total NC" value={data.totalNc.toLocaleString('es-CL')} />
-        <Kpi label="Valor NC (OC)" value={fmtMoney(data.totalValorNcOC)} accent />
-        <Kpi label="Valor venta NC" value={fmtMoney(data.totalValorVentaNc)} />
+      {/* 4 KPI cards — mismo formato que Proveedor */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <IconKpi icon={ClipboardList} value={data.totalNc.toLocaleString('es-CL')}
+          caption="NC CONFORMIDADES DEL PERIODO (PRODUCTOS CÁRNICOS)" />
+        <IconKpi icon={Coins} value={fmtMoney(data.totalValorNcOC)}
+          caption="MONTO TOTAL GENERADO POR NC" />
+        <IconKpi icon={HandCoins} value={fmtMoney(data.montoRecaudadoVentaTercero)}
+          caption="MONTO RECAUDADO POR V.T." />
+        <IconKpi icon={BarChart3} caption="BALANCE DEL PERIODO">
+          <div className="text-sm leading-tight space-y-0.5">
+            <p className="text-white font-semibold">IMPACTO: <span className="text-pulse-red">{fmtMoney(data.impacto)}</span></p>
+            <p className="text-white font-semibold">RETORNO: <span className="text-status-ok">{data.retornoPct.toLocaleString('es-CL')}%</span></p>
+          </div>
+        </IconKpi>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <SectionCard title="Valor NC (OC) por razón">
-          <BrandDonut data={porRazonDonut} />
-        </SectionCard>
-        <SectionCard title="Evolución semanal — Valor NC (OC)">
-          <MoneyBars data={porSemanaBars} xKey="semana" yKey="valorNcOC" color="#CC0000" />
-        </SectionCard>
-      </div>
-
-      <SectionCard title="Detalle por semana y razón">
-        <DataTable
-          columns={[
-            { key: 'semana', label: 'Semana', render: (v) => `S${v}` },
-            { key: 'razon', label: 'Razón' },
-            { key: 'cantidad', label: 'N° NC', align: 'right' },
-            { key: 'valorNcOC', label: 'Valor NC (OC)', align: 'right', render: (v) => fmtMoney(Number(v)) },
-          ]}
-          rows={data.porSemanaRazon}
-        />
+      {/* Participación NC: Planta vs Proveedor */}
+      <SectionCard title="Participación NC">
+        <ParticipacionDonut data={participacionDonut} />
       </SectionCard>
+
+      {/* NC Manejo interno Planta (semanas): stacked bar + tabla de detalle por razón */}
+      <SectionCard title="NC manejo interno planta (semanas)">
+        <StackedBars data={stackedData} xKey="semana" series={stackedSeries} />
+        <RazonSemanaTable razones={razones} semanas={semanas} valores={valorPorSemanaYRazon} colors={RAZON_STACK_COLORS} />
+      </SectionCard>
+    </div>
+  )
+}
+
+/** Tabla de detalle bajo el stacked bar: una fila por razón (con su color de leyenda) y
+ *  una columna por semana, mostrando el valor NC (OC) de esa combinación (vacío si no hubo). */
+function RazonSemanaTable({ razones, semanas, valores, colors }: {
+  razones: string[]
+  semanas: number[]
+  valores: Map<string, number>
+  colors: string[]
+}) {
+  if (razones.length === 0 || semanas.length === 0) return null
+  return (
+    <div className="overflow-x-auto mt-4">
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="border-b border-border-dark text-[#666] uppercase tracking-wide">
+            <th className="py-2 px-3 text-left font-medium">Razón</th>
+            {semanas.map((s) => (
+              <th key={s} className="py-2 px-3 text-right font-medium">{s}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {razones.map((razon, i) => (
+            <tr key={razon} className="border-b border-border-dark/50">
+              <td className="py-2 px-3 text-[#ddd] flex items-center gap-2 whitespace-nowrap">
+                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
+                {razon}
+              </td>
+              {semanas.map((s) => {
+                const v = valores.get(`${s}|||${razon}`)
+                return (
+                  <td key={s} className="py-2 px-3 text-right text-[#ddd]">
+                    {v != null ? fmtMoney(v) : ''}
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
