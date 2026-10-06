@@ -15,8 +15,6 @@ import { appToday } from '@/lib/app-date'
 
 export const dynamic = 'force-dynamic'
 
-const ALLOWED = ['ADMINISTRADOR', 'SUPERVISOR']
-
 function rangoUlt4Semanas(today: string) {
   const [y, m, d] = today.split('-').map(Number)
   const hastaD = new Date(y, m - 1, d)
@@ -28,6 +26,8 @@ function rangoUlt4Semanas(today: string) {
 export default async function CapacidadPage({ searchParams }: { searchParams: { vista?: string } }) {
   const session = await getServerSession(authOptions)
   const role = session?.user?.role ?? 'OPERADOR'
+  const allowedModules = session?.user?.allowedModules ?? []
+  const hasModuleAccess = role === 'ADMINISTRADOR' || allowedModules.includes('capacidad')
 
   const header = (
     <div>
@@ -38,7 +38,7 @@ export default async function CapacidadPage({ searchParams }: { searchParams: { 
     </div>
   )
 
-  if (!ALLOWED.includes(role)) {
+  if (!hasModuleAccess) {
     return <div className="space-y-6">{header}<AccessDenied /></div>
   }
 

@@ -2,7 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
-import { getAllowedModuleKeys } from './permissions'
+import { getAllowedModuleKeysForUser } from './permissions'
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -45,11 +45,13 @@ export const authOptions: NextAuthOptions = {
           data: { lastLoginAt: new Date() },
         })
 
-        // Módulos a los que este rol tiene acceso (matriz de permisos por
-        // rol). Se calcula una vez aquí y viaja en el JWT durante toda la
-        // sesión (8h); si un administrador cambia la matriz, el usuario
-        // afectado verá el cambio reflejado en su próximo inicio de sesión.
-        const allowedModules = Array.from(await getAllowedModuleKeys(user.role))
+        // Módulos a los que este usuario tiene acceso: matriz por rol (base)
+        // combinada con sus overrides individuales (UserPermission), que
+        // tienen siempre la última palabra. Se calcula una vez aquí y viaja
+        // en el JWT durante toda la sesión (8h); si un administrador cambia
+        // la matriz o los overrides de este usuario, el cambio se refleja en
+        // su próximo inicio de sesión.
+        const allowedModules = Array.from(await getAllowedModuleKeysForUser(user.id, user.role))
 
         return {
           id: user.id,
