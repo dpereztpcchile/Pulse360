@@ -70,8 +70,8 @@ export default async function ConfiguracionPage() {
             <ShieldCheck className="w-5 h-5 text-pulse-red" />
           </div>
           <div>
-            <p className="font-semibold text-white">Permisos por rol</p>
-            <p className="text-xs text-[#666]">Define a qué módulos puede acceder cada rol (Supervisor, Operador, Calidad, Verificador, Visitante)</p>
+            <p className="font-semibold text-white">Permisos</p>
+            <p className="text-xs text-[#666]">Define a qué módulos puede acceder cada rol, y ajusta excepciones puntuales por usuario</p>
           </div>
         </div>
         <Link href="/admin/permisos" className="btn-primary text-xs py-1.5 flex items-center gap-1.5 shrink-0">

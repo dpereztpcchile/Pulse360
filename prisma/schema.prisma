@@ -156,6 +156,7 @@ model User {
   lastLoginAt        DateTime?
 
   sessions Session[]
+  userPermissions UserPermission[]
 
   @@map("users")
 }
@@ -176,6 +177,23 @@ model RolePermission {
 
   @@unique([role, moduleKey])
   @@map("role_permissions")
+}
+
+// Permisos de acceso a módulos por usuario individual (overrides puntuales
+// sobre la matriz por rol). Si no existe una fila para un (userId, moduleKey),
+// se usa el valor efectivo del rol del usuario (default + RolePermission).
+// Permite, por ejemplo, dar acceso a Reportes a un Operador específico sin
+// cambiar el permiso de todo el rol OPERADOR.
+model UserPermission {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleKey String
+  allowed   Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, moduleKey])
+  @@map("user_permissions")
 }
 
 model Session {

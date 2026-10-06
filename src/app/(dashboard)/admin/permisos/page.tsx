@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 import { getFullPermissionMatrix } from '@/lib/permissions'
 import { MANAGED_MODULES, MANAGED_ROLES } from '@/lib/modules'
 import { PermisosClient } from './PermisosClient'
@@ -13,13 +14,21 @@ export default async function PermisosPage() {
     redirect('/dashboard')
   }
 
-  const matrix = await getFullPermissionMatrix()
+  const [matrix, users] = await Promise.all([
+    getFullPermissionMatrix(),
+    prisma.user.findMany({
+      where: { active: true },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, email: true, role: true },
+    }),
+  ])
 
   return (
     <PermisosClient
       roles={MANAGED_ROLES as unknown as string[]}
       modules={MANAGED_MODULES}
       initialMatrix={matrix as unknown as Record<string, Record<string, boolean>>}
+      users={users}
     />
   )
 }
