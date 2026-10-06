@@ -27,11 +27,11 @@ interface IndicadoresProveedor {
   impacto: number
   retornoPct: number
   gestionado: GestionadoStats
-  porProveedorRazon: { proveedor: string; razon: string; valorNcOC: number; cantidad: number }[]
-  porProveedor: { proveedor: string; valorNcOC: number; cantidad: number; participacionPct: number }[]
-  porRazon: { razon: string; valorNcOC: number; cantidad: number }[]
-  porSemana: { semana: number; valorNcOC: number; cantidad: number }[]
-  porProductoRazon: { producto: string; razon: string; cantidad: number; valorNcOC: number }[]
+  porProveedorRazon: { proveedor: string; razon: string; costoPlanta: number; cantidad: number }[]
+  porProveedor: { proveedor: string; costoPlanta: number; cantidad: number; participacionPct: number }[]
+  porRazon: { razon: string; costoPlanta: number; cantidad: number }[]
+  porSemana: { semana: number; costoPlanta: number; cantidad: number }[]
+  porProductoRazon: { producto: string; razon: string; cantidad: number; costoPlanta: number }[]
   semanasDisponibles: number[]
   mesesDisponibles: string[]
 }
@@ -44,9 +44,9 @@ interface IndicadoresPlanta {
   impacto: number
   retornoPct: number
   participacion: { planta: number; proveedor: number }
-  porSemanaRazon: { semana: number; razon: string; valorNcOC: number; cantidad: number }[]
-  porRazon: { razon: string; valorNcOC: number; cantidad: number }[]
-  porSemana: { semana: number; valorNcOC: number; cantidad: number }[]
+  porSemanaRazon: { semana: number; razon: string; costoPlanta: number; cantidad: number }[]
+  porRazon: { razon: string; costoPlanta: number; cantidad: number }[]
+  porSemana: { semana: number; costoPlanta: number; cantidad: number }[]
   semanasDisponibles: number[]
   mesesDisponibles: string[]
 }
@@ -282,8 +282,8 @@ function ProveedorView({ data }: { data: IndicadoresProveedor }) {
     return <div className="card p-10 text-center text-[#666] text-sm">Sin NC de Proveedor en el período seleccionado.</div>
   }
 
-  const porSemanaLine = data.porSemana.map((s) => ({ semana: `${s.semana}`, valorNcOC: s.valorNcOC }))
-  const porRazonBars = data.porRazon.map((r) => ({ razon: r.razon, valorNcOC: r.valorNcOC }))
+  const porSemanaLine = data.porSemana.map((s) => ({ semana: `${s.semana}`, costoPlanta: s.costoPlanta }))
+  const porRazonBars = data.porRazon.map((r) => ({ razon: r.razon, costoPlanta: r.costoPlanta }))
   const gestionadoDonut = [
     { name: 'NO GESTIONADO', value: data.gestionado.no },
     { name: 'SI GESTIONADO', value: data.gestionado.si },
@@ -311,11 +311,11 @@ function ProveedorView({ data }: { data: IndicadoresProveedor }) {
 
       {/* Fila de gráficos: línea semanal / razón / gestionado */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <SectionCard title="Monto generado (semanas)">
-          <MoneyLineChart data={porSemanaLine} xKey="semana" yKey="valorNcOC" />
+        <SectionCard title="Pérdida en dinero (semanas)">
+          <MoneyLineChart data={porSemanaLine} xKey="semana" yKey="costoPlanta" />
         </SectionCard>
         <SectionCard title="Razón no conformidades">
-          <MoneyBars data={porRazonBars} xKey="razon" yKey="valorNcOC" color="#3B82F6" angledLabels />
+          <MoneyBars data={porRazonBars} xKey="razon" yKey="costoPlanta" color="#3B82F6" angledLabels />
         </SectionCard>
         <SectionCard title="Gestionado">
           <BrandDonut data={gestionadoDonut} colors={['#F59E0B', '#3B82F6']} />
@@ -336,25 +336,25 @@ function ProveedorView({ data }: { data: IndicadoresProveedor }) {
 
 /** Mini-card de un proveedor: barras horizontales por razón + barra resumen oscura. */
 function ProveedorMiniCard({ proveedor, detalle, totalNc }: {
-  proveedor: { proveedor: string; valorNcOC: number; cantidad: number; participacionPct: number }
-  detalle: { proveedor: string; razon: string; valorNcOC: number; cantidad: number }[]
+  proveedor: { proveedor: string; costoPlanta: number; cantidad: number; participacionPct: number }
+  detalle: { proveedor: string; razon: string; costoPlanta: number; cantidad: number }[]
   totalNc: number
 }) {
   const razones = detalle
     .filter((d) => d.proveedor === proveedor.proveedor)
-    .sort((a, b) => b.valorNcOC - a.valorNcOC)
-    .map((d) => ({ razon: d.razon, valorNcOC: d.valorNcOC }))
+    .sort((a, b) => b.costoPlanta - a.costoPlanta)
+    .map((d) => ({ razon: d.razon, costoPlanta: d.costoPlanta }))
 
   return (
     <div className="rounded-lg border border-border-dark overflow-hidden">
       <p className="text-xs font-semibold text-white text-center py-2 bg-border-dark/40">{proveedor.proveedor}</p>
       <div className="px-2 pt-2">
-        <MiniHorizontalBars data={razones} xKey="razon" yKey="valorNcOC" />
+        <MiniHorizontalBars data={razones} xKey="razon" yKey="costoPlanta" />
       </div>
       <div className="grid grid-cols-3 text-center text-[10px] text-[#ccc] bg-[#111] py-2 border-t border-border-dark">
         <div>
           <p className="text-[#666] uppercase">Total</p>
-          <p className="font-semibold text-white">{fmtMoney(proveedor.valorNcOC)}</p>
+          <p className="font-semibold text-white">{fmtMoney(proveedor.costoPlanta)}</p>
         </div>
         <div>
           <p className="text-[#666] uppercase">Suma NC</p>
@@ -390,7 +390,7 @@ function PlantaView({ data }: { data: IndicadoresPlanta }) {
   // Pivot semana × razón → una serie por razón, para el stacked bar.
   const valorPorSemanaYRazon = new Map<string, number>()
   for (const r of data.porSemanaRazon) {
-    valorPorSemanaYRazon.set(`${r.semana}|||${r.razon}`, r.valorNcOC)
+    valorPorSemanaYRazon.set(`${r.semana}|||${r.razon}`, r.costoPlanta)
   }
   const stackedData = semanas.map((s) => {
     const row: Record<string, string | number> = { semana: `${s}` }
