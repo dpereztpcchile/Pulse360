@@ -57,6 +57,25 @@ async function fetchRegistros(
 
 const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0)
 const round = (n: number) => Math.round(n * 100) / 100
+
+/**
+ * Costo real para planta de una NC: el valor generado por la NC menos lo
+ * recuperado por venta a terceros (columna "COSTO PLANTA" del Excel). Esta
+ * es la métrica correcta para TODO análisis de impacto económico/pérdida —
+ * a diferencia de `valorNcOC` (el valor bruto de la NC antes de descontar lo
+ * recuperado), que solo debe usarse para el KPI de monto "generado".
+ *
+ * Ejemplo: una NC de $155.400 (valorNcOC) vendida a terceros por $57.750
+ * (valorVentaNc) representa una pérdida real para planta de solo $97.650
+ * (costoPlanta) — no los $155.400 brutos.
+ *
+ * Se usa el campo `costoPlanta` ya calculado al importar el Excel; si algún
+ * registro antiguo no lo trajera (null), se calcula aquí como respaldo.
+ */
+function costoPlantaOf(r: NcRegistro): number {
+  if (r.costoPlanta != null) return r.costoPlanta
+  return (r.valorNcOC ?? 0) - (r.valorVentaNc ?? 0)
+}
 // Redondea a 1 decimal (ej. 35,9%). Nota: NO usar round() aquí — round() ya
 // redondea a 2 decimales, y encadenarlo con /10 deja 3 decimales en el resultado.
 const pct = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 1000) / 10 : 0)
@@ -102,12 +121,16 @@ export interface IndicadoresProveedor {
   /** % del valor generado por NC que se logró recuperar vía venta a terceros. */
   retornoPct: number
   gestionado: GestionadoStats
-  porProveedorRazon: { proveedor: string; razon: string; valorNcOC: number; cantidad: number }[]
-  porProveedor: { proveedor: string; valorNcOC: number; cantidad: number; participacionPct: number }[]
-  porRazon: { razon: string; valorNcOC: number; cantidad: number }[]
-  porSemana: { semana: number; valorNcOC: number; cantidad: number }[]
+  /** Desgloses de detalle: usan `costoPlanta` (valorNcOC - valorVentaNc), el
+   *  impacto económico REAL para planta de cada NC — no el valor bruto de la
+   *  NC. Así una NC recuperada por venta a terceros pesa en el detalle solo
+   *  por su pérdida neta, consistente con el KPI "IMPACTO" de arriba. */
+  porProveedorRazon: { proveedor: string; razon: string; costoPlanta: number; cantidad: number }[]
+  porProveedor: { proveedor: string; costoPlanta: number; cantidad: number; participacionPct: number }[]
+  porRazon: { razon: string; costoPlanta: number; cantidad: number }[]
+  porSemana: { semana: number; costoPlanta: number; cantidad: number }[]
   /** Productos (cárnicos) que más generan NC, desagregado por razón — para el gráfico de barras apiladas. */
-  porProductoRazon: { producto: string; razon: string; cantidad: number; valorNcOC: number }[]
+  porProductoRazon: { producto: string; razon: string; cantidad: number; costoPlanta: number }[]
   semanasDisponibles: number[]
   mesesDisponibles: string[]
 }
@@ -123,67 +146,69 @@ export async function getIndicadoresProveedor(filtros: IndicadoresFiltros = {}):
   )
   const impacto = round(totalValorNcOC - montoRecaudadoVentaTercero)
   const retornoPct = pct(montoRecaudadoVentaTercero, totalValorNcOC)
+  // Total de costoPlanta del grupo, usado como base de la participación % por proveedor.
+  const totalCostoPlanta = round(sum(rows.map(costoPlantaOf)))
 
   const gestionado = await computeGestionadoStats('PROVEEDOR', filtros)
 
   const keyPR = (r: NcRegistro) => `${r.proveedor ?? 'Sin proveedor'}|||${r.razon}`
-  const mapPR = new Map<string, { proveedor: string; razon: string; valorNcOC: number; cantidad: number }>()
+  const mapPR = new Map<string, { proveedor: string; razon: string; costoPlanta: number; cantidad: number }>()
   for (const r of rows) {
     const k = keyPR(r)
-    const cur = mapPR.get(k) ?? { proveedor: r.proveedor ?? 'Sin proveedor', razon: r.razon, valorNcOC: 0, cantidad: 0 }
-    cur.valorNcOC += r.valorNcOC ?? 0
+    const cur = mapPR.get(k) ?? { proveedor: r.proveedor ?? 'Sin proveedor', razon: r.razon, costoPlanta: 0, cantidad: 0 }
+    cur.costoPlanta += costoPlantaOf(r)
     cur.cantidad += 1
     mapPR.set(k, cur)
   }
   const porProveedorRazon = Array.from(mapPR.values())
-    .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC) }))
-    .sort((a, b) => b.valorNcOC - a.valorNcOC)
+    .map((v) => ({ ...v, costoPlanta: round(v.costoPlanta) }))
+    .sort((a, b) => b.costoPlanta - a.costoPlanta)
 
-  const mapProv = new Map<string, { proveedor: string; valorNcOC: number; cantidad: number }>()
+  const mapProv = new Map<string, { proveedor: string; costoPlanta: number; cantidad: number }>()
   for (const r of rows) {
     const k = r.proveedor ?? 'Sin proveedor'
-    const cur = mapProv.get(k) ?? { proveedor: k, valorNcOC: 0, cantidad: 0 }
-    cur.valorNcOC += r.valorNcOC ?? 0
+    const cur = mapProv.get(k) ?? { proveedor: k, costoPlanta: 0, cantidad: 0 }
+    cur.costoPlanta += costoPlantaOf(r)
     cur.cantidad += 1
     mapProv.set(k, cur)
   }
   const porProveedor = Array.from(mapProv.values())
-    .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC), participacionPct: pct(v.valorNcOC, totalValorNcOC) }))
-    .sort((a, b) => b.valorNcOC - a.valorNcOC)
+    .map((v) => ({ ...v, costoPlanta: round(v.costoPlanta), participacionPct: pct(v.costoPlanta, totalCostoPlanta) }))
+    .sort((a, b) => b.costoPlanta - a.costoPlanta)
 
-  const mapRazon = new Map<string, { razon: string; valorNcOC: number; cantidad: number }>()
+  const mapRazon = new Map<string, { razon: string; costoPlanta: number; cantidad: number }>()
   for (const r of rows) {
-    const cur = mapRazon.get(r.razon) ?? { razon: r.razon, valorNcOC: 0, cantidad: 0 }
-    cur.valorNcOC += r.valorNcOC ?? 0
+    const cur = mapRazon.get(r.razon) ?? { razon: r.razon, costoPlanta: 0, cantidad: 0 }
+    cur.costoPlanta += costoPlantaOf(r)
     cur.cantidad += 1
     mapRazon.set(r.razon, cur)
   }
   const porRazon = Array.from(mapRazon.values())
-    .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC) }))
-    .sort((a, b) => b.valorNcOC - a.valorNcOC)
+    .map((v) => ({ ...v, costoPlanta: round(v.costoPlanta) }))
+    .sort((a, b) => b.costoPlanta - a.costoPlanta)
 
-  const mapSemana = new Map<number, { semana: number; valorNcOC: number; cantidad: number }>()
+  const mapSemana = new Map<number, { semana: number; costoPlanta: number; cantidad: number }>()
   for (const r of rows) {
-    const cur = mapSemana.get(r.semana) ?? { semana: r.semana, valorNcOC: 0, cantidad: 0 }
-    cur.valorNcOC += r.valorNcOC ?? 0
+    const cur = mapSemana.get(r.semana) ?? { semana: r.semana, costoPlanta: 0, cantidad: 0 }
+    cur.costoPlanta += costoPlantaOf(r)
     cur.cantidad += 1
     mapSemana.set(r.semana, cur)
   }
   const porSemana = Array.from(mapSemana.values())
-    .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC) }))
+    .map((v) => ({ ...v, costoPlanta: round(v.costoPlanta) }))
     .sort((a, b) => a.semana - b.semana)
 
   const keyProdR = (r: NcRegistro) => `${r.producto}|||${r.razon}`
-  const mapProdR = new Map<string, { producto: string; razon: string; cantidad: number; valorNcOC: number }>()
+  const mapProdR = new Map<string, { producto: string; razon: string; cantidad: number; costoPlanta: number }>()
   for (const r of rows) {
     const k = keyProdR(r)
-    const cur = mapProdR.get(k) ?? { producto: r.producto, razon: r.razon, cantidad: 0, valorNcOC: 0 }
+    const cur = mapProdR.get(k) ?? { producto: r.producto, razon: r.razon, cantidad: 0, costoPlanta: 0 }
     cur.cantidad += 1
-    cur.valorNcOC += r.valorNcOC ?? 0
+    cur.costoPlanta += costoPlantaOf(r)
     mapProdR.set(k, cur)
   }
   const porProductoRazon = Array.from(mapProdR.values())
-    .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC) }))
+    .map((v) => ({ ...v, costoPlanta: round(v.costoPlanta) }))
     .sort((a, b) => b.cantidad - a.cantidad)
 
   const { semanasDisponibles, mesesDisponibles } = await fetchOpcionesSegmentador('PROVEEDOR', filtros.excluirEnvase)
@@ -207,12 +232,15 @@ export interface IndicadoresPlanta {
   impacto: number
   /** % del valor generado por NC que se logró recuperar vía venta a terceros. */
   retornoPct: number
-  /** Participación del valor NC (OC) total entre Planta y Proveedor, bajo los mismos filtros activos
-   *  (para contextualizar qué proporción del impacto económico corresponde a cada responsable). */
+  /** Participación del costo planta (impacto económico neto) total entre Planta y Proveedor,
+   *  bajo los mismos filtros activos (para contextualizar qué proporción del impacto económico
+   *  real corresponde a cada responsable). Usa `costoPlanta`, no el valor bruto de la NC. */
   participacion: { planta: number; proveedor: number }
-  porSemanaRazon: { semana: number; razon: string; valorNcOC: number; cantidad: number }[]
-  porRazon: { razon: string; valorNcOC: number; cantidad: number }[]
-  porSemana: { semana: number; valorNcOC: number; cantidad: number }[]
+  /** Desgloses de detalle: usan `costoPlanta` (valorNcOC - valorVentaNc), el impacto económico
+   *  REAL para planta de cada NC — no el valor bruto de la NC. */
+  porSemanaRazon: { semana: number; razon: string; costoPlanta: number; cantidad: number }[]
+  porRazon: { razon: string; costoPlanta: number; cantidad: number }[]
+  porSemana: { semana: number; costoPlanta: number; cantidad: number }[]
   semanasDisponibles: number[]
   mesesDisponibles: string[]
 }
@@ -227,46 +255,50 @@ export async function getIndicadoresPlanta(filtros: IndicadoresFiltros = {}): Pr
   )
   const impacto = round(totalValorNcOC - montoRecaudadoVentaTercero)
   const retornoPct = pct(montoRecaudadoVentaTercero, totalValorNcOC)
+  // Total de costoPlanta del grupo, usado en el detalle y en la comparación de participación.
+  const totalCostoPlanta = round(sum(rows.map(costoPlantaOf)))
 
-  // Participación: se recalcula el total de Proveedor bajo los mismos filtros activos
-  // (semanas/meses/excluirEnvase) para poder comparar ambos responsables en el donut.
+  // Participación: se recalcula el total de Proveedor (en costoPlanta, no valor bruto) bajo los
+  // mismos filtros activos (semanas/meses/excluirEnvase) para comparar ambos responsables en el
+  // donut usando el impacto económico real — consistente con el pedido de que "el valor que se
+  // debe considerar tanto para planta como para proveedores es el costo planta".
   const rowsProveedor = await fetchRegistros('PROVEEDOR', filtros)
-  const totalValorNcOCProveedor = round(sum(rowsProveedor.map((r) => r.valorNcOC ?? 0)))
-  const participacion = { planta: totalValorNcOC, proveedor: totalValorNcOCProveedor }
+  const totalCostoPlantaProveedor = round(sum(rowsProveedor.map(costoPlantaOf)))
+  const participacion = { planta: totalCostoPlanta, proveedor: totalCostoPlantaProveedor }
 
   const keySR = (r: NcRegistro) => `${r.semana}|||${r.razon}`
-  const mapSR = new Map<string, { semana: number; razon: string; valorNcOC: number; cantidad: number }>()
+  const mapSR = new Map<string, { semana: number; razon: string; costoPlanta: number; cantidad: number }>()
   for (const r of rows) {
     const k = keySR(r)
-    const cur = mapSR.get(k) ?? { semana: r.semana, razon: r.razon, valorNcOC: 0, cantidad: 0 }
-    cur.valorNcOC += r.valorNcOC ?? 0
+    const cur = mapSR.get(k) ?? { semana: r.semana, razon: r.razon, costoPlanta: 0, cantidad: 0 }
+    cur.costoPlanta += costoPlantaOf(r)
     cur.cantidad += 1
     mapSR.set(k, cur)
   }
   const porSemanaRazon = Array.from(mapSR.values())
-    .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC) }))
-    .sort((a, b) => a.semana - b.semana || b.valorNcOC - a.valorNcOC)
+    .map((v) => ({ ...v, costoPlanta: round(v.costoPlanta) }))
+    .sort((a, b) => a.semana - b.semana || b.costoPlanta - a.costoPlanta)
 
-  const mapRazon = new Map<string, { razon: string; valorNcOC: number; cantidad: number }>()
+  const mapRazon = new Map<string, { razon: string; costoPlanta: number; cantidad: number }>()
   for (const r of rows) {
-    const cur = mapRazon.get(r.razon) ?? { razon: r.razon, valorNcOC: 0, cantidad: 0 }
-    cur.valorNcOC += r.valorNcOC ?? 0
+    const cur = mapRazon.get(r.razon) ?? { razon: r.razon, costoPlanta: 0, cantidad: 0 }
+    cur.costoPlanta += costoPlantaOf(r)
     cur.cantidad += 1
     mapRazon.set(r.razon, cur)
   }
   const porRazon = Array.from(mapRazon.values())
-    .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC) }))
-    .sort((a, b) => b.valorNcOC - a.valorNcOC)
+    .map((v) => ({ ...v, costoPlanta: round(v.costoPlanta) }))
+    .sort((a, b) => b.costoPlanta - a.costoPlanta)
 
-  const mapSemana = new Map<number, { semana: number; valorNcOC: number; cantidad: number }>()
+  const mapSemana = new Map<number, { semana: number; costoPlanta: number; cantidad: number }>()
   for (const r of rows) {
-    const cur = mapSemana.get(r.semana) ?? { semana: r.semana, valorNcOC: 0, cantidad: 0 }
-    cur.valorNcOC += r.valorNcOC ?? 0
+    const cur = mapSemana.get(r.semana) ?? { semana: r.semana, costoPlanta: 0, cantidad: 0 }
+    cur.costoPlanta += costoPlantaOf(r)
     cur.cantidad += 1
     mapSemana.set(r.semana, cur)
   }
   const porSemana = Array.from(mapSemana.values())
-    .map((v) => ({ ...v, valorNcOC: round(v.valorNcOC) }))
+    .map((v) => ({ ...v, costoPlanta: round(v.costoPlanta) }))
     .sort((a, b) => a.semana - b.semana)
 
   const { semanasDisponibles, mesesDisponibles } = await fetchOpcionesSegmentador('PLANTA', filtros.excluirEnvase)
