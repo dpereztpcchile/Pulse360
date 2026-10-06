@@ -435,8 +435,11 @@ function PlantaView({ data }: { data: IndicadoresPlanta }) {
   )
 }
 
-/** Tabla de detalle bajo el stacked bar: una fila por razón (con su color de leyenda) y
- *  una columna por semana, mostrando el valor NC (OC) de esa combinación (vacío si no hubo). */
+/** Tabla "Pérdida en dinero por motivo": complementa el stacked bar (en escala
+ *  logarítmica) con el detalle exacto en $ por razón × semana, más una fila
+ *  de TOTAL por semana. Como el gráfico ya no imprime el valor de cada
+ *  segmento individual (solo el total de la barra), esta tabla es la fuente
+ *  de verdad del monto exacto de cada razón. */
 function RazonSemanaTable({ razones, semanas, valores, colors }: {
   razones: string[]
   semanas: number[]
@@ -444,36 +447,54 @@ function RazonSemanaTable({ razones, semanas, valores, colors }: {
   colors: string[]
 }) {
   if (razones.length === 0 || semanas.length === 0) return null
+
+  const totalPorSemana = semanas.map((s) =>
+    razones.reduce((acc, razon) => acc + (valores.get(`${s}|||${razon}`) ?? 0), 0)
+  )
+
   return (
-    <div className="overflow-x-auto mt-4">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="border-b border-border-dark text-[#666] uppercase tracking-wide">
-            <th className="py-2 px-3 text-left font-medium">Razón</th>
-            {semanas.map((s) => (
-              <th key={s} className="py-2 px-3 text-right font-medium">{s}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {razones.map((razon, i) => (
-            <tr key={razon} className="border-b border-border-dark/50">
-              <td className="py-2 px-3 text-[#ddd] flex items-center gap-2 whitespace-nowrap">
-                <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
-                {razon}
-              </td>
-              {semanas.map((s) => {
-                const v = valores.get(`${s}|||${razon}`)
-                return (
-                  <td key={s} className="py-2 px-3 text-right text-[#ddd]">
-                    {v != null ? fmtMoney(v) : ''}
-                  </td>
-                )
-              })}
+    <div className="mt-4">
+      <h4 className="text-xs font-semibold text-white mb-2">Pérdida en dinero por motivo</h4>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-border-dark text-[#666] uppercase tracking-wide">
+              <th className="py-2 px-3 text-left font-medium">Razón</th>
+              {semanas.map((s) => (
+                <th key={s} className="py-2 px-3 text-right font-medium">Semana {s}</th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {razones.map((razon, i) => (
+              <tr key={razon} className="border-b border-border-dark/50">
+                <td className="py-2 px-3 text-[#ddd] flex items-center gap-2 whitespace-nowrap">
+                  <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
+                  {razon}
+                </td>
+                {semanas.map((s) => {
+                  const v = valores.get(`${s}|||${razon}`)
+                  return (
+                    <td key={s} className="py-2 px-3 text-right text-[#ddd]">
+                      {v != null && v > 0 ? fmtMoney(v) : <span className="text-[#555]">—</span>}
+                    </td>
+                  )
+                })}
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="border-t border-border-dark">
+              <td className="py-2 px-3 text-white font-semibold">Total</td>
+              {totalPorSemana.map((t, i) => (
+                <td key={semanas[i]} className="py-2 px-3 text-right text-white font-semibold">
+                  {fmtMoney(t)}
+                </td>
+              ))}
+            </tr>
+          </tfoot>
+        </table>
+      </div>
     </div>
   )
 }

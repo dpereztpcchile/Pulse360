@@ -352,9 +352,55 @@ export function MoneyBars({ data, xKey, yKey, color = '#3B82F6', height = 260, a
 }
 
 // ═══════════════════════════════════════════════════════════
-// Barras apiladas de 2 series (ej. "PRINCIPALES PRODUCTOS CAUSANTES DE NC")
+// Barras apiladas de N series, eje Y logarítmico (ej. "NC manejo interno
+// planta (semanas)")
 // ═══════════════════════════════════════════════════════════
-export function StackedBars({ data, xKey, series, height = 260 }: {
+// Cuando una semana tiene un segmento dominante (ej. $11M) junto a otras
+// semanas con segmentos muy chicos (bajo $100k), una escala lineal hace que
+// los valores chicos midan apenas un puñado de píxeles: sus etiquetas quedan
+// amontonadas e ilegibles. La escala logarítmica resuelve esto dando espacio
+// visual proporcional también a los montos pequeños.
+//
+// Nota técnica: una escala log no puede representar el valor 0 (log(0) es
+// indefinido). Los ceros del dataset se reemplazan por un valor "piso"
+// (LOG_FLOOR) ínfimo antes de graficar, de forma que esa serie simplemente
+// no agregue altura visible a la barra en esa semana, en vez de romper el
+// renderizado. El $0 real se sigue mostrando tal cual en la tabla de detalle.
+const LOG_FLOOR = 1
+const LOG_DOMAIN_MIN = 10_000
+
+function toLogSafe(v: number) {
+  return v > 0 ? v : LOG_FLOOR
+}
+
+// Las etiquetas de valor se dibujan siempre arriba de cada barra (el total),
+// nunca dentro de los segmentos: con escala log la altura en píxeles de un
+// segmento ya no es proporcional a su valor de forma intuitiva, así que
+// poner texto dentro seguiría viéndose desordenado. El detalle por serie
+// vive en la tabla que acompaña al gráfico.
+function renderStackedTotalLabel(totals: Map<string, number>) {
+  return function TotalLabel(props: unknown) {
+    const { x, y, width, index } = props as { x?: number; y?: number; width?: number; index?: number }
+    if (x == null || y == null || width == null || index == null) return null
+    const total = totals.get(String(index))
+    if (total == null) return null
+    return (
+      <text
+        x={x + width / 2}
+        y={y - 8}
+        textAnchor="middle"
+        fill="#fff"
+        fontSize={12}
+        fontFamily="Rajdhani"
+        fontWeight={700}
+      >
+        {fmtMoney(total)}
+      </text>
+    )
+  }
+}
+
+export function StackedBars({ data, xKey, series, height = 340 }: {
   data: { [k: string]: string | number }[]
   xKey: string
   series: { key: string; name: string; color: string }[]
@@ -363,19 +409,57 @@ export function StackedBars({ data, xKey, series, height = 260 }: {
   if (data.length === 0) {
     return <div className="h-[260px] flex items-center justify-center text-[#666] text-sm">Sin datos en el período</div>
   }
+
+  // Dataset "seguro" para log scale (ceros → piso ínfimo) + mapa de totales
+  // reales por índice de barra, usado para la etiqueta de total. El valor
+  // real de cada serie (sin el piso sintético) se guarda aparte bajo
+  // `__raw_<key>` para que el tooltip muestre siempre el monto verdadero
+  // (incluyendo $0), nunca el piso técnico usado solo para el dibujo.
+  const totalsByIndex = new Map<string, number>()
+  const logData = data.map((row, i) => {
+    const logRow: Record<string, string | number> = { [xKey]: row[xKey] }
+    let total = 0
+    for (const s of series) {
+      const raw = Number(row[s.key]) || 0
+      total += raw
+      logRow[s.key] = toLogSafe(raw)
+      logRow[`__raw_${s.key}`] = raw
+    }
+    totalsByIndex.set(String(i), total)
+    return logRow
+  })
+  const maxTotal = Math.max(...Array.from(totalsByIndex.values()), LOG_DOMAIN_MIN)
+
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data as never[]} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+      <BarChart data={logData as never[]} margin={{ top: 28, right: 12, left: 0, bottom: 0 }}>
         <CartesianGrid {...gridProps} vertical={false} />
         <XAxis dataKey={xKey} {...axisProps} interval={0} />
-        <YAxis {...axisProps} allowDecimals={false} width={70} tickFormatter={(v) => fmtMoney(v)} />
-        <Tooltip {...tooltipProps} cursor={{ fill: '#ffffff08' }} formatter={(v) => fmtMoney(v)} />
+        <YAxis
+          {...axisProps}
+          scale="log"
+          domain={[LOG_DOMAIN_MIN, Math.ceil(maxTotal * 1.15)]}
+          allowDataOverflow
+          width={70}
+          tickFormatter={(v) => fmtMoney(v)}
+        />
+        <Tooltip
+          {...tooltipProps}
+          cursor={{ fill: '#ffffff08' }}
+          formatter={(_v, name, props) => {
+            const payload = (props as { payload?: Record<string, unknown> })?.payload
+            const dataKey = (props as { dataKey?: string })?.dataKey
+            const raw = payload && dataKey ? payload[`__raw_${dataKey}`] : undefined
+            return [fmtMoney(raw ?? _v), name]
+          }}
+        />
         <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
         {series.map((s, i) => (
           <Bar key={s.key} dataKey={s.key} name={s.name} stackId="stack" fill={s.color}
             radius={i === series.length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}>
-            <LabelList dataKey={s.key} position="inside" formatter={(v: unknown) => (Number(v) > 0 ? fmtMoney(v) : '')}
-              style={{ fill: '#fff', fontSize: 11, fontFamily: 'Rajdhani', fontWeight: 600 }} />
+            {i === series.length - 1 && (
+              <LabelList dataKey={s.key} position="top" content={renderStackedTotalLabel(totalsByIndex)} />
+            )}
           </Bar>
         ))}
       </BarChart>
