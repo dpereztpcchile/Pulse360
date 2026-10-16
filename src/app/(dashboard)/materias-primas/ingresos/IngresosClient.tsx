@@ -79,8 +79,8 @@ export function IngresosClient({
     } catch { setCError('Error de conexión') } finally { setCBusy(false) }
   }
 
-  const inputCls = 'w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red'
-  const labelCls = 'block text-sm font-medium text-[#ccc] mb-1.5'
+  const inputCls = 'w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red'
+  const labelCls = 'block text-sm font-medium text-ink-2 mb-1.5'
 
   return (
     <div className="space-y-6">
@@ -90,11 +90,11 @@ export function IngresosClient({
         <div className="card">
           <div className="flex items-center gap-2 mb-4">
             <PackagePlus className="w-5 h-5 text-status-ok" />
-            <h2 className="font-semibold text-white">Registrar ingreso</h2>
+            <h2 className="font-semibold text-ink">Registrar ingreso</h2>
           </div>
 
           {!canManage ? (
-            <p className="text-sm text-[#666]">No tienes permisos para registrar ingresos.</p>
+            <p className="text-sm text-muted">No tienes permisos para registrar ingresos.</p>
           ) : (
             <form onSubmit={submitReceipt} className="space-y-3">
               {rError && (
@@ -149,7 +149,7 @@ export function IngresosClient({
         <div className="card">
           <div className="flex items-center gap-2 mb-4">
             <MinusCircle className="w-5 h-5 text-pulse-red" />
-            <h2 className="font-semibold text-white">Registrar consumo</h2>
+            <h2 className="font-semibold text-ink">Registrar consumo</h2>
           </div>
 
           <form onSubmit={submitConsumption} className="space-y-3">
@@ -175,12 +175,12 @@ export function IngresosClient({
             <div className="flex gap-2">
               <button type="button" onClick={() => setCMode('order')}
                 className={cn('flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                  cMode === 'order' ? 'bg-pulse-red text-white' : 'bg-bg-dark text-[#999] border border-border-dark hover:text-white')}>
+                  cMode === 'order' ? 'bg-pulse-red text-white' : 'bg-bg-dark text-muted border border-border-dark hover:text-ink')}>
                 Orden de producción
               </button>
               <button type="button" onClick={() => setCMode('general')}
                 className={cn('flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                  cMode === 'general' ? 'bg-pulse-red text-white' : 'bg-bg-dark text-[#999] border border-border-dark hover:text-white')}>
+                  cMode === 'general' ? 'bg-pulse-red text-white' : 'bg-bg-dark text-muted border border-border-dark hover:text-ink')}>
                 Uso general
               </button>
             </div>
@@ -213,12 +213,12 @@ export function IngresosClient({
 
       {/* Historial de ingresos */}
       <div>
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">Historial de ingresos</h3>
+        <h3 className="text-sm font-semibold text-ink uppercase tracking-wider mb-2">Historial de ingresos</h3>
         <div className="card overflow-hidden p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+                <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                   <th className="px-4 py-3 text-left font-medium">Fecha</th>
                   <th className="px-4 py-3 text-left font-medium">Insumo</th>
                   <th className="px-4 py-3 text-left font-medium">Proveedor</th>
@@ -231,20 +231,20 @@ export function IngresosClient({
               </thead>
               <tbody className="divide-y divide-border-dark">
                 {receipts.length === 0 && (
-                  <tr><td colSpan={8} className="px-4 py-10 text-center text-[#555]">Sin ingresos registrados</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-2">Sin ingresos registrados</td></tr>
                 )}
                 {receipts.map((r) => (
                   <tr key={r.id} className="hover:bg-border-dark/30 transition-colors">
-                    <td className="px-4 py-3 text-[#999] whitespace-nowrap">{formatDateTime(r.createdAt)}</td>
-                    <td className="px-4 py-3 font-medium text-white">{r.materialName}</td>
-                    <td className="px-4 py-3 text-[#999]">{r.supplier}</td>
+                    <td className="px-4 py-3 text-muted whitespace-nowrap">{formatDateTime(r.createdAt)}</td>
+                    <td className="px-4 py-3 font-medium text-ink">{r.materialName}</td>
+                    <td className="px-4 py-3 text-muted">{r.supplier}</td>
                     <td className="px-4 py-3 text-right text-status-ok font-rajdhani font-semibold">+{r.quantity.toLocaleString()} {r.unit}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-[#999]">{r.lot ?? '—'}</td>
-                    <td className="px-4 py-3 text-[#999]">{r.expiryDate ? formatDate(r.expiryDate) : '—'}</td>
-                    <td className="px-4 py-3 text-right text-[#999]">
+                    <td className="px-4 py-3 font-mono text-xs text-muted">{r.lot ?? '—'}</td>
+                    <td className="px-4 py-3 text-muted">{r.expiryDate ? formatDate(r.expiryDate) : '—'}</td>
+                    <td className="px-4 py-3 text-right text-muted">
                       {r.entryTemp != null ? <span className="inline-flex items-center gap-1"><Thermometer className="w-3 h-3" />{r.entryTemp}°</span> : '—'}
                     </td>
-                    <td className="px-4 py-3 text-[#999]">{r.receivedBy}</td>
+                    <td className="px-4 py-3 text-muted">{r.receivedBy}</td>
                   </tr>
                 ))}
               </tbody>
@@ -255,12 +255,12 @@ export function IngresosClient({
 
       {/* Historial de consumos */}
       <div>
-        <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">Historial de consumos</h3>
+        <h3 className="text-sm font-semibold text-ink uppercase tracking-wider mb-2">Historial de consumos</h3>
         <div className="card overflow-hidden p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+                <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                   <th className="px-4 py-3 text-left font-medium">Fecha</th>
                   <th className="px-4 py-3 text-left font-medium">Insumo</th>
                   <th className="px-4 py-3 text-right font-medium">Cantidad</th>
@@ -270,19 +270,19 @@ export function IngresosClient({
               </thead>
               <tbody className="divide-y divide-border-dark">
                 {consumptions.length === 0 && (
-                  <tr><td colSpan={5} className="px-4 py-10 text-center text-[#555]">Sin consumos registrados</td></tr>
+                  <tr><td colSpan={5} className="px-4 py-10 text-center text-muted-2">Sin consumos registrados</td></tr>
                 )}
                 {consumptions.map((c) => (
                   <tr key={c.id} className="hover:bg-border-dark/30 transition-colors">
-                    <td className="px-4 py-3 text-[#999] whitespace-nowrap">{formatDateTime(c.createdAt)}</td>
-                    <td className="px-4 py-3 font-medium text-white">{c.materialName}</td>
+                    <td className="px-4 py-3 text-muted whitespace-nowrap">{formatDateTime(c.createdAt)}</td>
+                    <td className="px-4 py-3 font-medium text-ink">{c.materialName}</td>
                     <td className="px-4 py-3 text-right text-pulse-red font-rajdhani font-semibold">−{c.quantity.toLocaleString()} {c.unit}</td>
-                    <td className="px-4 py-3 text-[#999]">
+                    <td className="px-4 py-3 text-muted">
                       {c.orderNumber
                         ? <span className="font-mono text-xs">{c.orderNumber}</span>
-                        : <span className="text-[#999]">{c.usage}</span>}
+                        : <span className="text-muted">{c.usage}</span>}
                     </td>
-                    <td className="px-4 py-3 text-[#999]">{c.consumedBy}</td>
+                    <td className="px-4 py-3 text-muted">{c.consumedBy}</td>
                   </tr>
                 ))}
               </tbody>

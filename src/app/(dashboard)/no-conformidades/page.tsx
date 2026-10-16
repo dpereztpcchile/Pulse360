@@ -28,10 +28,10 @@ export default async function NoConformidadesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <AlertTriangle className="w-6 h-6 text-pulse-red" /> No Conformidades
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">Registro y seguimiento de NC cárnicas (carga desde Excel)</p>
+        <p className="text-sm text-muted mt-0.5">Registro y seguimiento de NC cárnicas (carga desde Excel)</p>
       </div>
 
       <NcTabs />

@@ -13,9 +13,9 @@ const CARN = '#14b8a6'   // Carnicería — teal
 const MOL = '#38bdf8'    // Molidas — sky
 const VAR = '#64748b'    // Variedades — slate
 const MIL = '#0e7490'    // Milanesas — teal profundo
-const AXIS = '#94a3b8'
+const AXIS = '#6B7280'
 // Saturación: tarjetas en gris más claro para destacar del resto del módulo
-const CARD = '#262932', CARD_BORDER = '#3a3e4a', PANEL = '#2f333d', GRID = '#3a3f4b'
+const CARD = '#FFFFFF', CARD_BORDER = '#E3E0D7', PANEL = '#F4F3EF', GRID = '#E3E0D7'
 const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 const pad = (n: number) => String(n).padStart(2, '0')
 const fmt = (n: number) => Math.round(n).toLocaleString('es-CL')
@@ -46,7 +46,7 @@ function semaforo(s: number) {
   return { color: ROJO, ic: '🔴', txt: 'Déficit' }
 }
 
-const TT = { background: '#1a1a1a', border: '1px solid #333', borderRadius: 8, color: '#fff', fontSize: 12 } as const
+const TT = { background: '#FFFFFF', border: '1px solid #E3E0D7', borderRadius: 8, color: '#1E2227', fontSize: 12 } as const
 
 export function SaturacionClient({ today, canManage }: { today: string; canManage: boolean }) {
   const [weekStart, setWeekStart] = useState(() => mondayOf(today))
@@ -98,9 +98,9 @@ export function SaturacionClient({ today, canManage }: { today: string; canManag
       {/* Selector + carga */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="inline-flex items-center rounded-lg border border-border-dark overflow-hidden">
-          <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="px-3 py-2 text-[#999] hover:text-white hover:bg-border-dark"><ChevronLeft className="w-4 h-4" /></button>
-          <span className="px-4 py-2 text-sm font-medium text-white border-x border-border-dark whitespace-nowrap">{periodo}</span>
-          <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="px-3 py-2 text-[#999] hover:text-white hover:bg-border-dark"><ChevronRight className="w-4 h-4" /></button>
+          <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="px-3 py-2 text-muted hover:text-ink hover:bg-border-dark"><ChevronLeft className="w-4 h-4" /></button>
+          <span className="px-4 py-2 text-sm font-medium text-ink border-x border-border-dark whitespace-nowrap">{periodo}</span>
+          <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="px-3 py-2 text-muted hover:text-ink hover:bg-border-dark"><ChevronRight className="w-4 h-4" /></button>
         </div>
         {canManage && (
           <>
@@ -110,15 +110,15 @@ export function SaturacionClient({ today, canManage }: { today: string; canManag
             </button>
           </>
         )}
-        {data && <button onClick={exportarPdf} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-sm text-[#ccc] hover:border-pulse-red"><Download className="w-4 h-4" /> Exportar PDF</button>}
-        {loading && <Loader2 className="w-4 h-4 animate-spin text-[#666]" />}
+        {data && <button onClick={exportarPdf} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-sm text-ink-2 hover:border-pulse-red"><Download className="w-4 h-4" /> Exportar PDF</button>}
+        {loading && <Loader2 className="w-4 h-4 animate-spin text-muted" />}
       </div>
 
       {!data && !loading && (
         <div className="rounded-xl border text-center py-16" style={{ background: CARD, borderColor: CARD_BORDER }}>
-          <FileSpreadsheet className="w-10 h-10 text-[#555] mx-auto mb-3" />
-          <p className="text-white font-semibold">Sin proyección para esta semana</p>
-          <p className="text-sm text-[#666] mt-1">Carga el archivo de proyección (.xlsx) con las hojas BASE y PROYECCIÓN.</p>
+          <FileSpreadsheet className="w-10 h-10 text-muted-2 mx-auto mb-3" />
+          <p className="text-ink font-semibold">Sin proyección para esta semana</p>
+          <p className="text-sm text-muted mt-1">Carga el archivo de proyección (.xlsx) con las hojas BASE y PROYECCIÓN.</p>
         </div>
       )}
 
@@ -145,7 +145,7 @@ export function SaturacionClient({ today, canManage }: { today: string; canManag
       )}
 
       {toast && (
-        <div className="fixed left-1/2 -translate-x-1/2 bottom-8 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-semibold shadow-xl max-w-[90vw]" style={{ background: toast.startsWith('✓') ? VERDE : ROJO }}>
+        <div className="fixed left-1/2 -translate-x-1/2 bottom-8 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-xl text-ink font-semibold shadow-xl max-w-[90vw]" style={{ background: toast.startsWith('✓') ? VERDE : ROJO }}>
           <Check className="w-4 h-4 shrink-0" /> <span className="text-sm">{toast}</span>
         </div>
       )}
@@ -157,8 +157,8 @@ function Section({ title, open, onToggle, children }: { title: string; open: boo
   return (
     <div className="rounded-xl overflow-hidden border" style={{ background: CARD, borderColor: CARD_BORDER }}>
       <button onClick={onToggle} className="w-full flex items-center justify-between px-4 py-3 hover:bg-white/[0.04]">
-        <span className="font-rajdhani font-bold text-lg text-white uppercase tracking-wide">{title}</span>
-        {open ? <ChevronUp className="w-5 h-5 text-[#aaa]" /> : <ChevronDown className="w-5 h-5 text-[#aaa]" />}
+        <span className="font-rajdhani font-bold text-lg text-ink uppercase tracking-wide">{title}</span>
+        {open ? <ChevronUp className="w-5 h-5 text-muted-2" /> : <ChevronDown className="w-5 h-5 text-muted-2" />}
       </button>
       {open && <div className="px-4 pb-4 pt-4 space-y-3 border-t" style={{ borderColor: CARD_BORDER }}>{children}</div>}
     </div>
@@ -174,7 +174,7 @@ function CarniceriaChart({ d }: { d: Sat }) {
         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 4" />
         <XAxis dataKey="dia" tick={{ fill: AXIS, fontSize: 12 }} axisLine={{ stroke: GRID }} tickLine={false} />
         <YAxis tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => fmt(Number(v))} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={TT} cursor={{ fill: 'rgba(255,255,255,0.04)' }} formatter={(v, n) => [`${fmt(Number(v))} kg`, n]} />
+        <Tooltip contentStyle={TT} cursor={{ fill: 'rgba(0,0,0,0.04)' }} formatter={(v, n) => [`${fmt(Number(v))} kg`, n]} />
         <Legend wrapperStyle={{ fontSize: 11 }} />
         <Bar dataKey="pedido" name="Pedido PT" fill={CARN} radius={[4, 4, 0, 0]} maxBarSize={56} isAnimationActive={false} />
         <Line type="monotone" dataKey="capacidad" name="Capacidad PT" stroke={ROJO} strokeWidth={2} strokeDasharray="6 4" dot={false} />
@@ -193,7 +193,7 @@ function MolidasChart({ d }: { d: Sat }) {
         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 4" />
         <XAxis dataKey="dia" tick={{ fill: AXIS, fontSize: 12 }} axisLine={{ stroke: GRID }} tickLine={false} />
         <YAxis tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => fmt(Number(v))} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={TT} cursor={{ fill: 'rgba(255,255,255,0.04)' }} formatter={(v, n) => [`${fmt(Number(v))} kg`, n]} />
+        <Tooltip contentStyle={TT} cursor={{ fill: 'rgba(0,0,0,0.04)' }} formatter={(v, n) => [`${fmt(Number(v))} kg`, n]} />
         <Legend wrapperStyle={{ fontSize: 11 }} />
         <Bar dataKey="pedido" name="Pedido Molidas" stackId="kg" fill={MOL} maxBarSize={56} isAnimationActive={false} />
         <Bar dataKey="variedades" name="Variedades" stackId="kg" fill={VAR} radius={[4, 4, 0, 0]} maxBarSize={56} isAnimationActive={false} />
@@ -212,7 +212,7 @@ function MilanesasChart({ d }: { d: Sat }) {
         <CartesianGrid stroke={GRID} vertical={false} strokeDasharray="3 4" />
         <XAxis dataKey="dia" tick={{ fill: AXIS, fontSize: 12 }} axisLine={{ stroke: GRID }} tickLine={false} />
         <YAxis tick={{ fill: AXIS, fontSize: 11 }} tickFormatter={(v) => fmt(Number(v))} axisLine={false} tickLine={false} />
-        <Tooltip contentStyle={TT} cursor={{ fill: 'rgba(255,255,255,0.04)' }} formatter={(v, n) => [`${fmt(Number(v))} kg`, n]} />
+        <Tooltip contentStyle={TT} cursor={{ fill: 'rgba(0,0,0,0.04)' }} formatter={(v, n) => [`${fmt(Number(v))} kg`, n]} />
         <Legend wrapperStyle={{ fontSize: 11 }} />
         <Bar dataKey="pedido" name="Pedido" fill={MIL} radius={[4, 4, 0, 0]} maxBarSize={56} isAnimationActive={false} />
         <Line type="monotone" dataKey="capacidad" name="Capacidad" stroke={ROJO} strokeWidth={2} strokeDasharray="6 4" dot={false} />
@@ -226,7 +226,7 @@ function Semaforos({ dias, sat }: { dias: string[]; sat: number[] }) {
     <div className="flex flex-wrap gap-2">
       {dias.map((dia, i) => { const s = semaforo(sat[i]); return (
         <div key={dia} className="flex-1 min-w-[90px] rounded-lg border px-2 py-1.5 text-center" style={{ borderColor: s.color }}>
-          <div className="text-xs text-[#888]">{dia}</div>
+          <div className="text-xs text-muted">{dia}</div>
           <div className="font-bold text-sm" style={{ color: s.color }}>{fmt1(sat[i])}%</div>
           <div className="text-[10px]" style={{ color: s.color }}>{s.ic} {s.txt}</div>
         </div>
@@ -238,17 +238,17 @@ function Semaforos({ dias, sat }: { dias: string[]; sat: number[] }) {
 function HolguraMolidas({ dias, holgura }: { dias: string[]; holgura: number[] }) {
   return (
     <div className="rounded-lg border p-3" style={{ background: PANEL, borderColor: CARD_BORDER }}>
-      <p className="text-[11px] font-semibold text-[#888] uppercase tracking-wide mb-2">Holgura para adelantar variedades</p>
+      <p className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-2">Holgura para adelantar variedades</p>
       <div className="flex flex-wrap gap-2">
         {dias.slice(0, 5).map((dia, i) => { const ok = holgura[i] > 0.5, warn = holgura[i] >= 0 && holgura[i] <= 0.5; const col = ok ? VERDE : warn ? NARANJA : ROJO; return (
           <div key={dia} className="flex-1 min-w-[80px] text-center">
-            <div className="text-xs text-[#888]">{dia}</div>
+            <div className="text-xs text-muted">{dia}</div>
             <div className="font-bold text-sm" style={{ color: col }}>{holgura[i] >= 0 ? '+' : ''}{fmt1(holgura[i])}h</div>
             <div style={{ color: col }}>{ok ? '✓' : warn ? '⚠' : '🔴'}</div>
           </div>
         ) })}
       </div>
-      <p className="text-[10px] text-[#666] mt-2">Holgura positiva → puede adelantar variedades ese día · negativa → déficit, redistribuir.</p>
+      <p className="text-[10px] text-muted mt-2">Holgura positiva → puede adelantar variedades ese día · negativa → déficit, redistribuir.</p>
     </div>
   )
 }
@@ -256,17 +256,17 @@ function HolguraMolidas({ dias, holgura }: { dias: string[]; holgura: number[] }
 function HolguraMilanesas({ dias, holgura, acum }: { dias: string[]; holgura: number[]; acum: number }) {
   return (
     <div className="rounded-lg border p-3" style={{ background: PANEL, borderColor: CARD_BORDER }}>
-      <p className="text-[11px] font-semibold text-[#888] uppercase tracking-wide mb-2">Holgura para adelantar pedidos</p>
+      <p className="text-[11px] font-semibold text-muted uppercase tracking-wide mb-2">Holgura para adelantar pedidos</p>
       <div className="flex flex-wrap gap-2">
         {dias.slice(0, 5).map((dia, i) => { const ok = holgura[i] >= 0; const col = ok ? VERDE : ROJO; return (
           <div key={dia} className="flex-1 min-w-[80px] text-center">
-            <div className="text-xs text-[#888]">{dia}</div>
+            <div className="text-xs text-muted">{dia}</div>
             <div className="font-bold text-sm" style={{ color: col }}>{ok ? '+' : ''}{fmt(holgura[i])} kg</div>
             <div style={{ color: col }}>{ok ? '✓' : '🔴'}</div>
           </div>
         ) })}
       </div>
-      <p className="text-sm text-[#ccc] mt-2 flex items-center gap-1.5">
+      <p className="text-sm text-ink-2 mt-2 flex items-center gap-1.5">
         {acum >= 0 ? <Check className="w-4 h-4 text-status-ok" /> : <AlertTriangle className="w-4 h-4 text-pulse-red" />}
         Holgura acumulada semana: <b style={{ color: acum >= 0 ? VERDE : ROJO }}>{acum >= 0 ? '+' : ''}{fmt(acum)} kg</b>
       </p>

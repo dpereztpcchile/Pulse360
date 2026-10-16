@@ -16,7 +16,7 @@ export default async function MateriasPrimasReportPage() {
   }
 
   return (
-    <Suspense fallback={<div className="text-[#666]">Cargando…</div>}>
+    <Suspense fallback={<div className="text-muted">Cargando…</div>}>
       <MateriasPrimasReportView canExport user={session?.user?.name ?? 'Usuario'} />
     </Suspense>
   )

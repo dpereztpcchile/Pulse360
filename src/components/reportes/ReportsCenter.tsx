@@ -47,33 +47,33 @@ export function ReportsCenter({ role }: { role: string }) {
     <div className="space-y-6">
       {/* Selector global de rango */}
       <div className="card p-4 flex flex-col sm:flex-row sm:items-end gap-4">
-        <div className="flex items-center gap-2 text-sm text-[#999]">
+        <div className="flex items-center gap-2 text-sm text-muted">
           <Calendar className="w-4 h-4 text-pulse-red" />
           <span className="font-medium">Rango de fechas</span>
         </div>
         <div className="flex flex-wrap items-end gap-4">
-          <label className="flex flex-col gap-1 text-xs text-[#666]">
+          <label className="flex flex-col gap-1 text-xs text-muted">
             Desde
             <input
               type="date"
               value={from}
               max={to}
               onChange={(e) => setFrom(e.target.value)}
-              className="bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-white focus:border-pulse-red outline-none"
+              className="bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-ink focus:border-pulse-red outline-none"
             />
           </label>
-          <label className="flex flex-col gap-1 text-xs text-[#666]">
+          <label className="flex flex-col gap-1 text-xs text-muted">
             Hasta
             <input
               type="date"
               value={to}
               min={from}
               onChange={(e) => setTo(e.target.value)}
-              className="bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-white focus:border-pulse-red outline-none"
+              className="bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-ink focus:border-pulse-red outline-none"
             />
           </label>
         </div>
-        <p className="text-xs text-[#666] sm:ml-auto">El rango se aplica a todos los reportes.</p>
+        <p className="text-xs text-muted sm:ml-auto">El rango se aplica a todos los reportes.</p>
       </div>
 
       {/* Grid de tarjetas */}
@@ -85,9 +85,9 @@ export function ReportsCenter({ role }: { role: string }) {
                 <div className="w-10 h-10 rounded-lg bg-pulse-red/10 flex items-center justify-center shrink-0">
                   <Icon className="w-5 h-5 text-pulse-red" />
                 </div>
-                <h3 className="font-semibold text-white">{nombre}</h3>
+                <h3 className="font-semibold text-ink">{nombre}</h3>
               </div>
-              <p className="text-sm text-[#666]">{descripcion}</p>
+              <p className="text-sm text-muted">{descripcion}</p>
             </div>
             <button onClick={() => generate(slug)} className="btn-primary text-sm justify-center flex items-center gap-2">
               Generar <ArrowRight className="w-4 h-4" />

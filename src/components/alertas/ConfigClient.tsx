@@ -71,8 +71,8 @@ export function ConfigClient({ initialConfig, initialLines }: { initialConfig: A
     } catch { setError('Error de conexión') } finally { setSaving(false) }
   }
 
-  const inputCls = 'w-full px-3 py-2 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red'
-  const labelCls = 'block text-xs font-medium text-[#888] mb-1'
+  const inputCls = 'w-full px-3 py-2 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red'
+  const labelCls = 'block text-xs font-medium text-muted mb-1'
 
   // Agrupa toggles por módulo
   const grouped = TOGGLES.reduce<Record<string, typeof TOGGLES>>((acc, t) => {
@@ -92,7 +92,7 @@ export function ConfigClient({ initialConfig, initialLines }: { initialConfig: A
       <div className="card space-y-4">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="w-4 h-4 text-pulse-red" />
-          <h2 className="font-semibold text-white">Umbrales globales</h2>
+          <h2 className="font-semibold text-ink">Umbrales globales</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
@@ -112,8 +112,8 @@ export function ConfigClient({ initialConfig, initialLines }: { initialConfig: A
             <input type="number" min={0} max={100} value={config.capacityOverPct || ''} onChange={(e) => setNum('capacityOverPct', e.target.value)} className={inputCls} />
           </div>
         </div>
-        <p className="text-xs text-[#555]">
-          El stock mínimo por insumo se administra en el módulo de <span className="text-[#888]">Materias Primas</span>.
+        <p className="text-xs text-muted-2">
+          El stock mínimo por insumo se administra en el módulo de <span className="text-muted">Materias Primas</span>.
         </p>
       </div>
 
@@ -121,22 +121,22 @@ export function ConfigClient({ initialConfig, initialLines }: { initialConfig: A
       <div className="card space-y-4">
         <div className="flex items-center gap-2">
           <Factory className="w-4 h-4 text-pulse-red" />
-          <h2 className="font-semibold text-white">OEE mínimo por línea</h2>
+          <h2 className="font-semibold text-ink">OEE mínimo por línea</h2>
         </div>
         {lines.length === 0 ? (
-          <p className="text-sm text-[#555]">No hay líneas de producción registradas.</p>
+          <p className="text-sm text-muted-2">No hay líneas de producción registradas.</p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {lines.map((l) => (
               <div key={l.id} className="flex items-center justify-between gap-3 rounded-lg bg-bg-dark border border-border-dark px-3 py-2.5">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{l.name}</p>
-                  <p className="text-xs text-[#666] font-mono">{l.code}</p>
+                  <p className="text-sm font-medium text-ink truncate">{l.name}</p>
+                  <p className="text-xs text-muted font-mono">{l.code}</p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <input type="number" min={0} max={100} value={l.oeeMin || ''} onChange={(e) => setLineOee(l.id, e.target.value)}
-                    className="w-16 px-2 py-1.5 rounded-lg bg-card-dark border border-border-dark text-white text-sm text-center focus:outline-none focus:border-pulse-red" />
-                  <span className="text-xs text-[#666]">%</span>
+                    className="w-16 px-2 py-1.5 rounded-lg bg-card-dark border border-border-dark text-ink text-sm text-center focus:outline-none focus:border-pulse-red" />
+                  <span className="text-xs text-muted">%</span>
                 </div>
               </div>
             ))}
@@ -148,15 +148,15 @@ export function ConfigClient({ initialConfig, initialLines }: { initialConfig: A
       <div className="card space-y-4">
         <div className="flex items-center gap-2">
           <ToggleRight className="w-4 h-4 text-pulse-red" />
-          <h2 className="font-semibold text-white">Tipos de alerta</h2>
+          <h2 className="font-semibold text-ink">Tipos de alerta</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1">
           {Object.entries(grouped).map(([module, items]) => (
             <div key={module} className="py-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#666] mt-2 mb-1">{module}</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted mt-2 mb-1">{module}</p>
               {items.map((t) => (
                 <label key={t.key} className="flex items-center justify-between py-2 border-b border-border-dark/50 cursor-pointer group">
-                  <span className="text-sm text-[#bbb] group-hover:text-white">{t.label}</span>
+                  <span className="text-sm text-ink-2 group-hover:text-ink">{t.label}</span>
                   <button
                     type="button"
                     onClick={() => toggle(t.key)}

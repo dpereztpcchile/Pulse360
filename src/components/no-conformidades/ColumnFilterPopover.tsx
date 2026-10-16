@@ -64,7 +64,7 @@ export function ColumnFilterPopover({
         onClick={(e) => { e.stopPropagation(); onOpenChange(!open) }}
         className={cn(
           'p-0.5 rounded transition-colors',
-          active ? 'text-pulse-red' : 'text-[#666] hover:text-white'
+          active ? 'text-pulse-red' : 'text-muted hover:text-ink'
         )}
         title="Filtrar"
       >
@@ -83,29 +83,29 @@ export function ColumnFilterPopover({
 
           {searchable && (
             <div className="relative mb-2">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[#666]" />
+              <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted" />
               <input
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar..."
-                className="w-full pl-6 pr-2 py-1 rounded bg-bg-dark border border-border-dark text-white text-xs focus:outline-none focus:border-pulse-red"
+                className="w-full pl-6 pr-2 py-1 rounded bg-bg-dark border border-border-dark text-ink text-xs focus:outline-none focus:border-pulse-red"
               />
             </div>
           )}
 
           <div className="flex items-center justify-between px-0.5 pb-1.5 mb-1 border-b border-border-dark">
-            <button type="button" onClick={() => onChange(null)} className="text-[11px] text-[#999] hover:text-white transition-colors">
+            <button type="button" onClick={() => onChange(null)} className="text-[11px] text-muted hover:text-ink transition-colors">
               Todo
             </button>
-            <button type="button" onClick={() => onChange(new Set())} className="text-[11px] text-[#999] hover:text-white transition-colors">
+            <button type="button" onClick={() => onChange(new Set())} className="text-[11px] text-muted hover:text-ink transition-colors">
               Ninguno
             </button>
           </div>
 
           <div className="max-h-52 overflow-y-auto space-y-0.5">
             {visibleOptions.length === 0 && (
-              <p className="text-[11px] text-[#555] px-1 py-2 text-center">Sin coincidencias</p>
+              <p className="text-[11px] text-muted-2 px-1 py-2 text-center">Sin coincidencias</p>
             )}
             {visibleOptions.map((o) => {
               const checked = effectiveSelected.has(o.value)
@@ -117,8 +117,8 @@ export function ColumnFilterPopover({
                     onChange={() => toggleValue(o.value)}
                     className="accent-pulse-red w-3.5 h-3.5 shrink-0"
                   />
-                  <span className="flex-1 text-[#ccc] truncate">{o.label}</span>
-                  <span className="text-[#666] text-[10px]">{o.count}</span>
+                  <span className="flex-1 text-ink-2 truncate">{o.label}</span>
+                  <span className="text-muted text-[10px]">{o.count}</span>
                 </label>
               )
             })}

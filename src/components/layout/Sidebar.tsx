@@ -91,23 +91,23 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     <aside
       className={cn(
         'fixed left-0 top-0 h-full z-40 flex flex-col',
-        'bg-card-dark border-r border-border-dark',
+        'bg-nav-dark border-r border-border-dark',
         'transition-all duration-300 ease-in-out',
         collapsed ? 'w-16' : 'w-64'
       )}
     >
       {/* Logo */}
       <div className={cn(
-        'flex items-center h-16 px-4 border-b border-border-dark shrink-0 bg-[#050505]',
+        'flex items-center h-16 px-4 border-b border-border-dark shrink-0 bg-top-dark',
         collapsed ? 'justify-center' : 'gap-3'
       )}>
         <div className="relative w-8 h-8 shrink-0 flex items-center justify-center">
           <Activity className="absolute w-5 h-5 text-pulse-red" strokeWidth={2.5} />
-          <BarChart3 className="absolute w-7 h-7 text-white opacity-15" />
+          <BarChart3 className="absolute w-7 h-7 text-ink opacity-15" />
         </div>
         {!collapsed && (
           <span className="text-xl font-bold tracking-wider">
-            <span className="text-white">PULSE</span>
+            <span className="text-ink">PULSE</span>
             <span className="text-pulse-red">360</span>
           </span>
         )}
@@ -128,7 +128,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 key={href}
                 title={collapsed ? `${label} (en construcción)` : undefined}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#555] cursor-not-allowed select-none',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-2 cursor-not-allowed select-none',
                   collapsed && 'justify-center'
                 )}
               >
@@ -136,7 +136,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 {!collapsed && (
                   <>
                     <span className="text-sm font-medium truncate flex-1">{label}</span>
-                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-border-dark text-[#777] uppercase tracking-wide whitespace-nowrap">
+                    <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-border-dark text-muted uppercase tracking-wide whitespace-nowrap">
                       En construcción
                     </span>
                   </>
@@ -154,8 +154,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg',
                 'transition-colors duration-150 group',
                 isActive
-                  ? 'bg-pulse-red text-white'
-                  : 'text-[#999] hover:bg-border-dark hover:text-white',
+                  ? 'bg-pulse-red/10 text-pulse-red font-semibold'
+                  : 'text-muted hover:bg-border-dark hover:text-ink',
                 collapsed && 'justify-center'
               )}
             >
@@ -173,7 +173,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {!collapsed && badge > 0 && (
                 <span className={cn(
                   'min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full text-[10px] font-bold leading-none',
-                  isActive ? 'bg-white text-pulse-red' : 'bg-pulse-red text-white'
+                  'bg-pulse-red text-white'
                 )}>
                   {badge > 99 ? '99+' : badge}
                 </span>
@@ -189,7 +189,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           onClick={onToggle}
           className={cn(
             'w-full flex items-center gap-2 px-3 py-2 rounded-lg',
-            'text-[#666] hover:bg-border-dark hover:text-white transition-colors',
+            'text-muted hover:bg-border-dark hover:text-ink transition-colors',
             collapsed && 'justify-center'
           )}
         >

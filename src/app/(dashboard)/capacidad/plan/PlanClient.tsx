@@ -80,18 +80,18 @@ export function PlanClient({
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-1 rounded-lg bg-card-dark border border-border-dark p-1">
           <button onClick={() => shiftMonth(-1)} disabled={loading}
-            className="p-1.5 rounded-md text-[#888] hover:text-white hover:bg-border-dark transition-colors disabled:opacity-50">
+            className="p-1.5 rounded-md text-muted hover:text-ink hover:bg-border-dark transition-colors disabled:opacity-50">
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="px-3 text-sm font-semibold text-white min-w-[150px] text-center">
+          <span className="px-3 text-sm font-semibold text-ink min-w-[150px] text-center">
             {MONTH_NAMES[month - 1]} {year}
           </span>
           <button onClick={() => shiftMonth(1)} disabled={loading}
-            className="p-1.5 rounded-md text-[#888] hover:text-white hover:bg-border-dark transition-colors disabled:opacity-50">
+            className="p-1.5 rounded-md text-muted hover:text-ink hover:bg-border-dark transition-colors disabled:opacity-50">
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
-        {loading && <Loader2 className="w-4 h-4 animate-spin text-[#888]" />}
+        {loading && <Loader2 className="w-4 h-4 animate-spin text-muted" />}
 
         {saved && (
           <span className="flex items-center gap-1.5 text-sm text-status-ok">
@@ -116,7 +116,7 @@ export function PlanClient({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+              <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left font-medium sticky left-0 bg-card-dark">Línea</th>
                 {Array.from({ length: weeks }, (_, j) => (
                   <th key={j} className="px-3 py-3 text-center font-medium whitespace-nowrap">Semana {j + 1}</th>
@@ -126,13 +126,13 @@ export function PlanClient({
             </thead>
             <tbody className="divide-y divide-border-dark">
               {rows.length === 0 && (
-                <tr><td colSpan={weeks + 2} className="px-4 py-10 text-center text-[#555]">Sin líneas configuradas</td></tr>
+                <tr><td colSpan={weeks + 2} className="px-4 py-10 text-center text-muted-2">Sin líneas configuradas</td></tr>
               )}
               {rows.map((r, i) => (
                 <tr key={r.lineId} className="hover:bg-border-dark/20">
                   <td className="px-4 py-2 sticky left-0 bg-card-dark">
-                    <span className="font-medium text-white">{r.lineName}</span>
-                    <span className="block text-xs text-[#666] font-mono">{r.lineCode}</span>
+                    <span className="font-medium text-ink">{r.lineName}</span>
+                    <span className="block text-xs text-muted font-mono">{r.lineCode}</span>
                   </td>
                   {r.weeks.map((w, j) => (
                     <td key={j} className="px-2 py-2">
@@ -140,20 +140,20 @@ export function PlanClient({
                         type="number" min={0} value={w === 0 ? '' : w}
                         onChange={(e) => setCell(i, j, e.target.value)}
                         placeholder="0"
-                        className="w-24 px-2 py-1.5 rounded-md bg-bg-dark border border-border-dark text-white text-sm text-right tabular-nums focus:outline-none focus:border-pulse-red"
+                        className="w-24 px-2 py-1.5 rounded-md bg-bg-dark border border-border-dark text-ink text-sm text-right tabular-nums focus:outline-none focus:border-pulse-red"
                       />
                     </td>
                   ))}
-                  <td className="px-4 py-2 text-right font-semibold text-white tabular-nums">{rowTotal(r).toLocaleString('es-CL')}</td>
+                  <td className="px-4 py-2 text-right font-semibold text-ink tabular-nums">{rowTotal(r).toLocaleString('es-CL')}</td>
                 </tr>
               ))}
             </tbody>
             {rows.length > 0 && (
               <tfoot>
                 <tr className="border-t-2 border-border-dark bg-bg-dark/50 font-semibold">
-                  <td className="px-4 py-3 text-[#ccc] sticky left-0 bg-bg-dark/50">Total</td>
+                  <td className="px-4 py-3 text-ink-2 sticky left-0 bg-bg-dark/50">Total</td>
                   {colTotals.map((c, j) => (
-                    <td key={j} className="px-3 py-3 text-center text-white tabular-nums">{c.toLocaleString('es-CL')}</td>
+                    <td key={j} className="px-3 py-3 text-center text-ink tabular-nums">{c.toLocaleString('es-CL')}</td>
                   ))}
                   <td className="px-4 py-3 text-right text-pulse-red tabular-nums">{grandTotal.toLocaleString('es-CL')}</td>
                 </tr>
@@ -162,7 +162,7 @@ export function PlanClient({
           </table>
         </div>
       </div>
-      <p className="text-xs text-[#666]">Edita la demanda planificada (kg) por línea y semana. Los cambios se aplican al guardar el plan.</p>
+      <p className="text-xs text-muted">Edita la demanda planificada (kg) por línea y semana. Los cambios se aplican al guardar el plan.</p>
     </div>
   )
 }

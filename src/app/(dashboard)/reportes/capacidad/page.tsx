@@ -16,7 +16,7 @@ export default async function CapacidadReportPage() {
   }
 
   return (
-    <Suspense fallback={<div className="text-[#666]">Cargando…</div>}>
+    <Suspense fallback={<div className="text-muted">Cargando…</div>}>
       <CapacidadReportView canExport user={session?.user?.name ?? 'Usuario'} />
     </Suspense>
   )

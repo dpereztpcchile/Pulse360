@@ -45,13 +45,13 @@ export function TurnosConfigClient() {
     setBusy(false)
   }
 
-  if (loading) return <div className="card flex items-center gap-2 text-sm text-[#666]"><Loader2 className="w-4 h-4 animate-spin" /> Cargando configuración…</div>
-  if (turnos.length === 0) return <div className="card text-sm text-[#666]">Sin configuración de turnos. Ejecuta el seed para inicializar Carnicería.</div>
+  if (loading) return <div className="card flex items-center gap-2 text-sm text-muted"><Loader2 className="w-4 h-4 animate-spin" /> Cargando configuración…</div>
+  if (turnos.length === 0) return <div className="card text-sm text-muted">Sin configuración de turnos. Ejecuta el seed para inicializar Carnicería.</div>
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#666]">Productividad nominal: <span className="text-white font-medium">{PRODUCTIVIDAD_NOMINAL} Kg MP/HH</span></p>
+        <p className="text-xs text-muted">Productividad nominal: <span className="text-ink font-medium">{PRODUCTIVIDAD_NOMINAL} Kg MP/HH</span></p>
         <div className="flex items-center gap-3">
           {saved && <span className="text-xs text-status-ok flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Guardado</span>}
           <button onClick={save} disabled={busy} className="btn-primary text-sm flex items-center gap-2 disabled:opacity-60">
@@ -66,49 +66,49 @@ export function TurnosConfigClient() {
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-pulse-red/10"><Users className="w-5 h-5 text-pulse-red" /></div>
               <div>
-                <p className="font-semibold text-white">Turno {t.turnoNombre}</p>
-                <p className="text-xs text-[#666]">Colación descontada</p>
+                <p className="font-semibold text-ink">Turno {t.turnoNombre}</p>
+                <p className="text-xs text-muted">Colación descontada</p>
               </div>
             </div>
             <label className="flex items-center gap-2 text-sm">
-              <span className="text-[#999]">N° personas</span>
+              <span className="text-muted">N° personas</span>
               <input type="number" min="0" value={t.cantPersonas} onChange={(e) => upd(t.id, { cantPersonas: Number(e.target.value) || 0 })}
-                className="w-16 px-2 py-1 rounded bg-bg-dark border border-border-dark text-white text-center font-bold focus:outline-none focus:border-pulse-red" />
+                className="w-16 px-2 py-1 rounded bg-bg-dark border border-border-dark text-ink text-center font-bold focus:outline-none focus:border-pulse-red" />
             </label>
             <label className="flex items-center gap-2 text-sm">
-              <span className="text-[#999]">Colación (min)</span>
+              <span className="text-muted">Colación (min)</span>
               <input type="number" min="0" value={t.colacionMin} onChange={(e) => upd(t.id, { colacionMin: Number(e.target.value) || 0 })}
-                className="w-16 px-2 py-1 rounded bg-bg-dark border border-border-dark text-white text-center focus:outline-none focus:border-pulse-red" />
+                className="w-16 px-2 py-1 rounded bg-bg-dark border border-border-dark text-ink text-center focus:outline-none focus:border-pulse-red" />
             </label>
             <label className="flex items-center gap-2 text-sm ml-auto cursor-pointer">
               <input type="checkbox" checked={t.activo} onChange={(e) => upd(t.id, { activo: e.target.checked })} className="accent-pulse-red" />
-              <span className="text-[#999]">Activo</span>
+              <span className="text-muted">Activo</span>
             </label>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs text-[#666]">
+                <tr className="text-xs text-muted">
                   <th className="px-2 py-1 text-left font-medium">HH/persona</th>
                   {DAY_SHORT.slice(0, 6).map((d) => <th key={d} className="px-2 py-1 font-medium">{d}</th>)}
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="px-2 py-1.5 text-[#999]">Horario</td>
+                  <td className="px-2 py-1.5 text-muted">Horario</td>
                   {DAY_SHORT.slice(0, 6).map((_, i) => (
-                    <td key={i} className="px-2 py-1.5 text-center text-[10px] text-[#666]">
+                    <td key={i} className="px-2 py-1.5 text-center text-[10px] text-muted">
                       {t.entradas[i] && t.salidas[i] ? `${t.entradas[i]}–${t.salidas[i]}` : '—'}
                     </td>
                   ))}
                 </tr>
                 <tr>
-                  <td className="px-2 py-1.5 text-[#999]">HH netas</td>
+                  <td className="px-2 py-1.5 text-muted">HH netas</td>
                   {DAY_SHORT.slice(0, 6).map((_, i) => (
                     <td key={i} className="px-2 py-1.5 text-center">
                       <input type="number" min="0" step="0.5" value={t.hhPorDia[i] ?? 0} onChange={(e) => updHH(t.id, i, e.target.value)}
-                        className="w-14 px-1.5 py-1 rounded bg-bg-dark border border-border-dark text-white text-center text-sm focus:outline-none focus:border-pulse-red" />
+                        className="w-14 px-1.5 py-1 rounded bg-bg-dark border border-border-dark text-ink text-center text-sm focus:outline-none focus:border-pulse-red" />
                     </td>
                   ))}
                 </tr>
@@ -120,12 +120,12 @@ export function TurnosConfigClient() {
 
       {/* Capacidad resultante por día */}
       <div className="card">
-        <h4 className="font-semibold text-white mb-3">Capacidad resultante (kg MP / día)</h4>
+        <h4 className="font-semibold text-ink mb-3">Capacidad resultante (kg MP / día)</h4>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {DAY_SHORT.slice(0, 6).map((d, i) => (
             <div key={d} className="bg-bg-dark rounded-lg p-3 text-center border border-border-dark">
-              <p className="text-xs text-[#666]">{d}</p>
-              <p className="font-bold text-white">{fmt(capByDay[i])}</p>
+              <p className="text-xs text-muted">{d}</p>
+              <p className="font-bold text-ink">{fmt(capByDay[i])}</p>
             </div>
           ))}
         </div>

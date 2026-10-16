@@ -14,7 +14,13 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
   const [time, setTime] = useState('')
   const [date, setDate] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
-  const [darkMode, setDarkMode] = useState(true)
+  const [darkMode, setDarkMode] = useState(false)
+
+  // Sincroniza el estado del toggle con la preferencia guardada /
+  // clase .dark ya aplicada al <html>, para evitar desajuste visual.
+  useEffect(() => {
+    setDarkMode(document.documentElement.classList.contains('dark'))
+  }, [])
 
   useEffect(() => {
     function updateClock() {
@@ -31,9 +37,11 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
     const html = document.documentElement
     if (html.classList.contains('dark')) {
       html.classList.remove('dark')
+      localStorage.setItem('pulse360-theme', 'light')
       setDarkMode(false)
     } else {
       html.classList.add('dark')
+      localStorage.setItem('pulse360-theme', 'dark')
       setDarkMode(true)
     }
   }
@@ -44,7 +52,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
     <header
       className={cn(
         'fixed top-0 right-0 h-16 z-30',
-        'bg-[#050505] border-b border-border-dark',
+        'bg-top-dark border-b border-border-dark',
         'flex items-center justify-between px-5 gap-4',
         'transition-all duration-300',
         sidebarCollapsed ? 'left-16' : 'left-64'
@@ -53,8 +61,8 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
       {/* Empresa / planta */}
       <div className="flex items-center gap-4">
         <div className="flex flex-col">
-          <span className="text-xs text-[#666] uppercase tracking-wider font-medium">THE PROTEIN COMPANY</span>
-          <span className="text-sm font-semibold text-white leading-tight">Planta Carnes - Paine</span>
+          <span className="text-xs text-muted uppercase tracking-wider font-medium">THE PROTEIN COMPANY</span>
+          <span className="text-sm font-semibold text-ink leading-tight">Planta Carnes - Paine</span>
         </div>
       </div>
 
@@ -62,10 +70,10 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
       <div className="flex items-center gap-4">
         {/* Reloj */}
         <div className="text-right hidden sm:block">
-          <div className="font-rajdhani font-bold text-lg text-white leading-none tabular-nums">
+          <div className="font-rajdhani font-bold text-lg text-ink leading-none tabular-nums">
             {time}
           </div>
-          <div className="text-xs text-[#666] capitalize">{date}</div>
+          <div className="text-xs text-muted capitalize">{date}</div>
         </div>
 
         <div className="w-px h-8 bg-border-dark" />
@@ -73,7 +81,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
         {/* Toggle tema */}
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-lg text-[#666] hover:bg-border-dark hover:text-white transition-colors"
+          className="p-2 rounded-lg text-muted hover:bg-border-dark hover:text-ink transition-colors"
           title={darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         >
           {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -89,14 +97,14 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
               <User className="w-4 h-4 text-pulse-red" />
             </div>
             <div className="text-left hidden sm:block">
-              <div className="text-sm font-semibold text-white leading-tight">
+              <div className="text-sm font-semibold text-ink leading-tight">
                 {session?.user?.name?.split(' ')[0] ?? 'Usuario'}
               </div>
-              <div className={cn('text-xs font-medium', getRoleBadgeColor(role).includes('pulse-red') ? 'text-pulse-red' : 'text-[#999]')}>
+              <div className={cn('text-xs font-medium', getRoleBadgeColor(role).includes('pulse-red') ? 'text-pulse-red' : 'text-muted')}>
                 {getRoleLabel(role)}
               </div>
             </div>
-            <ChevronDown className={cn('w-4 h-4 text-[#666] transition-transform', menuOpen && 'rotate-180')} />
+            <ChevronDown className={cn('w-4 h-4 text-muted transition-transform', menuOpen && 'rotate-180')} />
           </button>
 
           {menuOpen && (
@@ -104,8 +112,8 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
               <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
               <div className="absolute right-0 top-full mt-2 w-56 bg-card-dark border border-border-dark rounded-xl shadow-xl z-20 overflow-hidden">
                 <div className="px-4 py-3 border-b border-border-dark">
-                  <p className="text-sm font-semibold text-white">{session?.user?.name}</p>
-                  <p className="text-xs text-[#666] mt-0.5">{session?.user?.email}</p>
+                  <p className="text-sm font-semibold text-ink">{session?.user?.name}</p>
+                  <p className="text-xs text-muted mt-0.5">{session?.user?.email}</p>
                   <span className={cn('inline-flex mt-2 px-2 py-0.5 rounded-full text-xs font-semibold', getRoleBadgeColor(role))}>
                     {getRoleLabel(role)}
                   </span>
@@ -113,7 +121,7 @@ export function Header({ sidebarCollapsed }: HeaderProps) {
                 <div className="p-1.5">
                   <button
                     onClick={() => signOut({ callbackUrl: '/login' })}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-[#999]
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted
                                hover:bg-pulse-red/10 hover:text-pulse-red transition-colors"
                   >
                     <LogOut className="w-4 h-4" />

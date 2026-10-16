@@ -94,18 +94,18 @@ export function NcCargaClient() {
       <div className="card">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div>
-            <h2 className="font-semibold text-white">Cargar NC desde Excel</h2>
-            <p className="text-xs text-[#666] mt-0.5">Archivo &quot;SEGUIMIENTO NC.xlsx&quot; — hoja &quot;CUADRO DE SEGUIMIENTO NC&quot;</p>
+            <h2 className="font-semibold text-ink">Cargar NC desde Excel</h2>
+            <p className="text-xs text-muted mt-0.5">Archivo &quot;SEGUIMIENTO NC.xlsx&quot; — hoja &quot;CUADRO DE SEGUIMIENTO NC&quot;</p>
           </div>
         </div>
 
         <UploadZone onFile={handleFile} />
 
         {file && (
-          <div className="flex items-center gap-2 mt-3 text-sm text-[#ccc]">
+          <div className="flex items-center gap-2 mt-3 text-sm text-ink-2">
             <FileSpreadsheet className="w-4 h-4 text-status-ok" />
             <span className="font-medium">{file.name}</span>
-            <span className="text-[#666]">· {fmtSize(file.size)}</span>
+            <span className="text-muted">· {fmtSize(file.size)}</span>
           </div>
         )}
 
@@ -116,7 +116,7 @@ export function NcCargaClient() {
         )}
 
         {loadingPreview && (
-          <div className="flex items-center gap-2 mt-4 text-sm text-[#999]">
+          <div className="flex items-center gap-2 mt-4 text-sm text-muted">
             <Loader2 className="w-4 h-4 animate-spin" /> Analizando archivo…
           </div>
         )}
@@ -138,10 +138,10 @@ export function NcCargaClient() {
       </div>
 
       <div className="card bg-bg-dark/40">
-        <p className="text-xs text-[#666] leading-relaxed">
-          <b className="text-[#999]">Cómo funciona la carga:</b> el archivo subido debe contener el histórico
-          completo más las NC nuevas de la semana. Las NC cuyo <b className="text-[#999]">N° de NC</b> ya
-          exista en la base de datos <b className="text-[#999]">nunca se actualizan</b>: solo se insertan las
+        <p className="text-xs text-muted leading-relaxed">
+          <b className="text-muted">Cómo funciona la carga:</b> el archivo subido debe contener el histórico
+          completo más las NC nuevas de la semana. Las NC cuyo <b className="text-muted">N° de NC</b> ya
+          exista en la base de datos <b className="text-muted">nunca se actualizan</b>: solo se insertan las
           filas con un N° de NC nuevo. Esto garantiza que los datos históricos no cambien.
         </p>
       </div>
@@ -161,8 +161,8 @@ function UploadZone({ onFile }: { onFile: (f: File) => void }) {
       className={`rounded-xl border-2 border-dashed transition-colors cursor-pointer px-5 py-10 text-center ${over ? 'border-pulse-red bg-pulse-red/5' : 'border-border-dark hover:border-pulse-red/50'}`}
     >
       <FileUp className="w-9 h-9 text-pulse-red mx-auto mb-2" />
-      <p className="text-white font-medium">Arrastra aquí el Excel de NC</p>
-      <p className="text-xs text-[#666] mt-1">SEGUIMIENTO NC.xlsx — .xlsx / .xls</p>
+      <p className="text-ink font-medium">Arrastra aquí el Excel de NC</p>
+      <p className="text-xs text-muted mt-1">SEGUIMIENTO NC.xlsx — .xlsx / .xls</p>
       <button type="button" onClick={(e) => { e.stopPropagation(); ref.current?.click() }} className="btn-secondary text-sm mt-3">Seleccionar archivo</button>
       <input ref={ref} type="file" accept=".xlsx,.xls" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = '' }} />
@@ -208,12 +208,12 @@ function Stat({ icon: Icon, label, value, accent = 'neutral' }: {
   value: number
   accent?: 'ok' | 'warn' | 'neutral'
 }) {
-  const color = accent === 'ok' ? 'text-status-ok' : accent === 'warn' ? 'text-status-warn' : 'text-[#999]'
+  const color = accent === 'ok' ? 'text-status-ok' : accent === 'warn' ? 'text-status-warn' : 'text-muted'
   return (
     <div className="bg-bg-dark rounded-lg p-3 border border-border-dark text-center">
       <Icon className={`w-4 h-4 mx-auto mb-1 ${color}`} />
-      <p className="text-lg font-bold text-white">{value.toLocaleString('es-CL')}</p>
-      <p className="text-[10px] text-[#666]">{label}</p>
+      <p className="text-lg font-bold text-ink">{value.toLocaleString('es-CL')}</p>
+      <p className="text-[10px] text-muted">{label}</p>
     </div>
   )
 }
@@ -225,14 +225,14 @@ function IssuesList({ issues, show, setShow }: {
 }) {
   return (
     <div className="mt-3">
-      <button onClick={() => setShow(!show)} className="text-xs text-[#999] hover:text-white transition-colors underline underline-offset-2">
+      <button onClick={() => setShow(!show)} className="text-xs text-muted hover:text-ink transition-colors underline underline-offset-2">
         {show ? 'Ocultar' : 'Ver'} {issues.length} fila{issues.length === 1 ? '' : 's'} omitida{issues.length === 1 ? '' : 's'} del archivo
       </button>
       {show && (
         <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border border-border-dark bg-bg-dark">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-border-dark text-[#666] uppercase tracking-wide">
+              <tr className="border-b border-border-dark text-muted uppercase tracking-wide">
                 <th className="px-3 py-2 text-left font-medium">Fila</th>
                 <th className="px-3 py-2 text-left font-medium">N° NC</th>
                 <th className="px-3 py-2 text-left font-medium">Motivo</th>
@@ -241,9 +241,9 @@ function IssuesList({ issues, show, setShow }: {
             <tbody className="divide-y divide-border-dark">
               {issues.map((iss, i) => (
                 <tr key={i}>
-                  <td className="px-3 py-1.5 text-[#999]">{iss.rowNumber}</td>
-                  <td className="px-3 py-1.5 text-[#999]">{iss.ncNumber ?? '—'}</td>
-                  <td className="px-3 py-1.5 text-[#999]">{iss.message}</td>
+                  <td className="px-3 py-1.5 text-muted">{iss.rowNumber}</td>
+                  <td className="px-3 py-1.5 text-muted">{iss.ncNumber ?? '—'}</td>
+                  <td className="px-3 py-1.5 text-muted">{iss.message}</td>
                 </tr>
               ))}
             </tbody>

@@ -18,10 +18,10 @@ function Row({ r, busy, onAction }: { r: RegistroDTO; busy: boolean; onAction: (
 
   return (
     <tr className="border-b border-border-dark hover:bg-white/[0.02]">
-      <td className="px-3 py-2.5 text-white">{r.productoNombre}</td>
-      <td className="px-3 py-2.5 text-right text-[#ccc]">{r.kgPlan.toLocaleString('es-CL')}</td>
+      <td className="px-3 py-2.5 text-ink">{r.productoNombre}</td>
+      <td className="px-3 py-2.5 text-right text-ink-2">{r.kgPlan.toLocaleString('es-CL')}</td>
       <td className="px-3 py-2.5 text-center">
-        {r.horaInicio ? <span className="text-[#ccc]">{fmtHora(r.horaInicio)}</span> : (
+        {r.horaInicio ? <span className="text-ink-2">{fmtHora(r.horaInicio)}</span> : (
           <button onClick={() => onAction(r.id, { action: 'iniciar' })} disabled={busy}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-pulse-red/15 text-pulse-red text-xs font-medium hover:bg-pulse-red/25 disabled:opacity-50">
             <Play className="w-3 h-3" /> Iniciar
@@ -29,22 +29,22 @@ function Row({ r, busy, onAction }: { r: RegistroDTO; busy: boolean; onAction: (
         )}
       </td>
       <td className="px-3 py-2.5 text-center">
-        {r.horaTermino ? <span className="text-[#ccc]">{fmtHora(r.horaTermino)}</span> : r.horaInicio ? (
+        {r.horaTermino ? <span className="text-ink-2">{fmtHora(r.horaTermino)}</span> : r.horaInicio ? (
           <button onClick={() => onAction(r.id, { action: 'terminar' })} disabled={busy}
             className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-status-ok/15 text-status-ok text-xs font-medium hover:bg-status-ok/25 disabled:opacity-50">
             <Square className="w-3 h-3" /> Terminar
           </button>
-        ) : <span className="text-[#555]">—</span>}
+        ) : <span className="text-muted-2">—</span>}
       </td>
       <td className="px-3 py-2.5 text-center">
         <input type="number" min="0" value={rentapacks} disabled={busy}
           onChange={(e) => setRentapacks(e.target.value)}
           onBlur={() => { if (rentapacks !== (r.rentapacks?.toString() ?? '')) onAction(r.id, { rentapacks: rp }) }}
-          className="w-24 px-2 py-1 rounded bg-bg-dark border border-border-dark text-white text-sm text-right focus:outline-none focus:border-pulse-red" />
+          className="w-24 px-2 py-1 rounded bg-bg-dark border border-border-dark text-ink text-sm text-right focus:outline-none focus:border-pulse-red" />
       </td>
-      <td className="px-3 py-2.5 text-right text-[#ccc]">{env > 0 ? Math.round(env).toLocaleString('es-CL') : '—'}</td>
-      <td className="px-3 py-2.5 text-right text-[#ccc]">{rend != null ? `${rend.toFixed(1)}%` : '—'}</td>
-      <td className="px-3 py-2.5 text-center">{busy ? <Loader2 className="w-4 h-4 animate-spin text-[#666] mx-auto" /> : <EstadoBadge estado={r.estado} />}</td>
+      <td className="px-3 py-2.5 text-right text-ink-2">{env > 0 ? Math.round(env).toLocaleString('es-CL') : '—'}</td>
+      <td className="px-3 py-2.5 text-right text-ink-2">{rend != null ? `${rend.toFixed(1)}%` : '—'}</td>
+      <td className="px-3 py-2.5 text-center">{busy ? <Loader2 className="w-4 h-4 animate-spin text-muted mx-auto" /> : <EstadoBadge estado={r.estado} />}</td>
     </tr>
   )
 }
@@ -68,7 +68,7 @@ export function EnvasadoTable({ registros, busyId, onAction }: { registros: Regi
       <div className="card overflow-x-auto p-0">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-[#666] border-b border-border-dark">
+            <tr className="text-left text-xs text-muted border-b border-border-dark">
               <th className="px-3 py-3 font-medium">Producto</th>
               <th className="px-3 py-3 font-medium text-right">Kg plan</th>
               <th className="px-3 py-3 font-medium text-center">Inicio</th>
@@ -81,7 +81,7 @@ export function EnvasadoTable({ registros, busyId, onAction }: { registros: Regi
           </thead>
           <tbody>
             {registros.length === 0 ? (
-              <tr><td colSpan={8} className="px-3 py-8 text-center text-[#555]">Sin productos cargados para este turno.</td></tr>
+              <tr><td colSpan={8} className="px-3 py-8 text-center text-muted-2">Sin productos cargados para este turno.</td></tr>
             ) : registros.map((r) => <Row key={r.id} r={r} busy={busyId === r.id} onAction={onAction} />)}
           </tbody>
         </table>

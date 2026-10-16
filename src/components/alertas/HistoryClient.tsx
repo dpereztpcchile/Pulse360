@@ -29,7 +29,7 @@ export function HistoryClient({ initial }: { initial: HistoryResult }) {
   useEffect(() => { load() }, [load])
 
   const { rows, kpis } = data
-  const inputCls = 'px-3 py-1.5 rounded-lg text-sm bg-card-dark border border-border-dark text-[#ccc] focus:outline-none focus:border-pulse-red'
+  const inputCls = 'px-3 py-1.5 rounded-lg text-sm bg-card-dark border border-border-dark text-ink-2 focus:outline-none focus:border-pulse-red'
 
   return (
     <div className="space-y-5">
@@ -55,35 +55,35 @@ export function HistoryClient({ initial }: { initial: HistoryResult }) {
       {/* Filtros */}
       <div className="flex flex-wrap items-end gap-3">
         <div>
-          <label className="block text-xs text-[#666] mb-1">Desde</label>
+          <label className="block text-xs text-muted mb-1">Desde</label>
           <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="block text-xs text-[#666] mb-1">Hasta</label>
+          <label className="block text-xs text-muted mb-1">Hasta</label>
           <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className={inputCls} />
         </div>
         <div>
-          <label className="block text-xs text-[#666] mb-1">Módulo</label>
+          <label className="block text-xs text-muted mb-1">Módulo</label>
           <select value={moduleFilter} onChange={(e) => setModuleFilter(e.target.value)} className={inputCls}>
             <option value="">Todos</option>
             {Object.entries(ALERT_MODULE).map(([k, m]) => <option key={k} value={k}>{m.label}</option>)}
           </select>
         </div>
         <div>
-          <label className="block text-xs text-[#666] mb-1">Severidad</label>
+          <label className="block text-xs text-muted mb-1">Severidad</label>
           <select value={severity} onChange={(e) => setSeverity(e.target.value)} className={inputCls}>
             <option value="">Todas</option>
             {Object.entries(ALERT_SEVERITY).map(([k, s]) => <option key={k} value={k}>{s.label}</option>)}
           </select>
         </div>
-        {loading && <Loader2 className="w-4 h-4 animate-spin text-[#666] mb-2" />}
+        {loading && <Loader2 className="w-4 h-4 animate-spin text-muted mb-2" />}
       </div>
 
       {/* Tabla */}
       <div className="card overflow-x-auto p-0">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-[#666] uppercase tracking-wide border-b border-border-dark">
+            <tr className="text-left text-xs text-muted uppercase tracking-wide border-b border-border-dark">
               <th className="px-4 py-3 font-medium">Fecha / hora</th>
               <th className="px-4 py-3 font-medium">Módulo</th>
               <th className="px-4 py-3 font-medium">Descripción</th>
@@ -96,7 +96,7 @@ export function HistoryClient({ initial }: { initial: HistoryResult }) {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={7} className="text-center py-12 text-[#555]">
+                <td colSpan={7} className="text-center py-12 text-muted-2">
                   <FileSearch className="w-8 h-8 mx-auto mb-2 opacity-40" />
                   No hay alertas resueltas para los filtros seleccionados.
                 </td>
@@ -107,17 +107,17 @@ export function HistoryClient({ initial }: { initial: HistoryResult }) {
               const sev = ALERT_SEVERITY[r.severity]
               return (
                 <tr key={r.id} className="border-b border-border-dark/60 hover:bg-border-dark/30">
-                  <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">{formatDateTime(r.createdAt)}</td>
+                  <td className="px-4 py-3 text-ink-2 whitespace-nowrap">{formatDateTime(r.createdAt)}</td>
                   <td className="px-4 py-3"><span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', mod.cls)}>{mod.label}</span></td>
-                  <td className="px-4 py-3 text-[#bbb] max-w-md"><span className="font-medium text-white">{r.title}</span></td>
+                  <td className="px-4 py-3 text-ink-2 max-w-md"><span className="font-medium text-ink">{r.title}</span></td>
                   <td className="px-4 py-3"><span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', sev.badge)}>{sev.label}</span></td>
-                  <td className="px-4 py-3 text-[#999] whitespace-nowrap">{r.acknowledgedBy ?? '—'}</td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">{r.acknowledgedBy ?? '—'}</td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {r.autoResolved
-                      ? <span className="text-[#666] italic">Automático</span>
-                      : <span className="text-[#999]">{r.resolvedBy ?? '—'}</span>}
+                      ? <span className="text-muted italic">Automático</span>
+                      : <span className="text-muted">{r.resolvedBy ?? '—'}</span>}
                   </td>
-                  <td className="px-4 py-3 text-[#ccc] whitespace-nowrap">
+                  <td className="px-4 py-3 text-ink-2 whitespace-nowrap">
                     {r.responseMs != null ? formatDuration(r.responseMs) : '—'}
                   </td>
                 </tr>
@@ -135,8 +135,8 @@ function KpiCard({ icon, label, value }: { icon: React.ReactNode; label: string;
     <div className="card flex items-center gap-4">
       <div className="p-2.5 rounded-lg bg-border-dark/50 shrink-0">{icon}</div>
       <div>
-        <p className="text-xs text-[#666]">{label}</p>
-        <p className="font-rajdhani font-bold text-2xl text-white leading-tight">{value}</p>
+        <p className="text-xs text-muted">{label}</p>
+        <p className="font-rajdhani font-bold text-2xl text-ink leading-tight">{value}</p>
       </div>
     </div>
   )

@@ -62,43 +62,43 @@ export function SemanalClient({ today }: { today: string }) {
       {/* Selector de semana */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="inline-flex items-center rounded-lg border border-border-dark overflow-hidden">
-          <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="px-3 py-2 text-[#999] hover:text-white hover:bg-border-dark" title="Semana anterior"><ChevronLeft className="w-4 h-4" /></button>
-          <span className="px-4 py-2 text-sm font-medium text-white border-x border-border-dark whitespace-nowrap">{periodLabel}</span>
-          <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="px-3 py-2 text-[#999] hover:text-white hover:bg-border-dark" title="Semana siguiente"><ChevronRight className="w-4 h-4" /></button>
+          <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="px-3 py-2 text-muted hover:text-ink hover:bg-border-dark" title="Semana anterior"><ChevronLeft className="w-4 h-4" /></button>
+          <span className="px-4 py-2 text-sm font-medium text-ink border-x border-border-dark whitespace-nowrap">{periodLabel}</span>
+          <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="px-3 py-2 text-muted hover:text-ink hover:bg-border-dark" title="Semana siguiente"><ChevronRight className="w-4 h-4" /></button>
         </div>
-        <button onClick={() => setWeekStart(mondayOf(today))} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-sm text-[#ccc] hover:border-pulse-red">
+        <button onClick={() => setWeekStart(mondayOf(today))} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-sm text-ink-2 hover:border-pulse-red">
           <CalendarClock className="w-4 h-4 text-pulse-red" /> Ir a semana actual
         </button>
-        {loading && <Loader2 className="w-4 h-4 animate-spin text-[#666]" />}
-        <span className="text-xs text-[#555]">Capacidad calculada desde los horarios configurados (pestaña ⚙ Horarios). Carnicería en kg de materia prima.</span>
+        {loading && <Loader2 className="w-4 h-4 animate-spin text-muted" />}
+        <span className="text-xs text-muted-2">Capacidad calculada desde los horarios configurados (pestaña ⚙ Horarios). Carnicería en kg de materia prima.</span>
       </div>
 
       {/* Tabla líneas × días */}
       <div className="card p-0 overflow-x-auto">
         <table className="w-full text-sm min-w-[1100px]">
           <thead>
-            <tr className="text-xs text-[#666] border-b border-border-dark">
+            <tr className="text-xs text-muted border-b border-border-dark">
               <th className="px-3 py-3 text-left font-medium sticky left-0 bg-card-dark z-10">Línea</th>
               {dias.map((d) => (
                 <th key={d.ymd} className="px-2 py-3 text-center font-medium">
-                  <div className="text-white">{d.label} {d.num}</div>
-                  <div className="text-[10px] text-[#666]">{d.mes}</div>
+                  <div className="text-ink">{d.label} {d.num}</div>
+                  <div className="text-[10px] text-muted">{d.mes}</div>
                 </th>
               ))}
-              <th className="px-3 py-3 text-right font-medium text-white">Total semana</th>
+              <th className="px-3 py-3 text-right font-medium text-ink">Total semana</th>
             </tr>
           </thead>
           <tbody>
             {lineas.length === 0 ? (
-              <tr><td colSpan={9} className="px-4 py-10 text-center text-[#555]">{loading ? 'Cargando…' : 'Sin líneas configuradas'}</td></tr>
+              <tr><td colSpan={9} className="px-4 py-10 text-center text-muted-2">{loading ? 'Cargando…' : 'Sin líneas configuradas'}</td></tr>
             ) : lineas.map((l) => (
               <tr key={l.id} className="border-b border-border-dark">
-                <td className="px-3 py-2.5 text-white font-medium whitespace-nowrap sticky left-0 bg-card-dark z-10">
+                <td className="px-3 py-2.5 text-ink font-medium whitespace-nowrap sticky left-0 bg-card-dark z-10">
                   {l.nombre}
                   {l.comparteEquipo && <span className="ml-1.5 text-[#f59e0b]" title="Comparte equipo con Molida/Hamburguesas/Albóndigas">⚠</span>}
                 </td>
                 {l.celdas.map((celda, i) => {
-                  if (!celda.opera) return <td key={i} className="px-2 py-2.5 text-center text-[#444]">—</td>
+                  if (!celda.opera) return <td key={i} className="px-2 py-2.5 text-center text-muted-2">—</td>
                   const cap = celda.capacidad
                   const dem = data?.demanda[l.nombre]?.[celda.ymd]
                   const tieneDem = dem != null
@@ -107,25 +107,25 @@ export function SemanalClient({ today }: { today: string }) {
                   const tip = `${dias[i].label} ${dias[i].num} · ${fmt(cap)} kg${celda.tooltip ? '\n' + celda.tooltip : ''}`
                   return (
                     <td key={i} className="px-2 py-2 text-center align-top" title={tip}>
-                      <div className={tieneDem ? 'text-white font-semibold tabular-nums' : 'text-[#888] tabular-nums'}>{fmt(cap)}</div>
+                      <div className={tieneDem ? 'text-ink font-semibold tabular-nums' : 'text-muted tabular-nums'}>{fmt(cap)}</div>
                       {tieneDem ? (
                         <>
                           <div className="text-xs tabular-nums" style={{ color: demColor }}>{fmt(dem)}</div>
-                          <div className="text-[10px] text-[#777]">{uso}%</div>
+                          <div className="text-[10px] text-muted">{uso}%</div>
                         </>
-                      ) : <div className="text-[10px] text-[#555]">disp.</div>}
+                      ) : <div className="text-[10px] text-muted-2">disp.</div>}
                     </td>
                   )
                 })}
-                <td className="px-3 py-2.5 text-right text-[#ccc] font-semibold tabular-nums whitespace-nowrap">{fmt(l.totalSemana)}</td>
+                <td className="px-3 py-2.5 text-right text-ink-2 font-semibold tabular-nums whitespace-nowrap">{fmt(l.totalSemana)}</td>
               </tr>
             ))}
           </tbody>
           <tfoot>
             <tr className="border-t-2 border-border-dark font-semibold">
-              <td className="px-3 py-3 text-white sticky left-0 bg-card-dark z-10">Total día</td>
+              <td className="px-3 py-3 text-ink sticky left-0 bg-card-dark z-10">Total día</td>
               {totalDia.map((t, i) => (
-                <td key={i} className="px-2 py-3 text-center text-white tabular-nums">{t > 0 ? fmt(t) : <span className="text-[#444]">—</span>}</td>
+                <td key={i} className="px-2 py-3 text-center text-ink tabular-nums">{t > 0 ? fmt(t) : <span className="text-muted-2">—</span>}</td>
               ))}
               <td className="px-3 py-3 text-right text-pulse-red tabular-nums whitespace-nowrap">{fmt(totalSemana)}</td>
             </tr>
@@ -142,10 +142,10 @@ export function SemanalClient({ today }: { today: string }) {
       )}
 
       {/* Leyenda */}
-      <div className="flex flex-wrap items-center gap-4 text-xs text-[#777]">
-        <span>Cada celda: <b className="text-white">capacidad</b> · <b style={{ color: VERDE }}>demanda ≤ cap</b> / <b style={{ color: ROJO }}>demanda &gt; cap</b> · % uso</span>
-        <span><span className="text-[#444]">—</span> = la línea no opera ese día</span>
-        <span><span className="text-[#888]">disp.</span> = sin demanda cargada (solo capacidad)</span>
+      <div className="flex flex-wrap items-center gap-4 text-xs text-muted">
+        <span>Cada celda: <b className="text-ink">capacidad</b> · <b style={{ color: VERDE }}>demanda ≤ cap</b> / <b style={{ color: ROJO }}>demanda &gt; cap</b> · % uso</span>
+        <span><span className="text-muted-2">—</span> = la línea no opera ese día</span>
+        <span><span className="text-muted">disp.</span> = sin demanda cargada (solo capacidad)</span>
       </div>
     </div>
   )

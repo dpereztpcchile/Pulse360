@@ -15,10 +15,10 @@ export default async function ConfiguracionAlertasPage() {
 
   const header = (
     <div>
-      <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+      <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
         <Bell className="w-6 h-6 text-pulse-red" /> Alertas
       </h1>
-      <p className="text-sm text-[#666] mt-0.5">Configuración de umbrales y tipos de alerta</p>
+      <p className="text-sm text-muted mt-0.5">Configuración de umbrales y tipos de alerta</p>
     </div>
   )
 

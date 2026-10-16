@@ -37,10 +37,10 @@ export default async function ConfiguracionPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <Settings className="w-6 h-6 text-pulse-red" /> Configuración
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">Administración de usuarios, plantas y sistema</p>
+        <p className="text-sm text-muted mt-0.5">Administración de usuarios, plantas y sistema</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -54,9 +54,9 @@ export default async function ConfiguracionPage() {
               <item.icon className="w-6 h-6 text-pulse-red" />
             </div>
             <div>
-              <p className="text-xs text-[#666] uppercase tracking-wider">{item.label}</p>
-              <p className="font-rajdhani font-bold text-3xl text-white leading-tight">
-                {item.value} <span className="text-sm font-normal text-[#666]">{item.desc}</span>
+              <p className="text-xs text-muted uppercase tracking-wider">{item.label}</p>
+              <p className="font-rajdhani font-bold text-3xl text-ink leading-tight">
+                {item.value} <span className="text-sm font-normal text-muted">{item.desc}</span>
               </p>
             </div>
           </div>
@@ -70,8 +70,8 @@ export default async function ConfiguracionPage() {
             <ShieldCheck className="w-5 h-5 text-pulse-red" />
           </div>
           <div>
-            <p className="font-semibold text-white">Permisos</p>
-            <p className="text-xs text-[#666]">Define a qué módulos puede acceder cada rol, y ajusta excepciones puntuales por usuario</p>
+            <p className="font-semibold text-ink">Permisos</p>
+            <p className="text-xs text-muted">Define a qué módulos puede acceder cada rol, y ajusta excepciones puntuales por usuario</p>
           </div>
         </div>
         <Link href="/admin/permisos" className="btn-primary text-xs py-1.5 flex items-center gap-1.5 shrink-0">
@@ -82,8 +82,8 @@ export default async function ConfiguracionPage() {
       {/* Tabla de usuarios (vista rápida, solo lectura) */}
       <div className="card overflow-hidden p-0">
         <div className="px-5 py-3 border-b border-border-dark flex items-center justify-between">
-          <span className="text-sm font-semibold text-white flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#666]" /> Usuarios ({totalUsuarios})
+          <span className="text-sm font-semibold text-ink flex items-center gap-2">
+            <Users className="w-4 h-4 text-muted" /> Usuarios ({totalUsuarios})
           </span>
           <Link href="/admin/usuarios" className="btn-primary text-xs py-1.5 flex items-center gap-1.5">
             Gestionar usuarios <ArrowRight className="w-3.5 h-3.5" />
@@ -92,7 +92,7 @@ export default async function ConfiguracionPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+              <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                 <th className="px-5 py-3 text-left">Nombre</th>
                 <th className="px-5 py-3 text-left">Email</th>
                 <th className="px-5 py-3 text-left">Rol</th>
@@ -102,15 +102,15 @@ export default async function ConfiguracionPage() {
             </thead>
             <tbody className="divide-y divide-border-dark">
               {users.length === 0 && (
-                <tr><td colSpan={5} className="px-5 py-8 text-center text-[#555]">Sin usuarios</td></tr>
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-muted-2">Sin usuarios</td></tr>
               )}
               {users.map((u) => (
                 <tr key={u.id} className="hover:bg-border-dark/30 transition-colors">
-                  <td className="px-5 py-3.5 font-medium text-white">
+                  <td className="px-5 py-3.5 font-medium text-ink">
                     {u.name}
-                    {u.id === session.user.id && <span className="text-xs text-[#555] ml-1">(tú)</span>}
+                    {u.id === session.user.id && <span className="text-xs text-muted-2 ml-1">(tú)</span>}
                   </td>
-                  <td className="px-5 py-3.5 text-[#999] font-mono text-xs">{u.email}</td>
+                  <td className="px-5 py-3.5 text-muted font-mono text-xs">{u.email}</td>
                   <td className="px-5 py-3.5">
                     <span className={cn('px-2 py-0.5 rounded-full text-xs font-semibold', getRoleBadgeColor(u.role))}>
                       {getRoleLabel(u.role)}
@@ -121,7 +121,7 @@ export default async function ConfiguracionPage() {
                       {u.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-xs text-[#666] font-mono">{formatLastLogin(u.lastLoginAt)}</td>
+                  <td className="px-5 py-3.5 text-xs text-muted font-mono">{formatLastLogin(u.lastLoginAt)}</td>
                 </tr>
               ))}
             </tbody>
@@ -129,7 +129,7 @@ export default async function ConfiguracionPage() {
         </div>
         {totalUsuarios > users.length && (
           <div className="px-5 py-3 border-t border-border-dark text-center">
-            <Link href="/admin/usuarios" className="text-xs text-[#666] hover:text-white transition-colors">
+            <Link href="/admin/usuarios" className="text-xs text-muted hover:text-ink transition-colors">
               Ver los {totalUsuarios} usuarios →
             </Link>
           </div>

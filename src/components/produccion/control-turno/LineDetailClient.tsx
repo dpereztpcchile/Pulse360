@@ -85,10 +85,10 @@ export function LineDetailClient({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href={`/produccion/control-turno?turno=${turno}`} className="text-xs text-[#666] hover:text-white flex items-center gap-1 mb-1">
+          <Link href={`/produccion/control-turno?turno=${turno}`} className="text-xs text-muted hover:text-ink flex items-center gap-1 mb-1">
             <ArrowLeft className="w-3.5 h-3.5" /> Volver al resumen de turno
           </Link>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-ink flex items-center gap-2">
             {line.name}
             <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-pulse-red/10 text-pulse-red">{variantLabel}</span>
           </h2>
@@ -106,7 +106,7 @@ export function LineDetailClient({
 
       {line.oeeEnabled && oee && <OeePanel data={oee} />}
       {line.oeeEnabled && !oee && (
-        <div className="card text-center text-[#555] py-6 text-sm">El OEE se calculará cuando haya producción y se registre el cierre de turno.</div>
+        <div className="card text-center text-muted-2 py-6 text-sm">El OEE se calculará cuando haya producción y se registre el cierre de turno.</div>
       )}
 
       {modal && (

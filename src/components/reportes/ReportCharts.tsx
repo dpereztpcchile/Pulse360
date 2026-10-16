@@ -13,18 +13,18 @@ import {
 // Tooltip fondo #111111, borde #CC0000, texto blanco, Rajdhani.
 const tooltipProps = {
   contentStyle: {
-    background: '#111111',
+    background: '#FFFFFF',
     border: '1px solid #CC0000',
     borderRadius: 8,
     fontSize: 12,
     fontFamily: 'Rajdhani, sans-serif',
   },
-  labelStyle: { color: '#fff', fontWeight: 600 },
-  itemStyle: { color: '#fff' },
+  labelStyle: { color: '#1E2227', fontWeight: 600 },
+  itemStyle: { color: '#3A4049' },
 }
 
-const axisProps = { tick: { fill: '#666666', fontSize: 12, fontFamily: 'Rajdhani' }, stroke: '#333333' }
-const gridProps = { stroke: '#222222', strokeDasharray: '3 3' }
+const axisProps = { tick: { fill: '#6B7280', fontSize: 12, fontFamily: 'Rajdhani' }, stroke: '#D8D4C8' }
+const gridProps = { stroke: '#E3E0D7', strokeDasharray: '3 3' }
 
 // Paleta de marca para donut / categorías
 export const BRAND_PALETTE = ['#CC0000', '#E30613', '#F59E0B', '#999999', '#555555', '#22C55E']
@@ -47,7 +47,7 @@ export function RealVsPlanLine({ data, xKey = 'day', unit = 'kg' }: {
         <XAxis dataKey={xKey} {...axisProps} />
         <YAxis {...axisProps} />
         <Tooltip {...tooltipProps} formatter={(v) => `${fmtNum(v)} ${unit}`} />
-        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
+        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#6B7280' }} />
         <Line type="monotone" dataKey="plan" name="Plan" stroke="#555555" strokeWidth={2} strokeDasharray="5 4" dot={false} />
         <Line type="monotone" dataKey="real" name="Real" stroke="#CC0000" strokeWidth={2.5} dot={{ r: 2, fill: '#CC0000' }} />
       </LineChart>
@@ -69,9 +69,9 @@ export function RealVsPlanBars({ data, xKey = 'line', unit = 'kg' }: {
         <CartesianGrid {...gridProps} vertical={false} />
         <XAxis dataKey={xKey} {...axisProps} />
         <YAxis {...axisProps} />
-        <Tooltip {...tooltipProps} cursor={{ fill: '#ffffff08' }} formatter={(v) => `${fmtNum(v)} ${unit}`} />
-        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
-        <Bar dataKey="plan" name="Plan" fill="#2A2A2A" radius={[3, 3, 0, 0]} />
+        <Tooltip {...tooltipProps} cursor={{ fill: 'rgba(0,0,0,0.04)' }} formatter={(v) => `${fmtNum(v)} ${unit}`} />
+        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#6B7280' }} />
+        <Bar dataKey="plan" name="Plan" fill="#D8D4C8" radius={[3, 3, 0, 0]} />
         <Bar dataKey="real" name="Real" fill="#CC0000" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
@@ -94,10 +94,10 @@ export function SimpleBars({ data, xKey, yKey, unit = '', highlightCritical = fa
         <CartesianGrid {...gridProps} vertical={false} />
         <XAxis dataKey={xKey} {...axisProps} />
         <YAxis {...axisProps} />
-        <Tooltip {...tooltipProps} cursor={{ fill: '#ffffff08' }} formatter={(v) => `${fmtNum(v)}${unit ? ' ' + unit : ''}`} />
+        <Tooltip {...tooltipProps} cursor={{ fill: 'rgba(0,0,0,0.04)' }} formatter={(v) => `${fmtNum(v)}${unit ? ' ' + unit : ''}`} />
         <Bar dataKey={yKey} fill="#CC0000" radius={[3, 3, 0, 0]}>
           {highlightCritical && data.map((d, i) => (
-            <Cell key={i} fill={(d as { critical?: boolean }).critical ? '#CC0000' : '#555555'} />
+            <Cell key={i} fill={(d as { critical?: boolean }).critical ? '#CC0000' : '#9CA3AF'} />
           ))}
         </Bar>
       </BarChart>
@@ -144,8 +144,8 @@ export function CapacityDemandArea({ data }: {
       <AreaChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="capGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#555555" stopOpacity={0.4} />
-            <stop offset="100%" stopColor="#555555" stopOpacity={0} />
+            <stop offset="0%" stopColor="#9CA3AF" stopOpacity={0.4} />
+            <stop offset="100%" stopColor="#9CA3AF" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="demGrad" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#CC0000" stopOpacity={0.5} />
@@ -156,8 +156,8 @@ export function CapacityDemandArea({ data }: {
         <XAxis dataKey="week" {...axisProps} />
         <YAxis {...axisProps} />
         <Tooltip {...tooltipProps} formatter={(v) => `${fmtNum(v)} kg`} />
-        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
-        <Area type="monotone" dataKey="capacidad" name="Capacidad" stroke="#888888" strokeWidth={2} fill="url(#capGrad)" />
+        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#6B7280' }} />
+        <Area type="monotone" dataKey="capacidad" name="Capacidad" stroke="#9CA3AF" strokeWidth={2} fill="url(#capGrad)" />
         <Area type="monotone" dataKey="demanda" name="Demanda" stroke="#CC0000" strokeWidth={2.5} fill="url(#demGrad)" />
       </AreaChart>
     </ResponsiveContainer>
@@ -175,7 +175,7 @@ export function BrandDonut({ data, colors, height = 280 }: {
 }) {
   const filtered = data.filter((d) => d.value > 0)
   if (filtered.length === 0) {
-    return <div className="h-[280px] flex items-center justify-center text-[#666] text-sm">Sin datos en el período</div>
+    return <div className="h-[280px] flex items-center justify-center text-muted text-sm">Sin datos en el período</div>
   }
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -189,7 +189,7 @@ export function BrandDonut({ data, colors, height = 280 }: {
           innerRadius={60}
           outerRadius={95}
           paddingAngle={2}
-          stroke="#1A1A1A"
+          stroke="#FFFFFF"
           strokeWidth={2}
           label={({ percent }) => `${Math.round((percent ?? 0) * 100)}%`}
           labelLine={false}
@@ -199,7 +199,7 @@ export function BrandDonut({ data, colors, height = 280 }: {
           ))}
         </Pie>
         <Tooltip {...tooltipProps} formatter={(v) => `${fmtNum(v)}`} />
-        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
+        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#6B7280' }} />
       </PieChart>
     </ResponsiveContainer>
   )
@@ -238,13 +238,13 @@ function renderParticipacionLabel(props: unknown) {
   const pctLabel = `${Math.round((percent ?? 0) * 100)}%`
   return (
     <g>
-      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke="#666666" fill="none" />
+      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke="#9CA3AF" fill="none" />
       <circle cx={sx} cy={sy} r={2.5} fill={fill} stroke="none" />
-      <rect x={boxX} y={boxY} width={boxW} height={boxH} rx={4} fill="#111111" stroke="#ffffff" strokeWidth={1} />
-      <text x={boxX + boxW / 2} y={boxY + 15} textAnchor="middle" fill="#ffffff" fontSize={11} fontFamily="Rajdhani" fontWeight={600}>
+      <rect x={boxX} y={boxY} width={boxW} height={boxH} rx={4} fill="#1E2227" stroke="#FFFFFF" strokeWidth={1} />
+      <text x={boxX + boxW / 2} y={boxY + 15} textAnchor="middle" fill="#FFFFFF" fontSize={11} fontFamily="Rajdhani" fontWeight={600}>
         {fmtMoney(value)}
       </text>
-      <text x={boxX + boxW / 2} y={boxY + 28} textAnchor="middle" fill="#cccccc" fontSize={11} fontFamily="Rajdhani">
+      <text x={boxX + boxW / 2} y={boxY + 28} textAnchor="middle" fill="#E5E2D8" fontSize={11} fontFamily="Rajdhani">
         {pctLabel}
       </text>
     </g>
@@ -258,7 +258,7 @@ export function ParticipacionDonut({ data, colors = ['#71798E', '#D9B36F'], heig
 }) {
   const filtered = data.filter((d) => d.value > 0)
   if (filtered.length === 0) {
-    return <div className="h-[300px] flex items-center justify-center text-[#666] text-sm">Sin datos en el período</div>
+    return <div className="h-[300px] flex items-center justify-center text-muted text-sm">Sin datos en el período</div>
   }
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -272,7 +272,7 @@ export function ParticipacionDonut({ data, colors = ['#71798E', '#D9B36F'], heig
           innerRadius={55}
           outerRadius={85}
           paddingAngle={2}
-          stroke="#1A1A1A"
+          stroke="#FFFFFF"
           strokeWidth={2}
           label={renderParticipacionLabel}
           labelLine={false}
@@ -281,7 +281,7 @@ export function ParticipacionDonut({ data, colors = ['#71798E', '#D9B36F'], heig
             <Cell key={i} fill={colors[i % colors.length]} />
           ))}
         </Pie>
-        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
+        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#6B7280' }} />
       </PieChart>
     </ResponsiveContainer>
   )
@@ -298,7 +298,7 @@ export function MoneyLineChart({ data, xKey, yKey, color = '#CC0000', height = 2
   height?: number
 }) {
   if (data.length === 0) {
-    return <div className="h-[260px] flex items-center justify-center text-[#666] text-sm">Sin datos en el período</div>
+    return <div className="h-[260px] flex items-center justify-center text-muted text-sm">Sin datos en el período</div>
   }
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -309,7 +309,7 @@ export function MoneyLineChart({ data, xKey, yKey, color = '#CC0000', height = 2
         <Tooltip {...tooltipProps} formatter={(v) => fmtMoney(v)} />
         <Line type="monotone" dataKey={yKey} stroke={color} strokeWidth={2.5} dot={{ r: 4, fill: color, strokeWidth: 0 }}>
           <LabelList dataKey={yKey} position="top" offset={10} formatter={(v: unknown) => fmtMoney(v)}
-            style={{ fill: '#fff', fontSize: 11, fontFamily: 'Rajdhani', fontWeight: 600 }} />
+            style={{ fill: '#1E2227', fontSize: 11, fontFamily: 'Rajdhani', fontWeight: 600 }} />
         </Line>
       </LineChart>
     </ResponsiveContainer>
@@ -328,7 +328,7 @@ export function MoneyBars({ data, xKey, yKey, color = '#3B82F6', height = 260, a
   angledLabels?: boolean
 }) {
   if (data.length === 0) {
-    return <div className="h-[260px] flex items-center justify-center text-[#666] text-sm">Sin datos en el período</div>
+    return <div className="h-[260px] flex items-center justify-center text-muted text-sm">Sin datos en el período</div>
   }
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -341,10 +341,10 @@ export function MoneyBars({ data, xKey, yKey, color = '#3B82F6', height = 260, a
           height={angledLabels ? 50 : 30}
         />
         <YAxis {...axisProps} tickFormatter={(v) => fmtMoney(v)} width={70} />
-        <Tooltip {...tooltipProps} cursor={{ fill: '#ffffff08' }} formatter={(v) => fmtMoney(v)} />
+        <Tooltip {...tooltipProps} cursor={{ fill: 'rgba(0,0,0,0.04)' }} formatter={(v) => fmtMoney(v)} />
         <Bar dataKey={yKey} fill={color} radius={[3, 3, 0, 0]}>
           <LabelList dataKey={yKey} position="top" formatter={(v: unknown) => fmtMoney(v)}
-            style={{ fill: '#fff', fontSize: 11, fontFamily: 'Rajdhani', fontWeight: 600 }} />
+            style={{ fill: '#1E2227', fontSize: 11, fontFamily: 'Rajdhani', fontWeight: 600 }} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>
@@ -389,7 +389,7 @@ function renderStackedTotalLabel(totals: Map<string, number>) {
         x={x + width / 2}
         y={y - 8}
         textAnchor="middle"
-        fill="#fff"
+        fill="#1E2227"
         fontSize={12}
         fontFamily="Rajdhani"
         fontWeight={700}
@@ -407,7 +407,7 @@ export function StackedBars({ data, xKey, series, height = 340 }: {
   height?: number
 }) {
   if (data.length === 0) {
-    return <div className="h-[260px] flex items-center justify-center text-[#666] text-sm">Sin datos en el período</div>
+    return <div className="h-[260px] flex items-center justify-center text-muted text-sm">Sin datos en el período</div>
   }
 
   // Dataset "seguro" para log scale (ceros → piso ínfimo) + mapa de totales
@@ -445,7 +445,7 @@ export function StackedBars({ data, xKey, series, height = 340 }: {
         />
         <Tooltip
           {...tooltipProps}
-          cursor={{ fill: '#ffffff08' }}
+          cursor={{ fill: 'rgba(0,0,0,0.04)' }}
           formatter={(_v, name, props) => {
             const payload = (props as { payload?: Record<string, unknown> })?.payload
             const dataKey = (props as { dataKey?: string })?.dataKey
@@ -453,7 +453,7 @@ export function StackedBars({ data, xKey, series, height = 340 }: {
             return [fmtMoney(raw ?? _v), name]
           }}
         />
-        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#999' }} />
+        <Legend wrapperStyle={{ fontFamily: 'Rajdhani', fontSize: 12, color: '#6B7280' }} />
         {series.map((s, i) => (
           <Bar key={s.key} dataKey={s.key} name={s.name} stackId="stack" fill={s.color}
             radius={i === series.length - 1 ? [3, 3, 0, 0] : [0, 0, 0, 0]}>
@@ -479,18 +479,18 @@ export function MiniHorizontalBars({ data, xKey, yKey, color = '#3B82F6', height
 }) {
   const h = height ?? Math.max(90, data.length * 28)
   if (data.length === 0) {
-    return <div className="h-[90px] flex items-center justify-center text-[#666] text-xs">Sin datos</div>
+    return <div className="h-[90px] flex items-center justify-center text-muted text-xs">Sin datos</div>
   }
   return (
     <ResponsiveContainer width="100%" height={h}>
       <BarChart data={data as never[]} layout="vertical" margin={{ top: 2, right: 40, left: 4, bottom: 2 }}>
         <XAxis type="number" hide />
         <YAxis type="category" dataKey={xKey} width={110}
-          tick={{ fill: '#999', fontSize: 11, fontFamily: 'Rajdhani' }} stroke="#333333" />
-        <Tooltip {...tooltipProps} cursor={{ fill: '#ffffff08' }} formatter={(v) => fmtMoney(v)} />
+          tick={{ fill: '#6B7280', fontSize: 11, fontFamily: 'Rajdhani' }} stroke="#D8D4C8" />
+        <Tooltip {...tooltipProps} cursor={{ fill: 'rgba(0,0,0,0.04)' }} formatter={(v) => fmtMoney(v)} />
         <Bar dataKey={yKey} fill={color} radius={[0, 3, 3, 0]} barSize={14}>
           <LabelList dataKey={yKey} position="right" formatter={(v: unknown) => fmtMoney(v)}
-            style={{ fill: '#ccc', fontSize: 10, fontFamily: 'Rajdhani', fontWeight: 600 }} />
+            style={{ fill: '#1E2227', fontSize: 10, fontFamily: 'Rajdhani', fontWeight: 600 }} />
         </Bar>
       </BarChart>
     </ResponsiveContainer>

@@ -7,10 +7,10 @@ export default async function ReportesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <FileBarChart className="w-6 h-6 text-pulse-red" /> Reportes
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">Consolida datos históricos y genera informes con gráficos exportables</p>
+        <p className="text-sm text-muted mt-0.5">Consolida datos históricos y genera informes con gráficos exportables</p>
       </div>
 
       {/* Reportes disponibles */}
@@ -20,9 +20,9 @@ export default async function ReportesPage() {
             <span className="w-10 h-10 rounded-lg bg-pulse-red/15 flex items-center justify-center shrink-0">
               <BarChart3 className="w-5 h-5 text-pulse-red" />
             </span>
-            <h3 className="font-bold text-white">Reporte Nivel de Servicio</h3>
+            <h3 className="font-bold text-ink">Reporte Nivel de Servicio</h3>
           </div>
-          <p className="text-sm text-[#888] leading-snug">
+          <p className="text-sm text-muted leading-snug">
             Cumplimiento de Órdenes de Fabricación, quiebre por grupo de producto y cascada de pérdidas (Fill Rate).
           </p>
           <span className="mt-4 inline-flex items-center gap-1 text-pulse-red text-sm font-semibold">
@@ -31,7 +31,7 @@ export default async function ReportesPage() {
         </Link>
       </div>
 
-      <p className="text-xs text-[#555]">Más reportes se irán habilitando a medida que avancen los módulos.</p>
+      <p className="text-xs text-muted-2">Más reportes se irán habilitando a medida que avancen los módulos.</p>
     </div>
   )
 }

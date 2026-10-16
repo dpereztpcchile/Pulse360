@@ -65,14 +65,14 @@ export default async function LinePage({ params, searchParams }: { params: { cod
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
             <GaugeCircle className="w-6 h-6 text-pulse-red" /> Producción
           </h1>
-          <p className="text-sm text-[#666] mt-0.5">Control de turno - Carnicería</p>
+          <p className="text-sm text-muted mt-0.5">Control de turno - Carnicería</p>
         </div>
         <ProductionTabs />
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span className="flex items-center gap-1.5 text-sm text-[#999]">
+          <span className="flex items-center gap-1.5 text-sm text-muted">
             <CalendarDays className="w-4 h-4 text-pulse-red" /> {fecha}
           </span>
           <Link href="/produccion/control-turno" className="btn-secondary text-sm inline-flex items-center gap-2">
@@ -126,16 +126,16 @@ export default async function LinePage({ params, searchParams }: { params: { cod
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <GaugeCircle className="w-6 h-6 text-pulse-red" /> Producción
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">Control de turno</p>
+        <p className="text-sm text-muted mt-0.5">Control de turno</p>
       </div>
 
       <ProductionTabs />
 
       <div className="flex items-center gap-3">
-        <span className="flex items-center gap-1.5 text-sm text-[#999]">
+        <span className="flex items-center gap-1.5 text-sm text-muted">
           <CalendarDays className="w-4 h-4 text-pulse-red" /> {fecha}
         </span>
         <ShiftToggle turno={turno} />

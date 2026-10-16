@@ -12,7 +12,7 @@ export interface CapacityChartRow {
   over: boolean
 }
 
-const COLOR_CAPACITY = '#2A2A2A'
+const COLOR_CAPACITY = '#D8D4C8'
 const COLOR_DEMAND = '#CC0000'
 const COLOR_DEMAND_INTENSE = '#E30613'
 
@@ -25,10 +25,10 @@ function CustomTooltip({ active, payload, label }: {
   const row = payload[0].payload
   return (
     <div className="rounded-lg border border-border-dark bg-card-dark px-3 py-2 shadow-xl text-xs">
-      <p className="font-semibold text-white mb-1">{label}</p>
-      <p className="text-[#999]">Capacidad: <span className="text-white font-medium">{row.capacidad.toLocaleString('es-CL')} kg</span></p>
-      <p className="text-[#999]">Demanda: <span className="text-pulse-red font-medium">{row.demanda.toLocaleString('es-CL')} kg</span></p>
-      <p className={row.over ? 'text-pulse-red font-semibold mt-0.5' : 'text-[#999] mt-0.5'}>
+      <p className="font-semibold text-ink mb-1">{label}</p>
+      <p className="text-muted">Capacidad: <span className="text-ink font-medium">{row.capacidad.toLocaleString('es-CL')} kg</span></p>
+      <p className="text-muted">Demanda: <span className="text-pulse-red font-medium">{row.demanda.toLocaleString('es-CL')} kg</span></p>
+      <p className={row.over ? 'text-pulse-red font-semibold mt-0.5' : 'text-muted mt-0.5'}>
         Ocupación: {row.pct}%{row.over ? ' ⚠' : ''}
       </p>
     </div>
@@ -50,13 +50,13 @@ export function CapacityChart({ data }: { data: CapacityChartRow[] }) {
   return (
     <ResponsiveContainer width="100%" height={340}>
       <BarChart data={data} margin={{ top: 24, right: 8, left: 8, bottom: 8 }} barGap={6}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#222" vertical={false} />
-        <XAxis dataKey="line" stroke="#666" fontSize={12} tickLine={false} axisLine={{ stroke: '#2A2A2A' }} />
-        <YAxis stroke="#666" fontSize={12} tickLine={false} axisLine={{ stroke: '#2A2A2A' }}
+        <CartesianGrid strokeDasharray="3 3" stroke="#E3E0D7" vertical={false} />
+        <XAxis dataKey="line" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={{ stroke: '#D8D4C8' }} />
+        <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={{ stroke: '#D8D4C8' }}
           tickFormatter={(v) => `${(v / 1000).toLocaleString('es-CL')}k`} />
-        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-        <Legend wrapperStyle={{ fontSize: 12, color: '#999' }} iconType="square" />
-        <Bar dataKey="capacidad" name="Capacidad" fill={COLOR_CAPACITY} stroke="#3A3A3A" radius={[3, 3, 0, 0]} maxBarSize={48} />
+        <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.04)' }} />
+        <Legend wrapperStyle={{ fontSize: 12, color: '#6B7280' }} iconType="square" />
+        <Bar dataKey="capacidad" name="Capacidad" fill={COLOR_CAPACITY} stroke="#D8D4C8" radius={[3, 3, 0, 0]} maxBarSize={48} />
         <Bar dataKey="demanda" name="Demanda" radius={[3, 3, 0, 0]} maxBarSize={48}
           label={(p: object) => <OverLabel {...(p as { x?: number; y?: number; width?: number; index?: number })} data={data} />}>
           {data.map((row, i) => (

@@ -31,10 +31,10 @@ export default async function CapacidadPage({ searchParams }: { searchParams: { 
 
   const header = (
     <div>
-      <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+      <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
         <Gauge className="w-6 h-6 text-pulse-red" /> Capacidad
       </h1>
-      <p className="text-sm text-[#666] mt-0.5">Capacidad instalada por línea y día, frente a la demanda planificada</p>
+      <p className="text-sm text-muted mt-0.5">Capacidad instalada por línea y día, frente a la demanda planificada</p>
     </div>
   )
 
@@ -73,7 +73,7 @@ export default async function CapacidadPage({ searchParams }: { searchParams: { 
           <CapacidadLineTabs />
           {await (async () => {
             const data = await getDiaView(null)
-            if (!data) return <div className="card text-center text-[#555] py-10">No se encontró la línea Carnicería.</div>
+            if (!data) return <div className="card text-center text-muted-2 py-10">No se encontró la línea Carnicería.</div>
             return <DiaView data={data} />
           })()}
         </>

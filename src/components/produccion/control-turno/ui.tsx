@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 export type Estado = 'PENDIENTE' | 'EN_PROCESO' | 'COMPLETADO'
 
 const ESTADO_META: Record<Estado, { label: string; cls: string }> = {
-  PENDIENTE:  { label: 'Pendiente',  cls: 'bg-[#2A2A2A] text-[#999]' },
+  PENDIENTE:  { label: 'Pendiente',  cls: 'bg-border-dark/60 text-muted' },
   EN_PROCESO: { label: 'En proceso', cls: 'bg-status-warn/15 text-status-warn' },
   COMPLETADO: { label: 'Completado', cls: 'bg-status-ok/15 text-status-ok' },
 }
@@ -24,8 +24,8 @@ export function fmtHora(iso: string | null | undefined): string {
 export function Kpi({ label, value, accent }: { label: string; value: string | number; accent?: boolean }) {
   return (
     <div className="card">
-      <p className="text-xs text-[#666] mb-1">{label}</p>
-      <p className={cn('text-2xl font-bold', accent ? 'text-pulse-red' : 'text-white')}>{value}</p>
+      <p className="text-xs text-muted mb-1">{label}</p>
+      <p className={cn('text-2xl font-bold', accent ? 'text-pulse-red' : 'text-ink')}>{value}</p>
     </div>
   )
 }

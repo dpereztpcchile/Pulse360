@@ -21,13 +21,13 @@ export function PermisosClient({ roles, modules, initialMatrix, users }: Props) 
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/configuracion" className="text-xs text-[#666] hover:text-white flex items-center gap-1 mb-1">
+        <Link href="/configuracion" className="text-xs text-muted hover:text-ink flex items-center gap-1 mb-1">
           <ArrowLeft className="w-3.5 h-3.5" /> Volver a Configuración
         </Link>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <ShieldCheck className="w-6 h-6 text-pulse-red" /> Permisos
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">
+        <p className="text-sm text-muted mt-0.5">
           Define a qué módulos puede acceder cada rol, y ajusta excepciones puntuales por usuario.
         </p>
       </div>
@@ -37,7 +37,7 @@ export function PermisosClient({ roles, modules, initialMatrix, users }: Props) 
           onClick={() => setTab('rol')}
           className={cn(
             'px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px',
-            tab === 'rol' ? 'border-pulse-red text-white' : 'border-transparent text-[#666] hover:text-white'
+            tab === 'rol' ? 'border-pulse-red text-ink' : 'border-transparent text-muted hover:text-ink'
           )}
         >
           Por rol
@@ -46,7 +46,7 @@ export function PermisosClient({ roles, modules, initialMatrix, users }: Props) 
           onClick={() => setTab('usuario')}
           className={cn(
             'px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px flex items-center gap-1.5',
-            tab === 'usuario' ? 'border-pulse-red text-white' : 'border-transparent text-[#666] hover:text-white'
+            tab === 'usuario' ? 'border-pulse-red text-ink' : 'border-transparent text-muted hover:text-ink'
           )}
         >
           <UserIcon className="w-3.5 h-3.5" /> Por usuario
@@ -130,7 +130,7 @@ function PorRolTab({ roles, modules, initialMatrix }: {
       <div className="card p-0 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+            <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
               <th className="px-5 py-3 text-left sticky left-0 bg-card-dark">Módulo</th>
               {roles.map((role) => (
                 <th key={role} className="px-4 py-3 text-center whitespace-nowrap">
@@ -144,7 +144,7 @@ function PorRolTab({ roles, modules, initialMatrix }: {
           <tbody className="divide-y divide-border-dark">
             {modules.map((mod) => (
               <tr key={mod.key} className="hover:bg-border-dark/30 transition-colors">
-                <td className="px-5 py-3.5 font-medium text-white sticky left-0 bg-card-dark">{mod.label}</td>
+                <td className="px-5 py-3.5 font-medium text-ink sticky left-0 bg-card-dark">{mod.label}</td>
                 {roles.map((role) => {
                   const checked = !!matrix[role]?.[mod.key]
                   const changed = dirty.has(`${role}:${mod.key}`)
@@ -181,7 +181,7 @@ function PorRolTab({ roles, modules, initialMatrix }: {
           </span>
         )}
         {dirty.size > 0 && !saved && (
-          <span className="text-xs text-[#666]">{dirty.size} cambio{dirty.size === 1 ? '' : 's'} sin guardar</span>
+          <span className="text-xs text-muted">{dirty.size} cambio{dirty.size === 1 ? '' : 's'} sin guardar</span>
         )}
         <button
           onClick={save}
@@ -294,11 +294,11 @@ function PorUsuarioTab({ modules, users }: { modules: ModuleDef[]; users: UserRe
 
       <div className="flex flex-col sm:flex-row sm:items-end gap-3">
         <div className="flex-1 max-w-sm">
-          <label className="block text-xs font-medium text-[#999] uppercase tracking-wide mb-1.5">Usuario</label>
+          <label className="block text-xs font-medium text-muted uppercase tracking-wide mb-1.5">Usuario</label>
           <select
             value={selectedId}
             onChange={(e) => setSelectedId(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm
+            className="w-full px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-ink text-sm
                        focus:outline-none focus:border-pulse-red focus:ring-1 focus:ring-pulse-red"
           >
             {users.map((u) => (
@@ -320,12 +320,12 @@ function PorUsuarioTab({ modules, users }: { modules: ModuleDef[]; users: UserRe
       )}
 
       {data?.isAdmin ? (
-        <div className="card p-6 text-center text-sm text-[#666]">
-          Este usuario es <strong className="text-white">Administrador</strong> y siempre tiene acceso total a todos los módulos.
+        <div className="card p-6 text-center text-sm text-muted">
+          Este usuario es <strong className="text-ink">Administrador</strong> y siempre tiene acceso total a todos los módulos.
           No se gestionan excepciones individuales para administradores.
         </div>
       ) : loading ? (
-        <div className="card p-10 flex items-center justify-center text-[#666] text-sm gap-2">
+        <div className="card p-10 flex items-center justify-center text-muted text-sm gap-2">
           <Loader2 className="w-4 h-4 animate-spin" /> Cargando permisos...
         </div>
       ) : data ? (
@@ -333,7 +333,7 @@ function PorUsuarioTab({ modules, users }: { modules: ModuleDef[]; users: UserRe
           <div className="card p-0 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+                <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                   <th className="px-5 py-3 text-left">Módulo</th>
                   <th className="px-4 py-3 text-center">Base (rol)</th>
                   <th className="px-4 py-3 text-center">Estado efectivo</th>
@@ -345,11 +345,11 @@ function PorUsuarioTab({ modules, users }: { modules: ModuleDef[]; users: UserRe
                   const state = states[mod.key] ?? 'heredado'
                   return (
                     <tr key={mod.key} className="hover:bg-border-dark/30 transition-colors">
-                      <td className="px-5 py-3.5 font-medium text-white">{mod.label}</td>
+                      <td className="px-5 py-3.5 font-medium text-ink">{mod.label}</td>
                       <td className="px-4 py-3.5 text-center">
                         <span className={cn(
                           'text-xs font-semibold px-2 py-0.5 rounded-full',
-                          roleHasIt ? 'bg-status-ok/10 text-status-ok' : 'bg-[#444]/30 text-[#777]'
+                          roleHasIt ? 'bg-status-ok/10 text-status-ok' : 'bg-border-dark/60 text-muted'
                         )}>
                           {roleHasIt ? 'Permitido' : 'Bloqueado'}
                         </span>
@@ -360,7 +360,7 @@ function PorUsuarioTab({ modules, users }: { modules: ModuleDef[]; users: UserRe
                           onClick={() => cycle(mod.key)}
                           className={cn(
                             'px-3 py-1.5 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 min-w-[160px] justify-center transition-colors',
-                            state === 'heredado' && 'bg-border-dark text-[#999] hover:bg-border-dark/70',
+                            state === 'heredado' && 'bg-border-dark text-muted hover:bg-border-dark/70',
                             state === 'permitido' && 'bg-status-ok/15 text-status-ok border border-status-ok/30 hover:bg-status-ok/25',
                             state === 'bloqueado' && 'bg-pulse-red/15 text-pulse-red border border-pulse-red/30 hover:bg-pulse-red/25',
                           )}
@@ -386,7 +386,7 @@ function PorUsuarioTab({ modules, users }: { modules: ModuleDef[]; users: UserRe
             )}
             <button
               onClick={resetAll}
-              className="text-xs text-[#666] hover:text-white flex items-center gap-1.5 transition-colors"
+              className="text-xs text-muted hover:text-ink flex items-center gap-1.5 transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" /> Restablecer todo al rol
             </button>

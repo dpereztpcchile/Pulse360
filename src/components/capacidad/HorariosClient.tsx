@@ -88,11 +88,11 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
     }
   }
 
-  const inputCls = 'w-full px-1.5 py-1 rounded bg-bg-dark border border-border-dark text-white text-xs text-center focus:outline-none focus:border-pulse-red'
+  const inputCls = 'w-full px-1.5 py-1 rounded bg-bg-dark border border-border-dark text-ink text-xs text-center focus:outline-none focus:border-pulse-red'
 
   return (
     <div className="space-y-4">
-      {!isAdmin && <p className="text-xs text-[#777]">Vista de solo lectura. Solo un administrador puede editar los horarios.</p>}
+      {!isAdmin && <p className="text-xs text-muted">Vista de solo lectura. Solo un administrador puede editar los horarios.</p>}
 
       {lineas.map((l) => {
         const open = openId === l.id
@@ -103,12 +103,12 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 cursor-pointer" onClick={() => setOpenId(open ? null : l.id)}>
               <div className="flex items-center gap-2">
-                {open ? <ChevronDown className="w-4 h-4 text-[#888]" /> : <ChevronRight className="w-4 h-4 text-[#666]" />}
-                <span className="font-rajdhani font-bold text-lg text-white">{l.nombre}</span>
-                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-full bg-border-dark text-[#888]">{l.tipo}</span>
+                {open ? <ChevronDown className="w-4 h-4 text-muted" /> : <ChevronRight className="w-4 h-4 text-muted" />}
+                <span className="font-rajdhani font-bold text-lg text-ink">{l.nombre}</span>
+                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-full bg-border-dark text-muted">{l.tipo}</span>
               </div>
               {isAdmin && !editing && (
-                <button onClick={(e) => { e.stopPropagation(); startEdit(l) }} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card-dark border border-border-dark text-sm text-[#ccc] hover:border-pulse-red">
+                <button onClick={(e) => { e.stopPropagation(); startEdit(l) }} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card-dark border border-border-dark text-sm text-ink-2 hover:border-pulse-red">
                   <Pencil className="w-3.5 h-3.5" /> Editar
                 </button>
               )}
@@ -117,7 +117,7 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
                   <button onClick={() => guardar(l)} disabled={saving} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pulse-red text-white text-sm font-semibold hover:bg-pulse-red/90 disabled:opacity-50">
                     {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />} Guardar
                   </button>
-                  <button onClick={cancel} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card-dark border border-border-dark text-sm text-[#ccc] hover:text-white">
+                  <button onClick={cancel} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card-dark border border-border-dark text-sm text-ink-2 hover:text-ink">
                     <X className="w-3.5 h-3.5" /> Cancelar
                   </button>
                 </div>
@@ -128,7 +128,7 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
               <div className="px-4 pb-4 border-t border-border-dark pt-3 space-y-4">
                 {/* Productividad */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                  <span className="text-[#888]">Productividad:</span>
+                  <span className="text-muted">Productividad:</span>
                   {l.tipo === 'kg_hh' && (
                     <ConfigInput label="kg · persona · hora" value={editing ? draft!.config.kgPorHH : l.config?.kgPorHH} editing={!!editing} onChange={(v) => setConfig({ kgPorHH: v })} />
                   )}
@@ -159,14 +159,14 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
                       <ConfigInput label="formatos / día" value={editing ? draft!.config.formatosDia : l.config?.formatosDia} editing={!!editing} onChange={(v) => setConfig({ formatosDia: v })} />
                     </>
                   )}
-                  {l.config?.actualizadoPor && <span className="text-[11px] text-[#555] ml-auto">Última edición: {l.config.actualizadoPor}</span>}
+                  {l.config?.actualizadoPor && <span className="text-[11px] text-muted-2 ml-auto">Última edición: {l.config.actualizadoPor}</span>}
                 </div>
 
                 {l.tipo === 'molida' && (
-                  <div className="rounded-lg bg-bg-dark border border-border-dark px-3 py-2 text-xs text-[#999]">
-                    <span className="text-[#888] font-semibold uppercase tracking-wide mr-2">Secuencia de producción:</span>
-                    <span className="text-[#ccc]">4% → 7% → 10% grasa</span>
-                    <span className="text-[#666]"> · cada formato: <b className="text-[#4ade80]">SISA 250g (L1)</b> / <b className="text-[#60a5fa]">JUMBO 500g (L2)</b> · set point {l.config?.setPointMin ?? 6} min entre cambios · setup {l.config?.setupMin ?? 30} min al inicio</span>
+                  <div className="rounded-lg bg-bg-dark border border-border-dark px-3 py-2 text-xs text-muted">
+                    <span className="text-muted font-semibold uppercase tracking-wide mr-2">Secuencia de producción:</span>
+                    <span className="text-ink-2">4% → 7% → 10% grasa</span>
+                    <span className="text-muted"> · cada formato: <b className="text-[#4ade80]">SISA 250g (L1)</b> / <b className="text-[#60a5fa]">JUMBO 500g (L2)</b> · set point {l.config?.setPointMin ?? 6} min entre cambios · setup {l.config?.setupMin ?? 30} min al inicio</span>
                   </div>
                 )}
 
@@ -176,22 +176,22 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
                     <div className="flex items-center justify-between gap-2 px-3 py-2 bg-bg-dark">
                       <div className="flex items-center gap-2">
                         {editing ? (
-                          <input value={t.nombre} onChange={(e) => setTurno(ti, { nombre: e.target.value })} className="w-28 px-2 py-1 rounded bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
-                        ) : <span className="font-semibold text-white">{t.nombre}</span>}
+                          <input value={t.nombre} onChange={(e) => setTurno(ti, { nombre: e.target.value })} className="w-28 px-2 py-1 rounded bg-card-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
+                        ) : <span className="font-semibold text-ink">{t.nombre}</span>}
                         {l.tipo === 'kg_hh' && <>
-                          <span className="text-xs text-[#888]">—</span>
+                          <span className="text-xs text-muted">—</span>
                           {editing ? (
-                            <span className="flex items-center gap-1 text-xs text-[#888]"><input type="number" min={1} value={t.personas} onChange={(e) => setTurno(ti, { personas: Math.max(1, Number(e.target.value) || 1) })} className="w-14 px-1.5 py-1 rounded bg-card-dark border border-border-dark text-white text-center focus:outline-none focus:border-pulse-red" /> personas</span>
-                          ) : <span className="text-xs text-[#888]">{t.personas} {t.personas === 1 ? 'persona' : 'personas'}</span>}
+                            <span className="flex items-center gap-1 text-xs text-muted"><input type="number" min={1} value={t.personas} onChange={(e) => setTurno(ti, { personas: Math.max(1, Number(e.target.value) || 1) })} className="w-14 px-1.5 py-1 rounded bg-card-dark border border-border-dark text-ink text-center focus:outline-none focus:border-pulse-red" /> personas</span>
+                          ) : <span className="text-xs text-muted">{t.personas} {t.personas === 1 ? 'persona' : 'personas'}</span>}
                         </>}
                       </div>
                       {editing && draft!.turnos.length > 1 && (
-                        <button onClick={() => removeTurno(ti)} className="text-[#888] hover:text-pulse-red" title="Eliminar turno"><Trash2 className="w-4 h-4" /></button>
+                        <button onClick={() => removeTurno(ti)} className="text-muted hover:text-pulse-red" title="Eliminar turno"><Trash2 className="w-4 h-4" /></button>
                       )}
                     </div>
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-[#666] border-b border-border-dark">
+                        <tr className="text-muted border-b border-border-dark">
                           <th className="px-2 py-1.5 text-left font-medium w-14"></th>
                           {DIAS.map((d) => <th key={d} className="px-2 py-1.5 text-center font-medium">{DIA_LBL[d]}</th>)}
                         </tr>
@@ -200,7 +200,7 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
                         {/* Opera */}
                         {editing && (
                           <tr className="border-b border-border-dark">
-                            <td className="px-2 py-1 text-[#888]">Opera</td>
+                            <td className="px-2 py-1 text-muted">Opera</td>
                             {DIAS.map((d) => (
                               <td key={d} className="px-2 py-1 text-center">
                                 <input type="checkbox" checked={t.dias[d].opera} onChange={(e) => setDia(ti, d, { opera: e.target.checked })} className="accent-pulse-red" />
@@ -211,7 +211,7 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
                         <Row label="Ingr">{DIAS.map((d) => <Cell key={d} op={t.dias[d].opera}>{editing && t.dias[d].opera ? <input type="time" value={t.dias[d].ingreso} onChange={(e) => setDia(ti, d, { ingreso: e.target.value })} className={inputCls} /> : (t.dias[d].opera ? t.dias[d].ingreso : '—')}</Cell>)}</Row>
                         <Row label="Sal">{DIAS.map((d) => <Cell key={d} op={t.dias[d].opera}>{editing && t.dias[d].opera ? <input type="time" value={t.dias[d].salida} onChange={(e) => setDia(ti, d, { salida: e.target.value })} className={inputCls} /> : (t.dias[d].opera ? t.dias[d].salida : '—')}</Cell>)}</Row>
                         <Row label="Col">{DIAS.map((d) => <Cell key={d} op={t.dias[d].opera}>{editing && t.dias[d].opera ? <input type="number" step="0.5" min="0" value={t.dias[d].colacion} onChange={(e) => setDia(ti, d, { colacion: Number(e.target.value) || 0 })} className={inputCls} /> : (t.dias[d].opera ? t.dias[d].colacion.toFixed(1) : '—')}</Cell>)}</Row>
-                        <Row label="HH">{DIAS.map((d) => { const hh = calcHH(t.dias[d].opera, t.dias[d].ingreso, t.dias[d].salida, t.dias[d].colacion); return <Cell key={d} op={t.dias[d].opera}><span className="font-semibold text-white">{hh != null ? hh : '—'}</span></Cell> })}</Row>
+                        <Row label="HH">{DIAS.map((d) => { const hh = calcHH(t.dias[d].opera, t.dias[d].ingreso, t.dias[d].salida, t.dias[d].colacion); return <Cell key={d} op={t.dias[d].opera}><span className="font-semibold text-ink">{hh != null ? hh : '—'}</span></Cell> })}</Row>
                       </tbody>
                     </table>
                   </div>
@@ -227,7 +227,7 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
       })}
 
       {toast && (
-        <div className="fixed left-1/2 -translate-x-1/2 bottom-8 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-xl text-white font-semibold shadow-xl" style={{ background: toast.startsWith('✓') ? '#16a34a' : '#CC0000' }}>
+        <div className="fixed left-1/2 -translate-x-1/2 bottom-8 z-[60] flex items-center gap-2 px-4 py-2.5 rounded-xl text-ink font-semibold shadow-xl" style={{ background: toast.startsWith('✓') ? '#16a34a' : '#CC0000' }}>
           <Check className="w-4 h-4" /> {toast}
         </div>
       )}
@@ -236,18 +236,18 @@ export function HorariosClient({ lineas: initial, isAdmin }: { lineas: LineaConf
 }
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
-  return <tr className="border-b border-border-dark last:border-0"><td className="px-2 py-1 text-[#888]">{label}</td>{children}</tr>
+  return <tr className="border-b border-border-dark last:border-0"><td className="px-2 py-1 text-muted">{label}</td>{children}</tr>
 }
 function Cell({ op, children }: { op: boolean; children: React.ReactNode }) {
-  return <td className={`px-1.5 py-1 text-center ${op ? 'text-[#ccc]' : 'text-[#444]'}`}>{children}</td>
+  return <td className={`px-1.5 py-1 text-center ${op ? 'text-ink-2' : 'text-muted-2'}`}>{children}</td>
 }
 function ConfigInput({ label, value, editing, onChange }: { label: string; value: number | null | undefined; editing: boolean; onChange: (v: number | null) => void }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       {editing ? (
-        <input type="number" min="0" value={value ?? ''} onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))} className="w-20 px-2 py-1 rounded bg-bg-dark border border-border-dark text-white text-sm text-right focus:outline-none focus:border-pulse-red" />
-      ) : <b className="text-white">{value ?? '—'}</b>}
-      <span className="text-xs text-[#888]">{label}</span>
+        <input type="number" min="0" value={value ?? ''} onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))} className="w-20 px-2 py-1 rounded bg-bg-dark border border-border-dark text-ink text-sm text-right focus:outline-none focus:border-pulse-red" />
+      ) : <b className="text-ink">{value ?? '—'}</b>}
+      <span className="text-xs text-muted">{label}</span>
     </span>
   )
 }
