@@ -52,13 +52,13 @@ export function CapacidadReportView({ canExport, user }: { canExport: boolean; u
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/reportes" className="text-xs text-[#666] hover:text-white flex items-center gap-1 mb-1">
+          <Link href="/reportes" className="text-xs text-muted hover:text-ink flex items-center gap-1 mb-1">
             <ArrowLeft className="w-3.5 h-3.5" /> Volver al centro de reportes
           </Link>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
             <Gauge className="w-6 h-6 text-pulse-red" /> Reporte de Capacidad vs Demanda
           </h1>
-          <p className="text-sm text-[#666] mt-0.5">Período: {period}</p>
+          <p className="text-sm text-muted mt-0.5">Período: {period}</p>
         </div>
         <ExportButtons canExport={canExport} onExcel={onExcel} onPdf={onPdf} busy={busy} />
       </div>
@@ -87,7 +87,7 @@ export function CapacidadReportView({ canExport, user }: { canExport: boolean; u
                 { key: 'capacidad', label: 'Capacidad (kg)', align: 'right', render: (v) => Number(v).toLocaleString('es-CL') },
                 { key: 'demanda', label: 'Demanda (kg)', align: 'right', render: (v) => Number(v).toLocaleString('es-CL') },
                 { key: 'occupation', label: 'Ocupación', align: 'right', render: (v, row) => (
-                  <span className={row.critical ? 'text-pulse-red font-semibold' : 'text-[#ddd]'}>{Number(v)}%</span>
+                  <span className={row.critical ? 'text-pulse-red font-semibold' : 'text-ink-2'}>{Number(v)}%</span>
                 ) },
               ]}
               rows={data.weekly as unknown as Record<string, unknown>[]}

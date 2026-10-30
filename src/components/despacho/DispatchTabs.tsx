@@ -23,8 +23,8 @@ export function DispatchTabs() {
             className={cn(
               'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors',
               active
-                ? 'border-pulse-red text-white'
-                : 'border-transparent text-[#666] hover:text-white'
+                ? 'border-pulse-red text-ink'
+                : 'border-transparent text-muted hover:text-ink'
             )}
           >
             <Icon className="w-4 h-4" />

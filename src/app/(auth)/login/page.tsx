@@ -104,14 +104,14 @@ export default function LoginPage() {
             <div className="flex items-center gap-3">
               <div className="relative w-12 h-12 flex items-center justify-center">
                 <Activity className="absolute w-7 h-7 text-pulse-red opacity-80" strokeWidth={2.5} />
-                <BarChart3 className="absolute w-10 h-10 text-white opacity-20" />
+                <BarChart3 className="absolute w-10 h-10 text-ink opacity-20" />
               </div>
               <div className="text-5xl font-bold leading-none tracking-wider">
-                <span className="text-white">PULSE</span>
+                <span className="text-ink">PULSE</span>
                 <span className="text-pulse-red">360</span>
               </div>
             </div>
-            <div className="text-sm text-[#666] tracking-[0.4em] uppercase font-medium">
+            <div className="text-sm text-muted tracking-[0.4em] uppercase font-medium">
               Smart Plant Platform
             </div>
           </div>
@@ -119,8 +119,8 @@ export default function LoginPage() {
 
         {/* Card de login */}
         <div className="card border border-border-dark shadow-2xl shadow-black/50">
-          <h2 className="text-xl font-semibold text-white mb-1">Iniciar Sesión</h2>
-          <p className="text-sm text-[#666] mb-6">Ingresa tus credenciales para continuar</p>
+          <h2 className="text-xl font-semibold text-ink mb-1">Iniciar Sesión</h2>
+          <p className="text-sm text-muted mb-6">Ingresa tus credenciales para continuar</p>
 
           {error && (
             <div className={`flex items-center gap-2 p-3 mb-4 rounded-lg text-sm ${
@@ -144,7 +144,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#ccc] mb-1.5">
+              <label className="block text-sm font-medium text-ink-2 mb-1.5">
                 Correo electrónico
               </label>
               <input
@@ -155,14 +155,14 @@ export default function LoginPage() {
                 disabled={isLocked}
                 placeholder="usuario@pulse360.cl"
                 className="w-full px-4 py-2.5 rounded-lg bg-card-dark border border-border-dark
-                           text-white placeholder-[#555] text-sm
+                           text-ink placeholder-[#555] text-sm
                            focus:outline-none focus:border-pulse-red focus:ring-1 focus:ring-pulse-red
                            transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#ccc] mb-1.5">
+              <label className="block text-sm font-medium text-ink-2 mb-1.5">
                 Contraseña
               </label>
               <div className="relative">
@@ -174,14 +174,14 @@ export default function LoginPage() {
                   disabled={isLocked}
                   placeholder="••••••••"
                   className="w-full px-4 py-2.5 pr-11 rounded-lg bg-card-dark border border-border-dark
-                             text-white placeholder-[#555] text-sm
+                             text-ink placeholder-[#555] text-sm
                              focus:outline-none focus:border-pulse-red focus:ring-1 focus:ring-pulse-red
                              transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#666] hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -209,7 +209,7 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <p className="text-center text-xs text-[#444] mt-6">
+        <p className="text-center text-xs text-muted-2 mt-6">
           © 2025 PULSE 360 · Smart Plant Platform
         </p>
       </div>

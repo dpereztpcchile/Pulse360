@@ -13,7 +13,7 @@ export function KpiTile({
   delta?: { value: number; suffix: string; positiveIsGood: boolean }
   sub?: string
 }) {
-  let deltaColor = 'text-[#888]'
+  let deltaColor = 'text-muted'
   if (delta && delta.value !== 0) {
     const good = delta.value > 0 ? delta.positiveIsGood : !delta.positiveIsGood
     deltaColor = good ? 'text-status-ok' : 'text-pulse-red'
@@ -22,13 +22,13 @@ export function KpiTile({
   return (
     <div className="card p-4 flex flex-col justify-between min-h-[112px]">
       <div className="flex items-start justify-between">
-        <p className="text-[11px] font-semibold text-[#888] uppercase tracking-wider leading-tight">{title}</p>
-        <Icon className="w-4 h-4 text-[#555] shrink-0" />
+        <p className="text-[11px] font-semibold text-muted uppercase tracking-wider leading-tight">{title}</p>
+        <Icon className="w-4 h-4 text-muted-2 shrink-0" />
       </div>
       <div>
         <div className="flex items-end gap-1.5 mt-2">
-          <span className="font-rajdhani font-bold text-3xl text-white leading-none tabular-nums">{value}</span>
-          {unit && <span className="text-sm font-semibold text-[#666] mb-0.5">{unit}</span>}
+          <span className="font-rajdhani font-bold text-3xl text-ink leading-none tabular-nums">{value}</span>
+          {unit && <span className="text-sm font-semibold text-muted mb-0.5">{unit}</span>}
         </div>
         <div className="flex items-center gap-2 mt-1.5 min-h-[16px]">
           {delta && (
@@ -37,7 +37,7 @@ export function KpiTile({
               {Math.abs(delta.value)}{delta.suffix}
             </span>
           )}
-          {sub && <span className="text-xs text-[#666] truncate">{sub}</span>}
+          {sub && <span className="text-xs text-muted truncate">{sub}</span>}
         </div>
       </div>
     </div>

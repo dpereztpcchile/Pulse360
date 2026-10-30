@@ -55,16 +55,16 @@ export function CierreTurnoModal({
     onClose()
   }
 
-  const inputCls = 'px-3 py-2 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red'
+  const inputCls = 'px-3 py-2 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-lg card border border-border-dark shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-semibold text-white">Cierre de turno — {lineName}</h2>
-          <button onClick={onClose} className="text-[#666] hover:text-white"><X className="w-5 h-5" /></button>
+          <h2 className="text-lg font-semibold text-ink">Cierre de turno — {lineName}</h2>
+          <button onClick={onClose} className="text-muted hover:text-ink"><X className="w-5 h-5" /></button>
         </div>
-        <p className="text-xs text-[#666] mb-4">Registra las paradas ocurridas durante el turno. El OEE se recalcula al guardar.</p>
+        <p className="text-xs text-muted mb-4">Registra las paradas ocurridas durante el turno. El OEE se recalcula al guardar.</p>
 
         {error && (
           <div className="flex items-center gap-2 p-3 mb-4 rounded-lg bg-pulse-red/10 border border-pulse-red/20 text-sm text-pulse-red">
@@ -80,7 +80,7 @@ export function CierreTurnoModal({
               </select>
               <input type="number" min="0" value={r.duracionMin} onChange={(e) => update(i, { duracionMin: e.target.value })}
                 placeholder="min" className={`${inputCls} w-24 text-right`} />
-              <button onClick={() => remove(i)} className="p-2 text-[#666] hover:text-pulse-red"><Trash2 className="w-4 h-4" /></button>
+              <button onClick={() => remove(i)} className="p-2 text-muted hover:text-pulse-red"><Trash2 className="w-4 h-4" /></button>
             </div>
           ))}
         </div>
@@ -90,8 +90,8 @@ export function CierreTurnoModal({
         </button>
 
         <div className="flex items-center justify-between mt-4 pt-4 border-t border-border-dark">
-          <span className="text-sm text-[#999]">Total tiempo perdido</span>
-          <span className="text-lg font-bold text-white">{total} min</span>
+          <span className="text-sm text-muted">Total tiempo perdido</span>
+          <span className="text-lg font-bold text-ink">{total} min</span>
         </div>
 
         <div className="flex gap-3 pt-4">

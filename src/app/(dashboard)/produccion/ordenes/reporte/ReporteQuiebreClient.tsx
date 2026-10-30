@@ -96,22 +96,22 @@ export function ReporteQuiebreClient({ today }: { today: string }) {
         <div className="flex items-center gap-2">
           <Calendar className="w-4 h-4 text-pulse-red" />
           <div>
-            <label className="block text-[11px] text-[#888] mb-1">Desde</label>
+            <label className="block text-[11px] text-muted mb-1">Desde</label>
             <input type="date" value={desde} max={hasta} onChange={(e) => setDesde(e.target.value)}
-              className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-white focus:border-pulse-red outline-none" />
+              className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-ink focus:border-pulse-red outline-none" />
           </div>
         </div>
         <div>
-          <label className="block text-[11px] text-[#888] mb-1">Hasta</label>
+          <label className="block text-[11px] text-muted mb-1">Hasta</label>
           <input type="date" value={hasta} min={desde} onChange={(e) => setHasta(e.target.value)}
-            className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-white focus:border-pulse-red outline-none" />
+            className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-ink focus:border-pulse-red outline-none" />
         </div>
         <button onClick={() => generar(desde, hasta)} disabled={loading}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-pulse-red text-white text-sm font-semibold hover:bg-pulse-red/90 disabled:opacity-50">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <BarChart3 className="w-4 h-4" />} Generar Reporte
         </button>
         <button onClick={exportar} disabled={!rep}
-          className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-bg-dark border border-border-dark text-[#ccc] text-sm font-semibold hover:border-pulse-red disabled:opacity-40">
+          className="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-bg-dark border border-border-dark text-ink-2 text-sm font-semibold hover:border-pulse-red disabled:opacity-40">
           <Download className="w-4 h-4" /> Exportar Excel
         </button>
       </div>
@@ -125,30 +125,30 @@ export function ReporteQuiebreClient({ today }: { today: string }) {
       {rep && (
         <>
           {/* Encabezado de período */}
-          <p className="text-sm text-[#999]">
-            Período: <b className="text-white">{fmtFecha(rep.periodo.desde)} — {fmtFecha(rep.periodo.hasta)}</b>
-            <span className="text-[#666]"> · {rep.totalOF} OF</span>
+          <p className="text-sm text-muted">
+            Período: <b className="text-ink">{fmtFecha(rep.periodo.desde)} — {fmtFecha(rep.periodo.hasta)}</b>
+            <span className="text-muted"> · {rep.totalOF} OF</span>
           </p>
 
           {/* KPIs */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="card p-4" style={{ borderColor: nsOk ? VERDE : ROJO, borderWidth: 1 }}>
-              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-wider">Nivel de Servicio Total</p>
+              <p className="text-[11px] font-semibold text-muted uppercase tracking-wider">Nivel de Servicio Total</p>
               <p className="font-rajdhani font-bold text-4xl mt-1" style={{ color: nsOk ? VERDE : ROJO }}>{fmt1(rep.nivelServicio)}%</p>
             </div>
             <div className="card p-4">
-              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-wider">Kg Pedido</p>
-              <p className="font-rajdhani font-bold text-4xl mt-1 text-white">{fmt(rep.kgPedido)}</p>
+              <p className="text-[11px] font-semibold text-muted uppercase tracking-wider">Kg Pedido</p>
+              <p className="font-rajdhani font-bold text-4xl mt-1 text-ink">{fmt(rep.kgPedido)}</p>
             </div>
             <div className="card p-4">
-              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-wider">Kg Completado</p>
-              <p className="font-rajdhani font-bold text-4xl mt-1 text-white">{fmt(rep.kgCompletado)}</p>
+              <p className="text-[11px] font-semibold text-muted uppercase tracking-wider">Kg Completado</p>
+              <p className="font-rajdhani font-bold text-4xl mt-1 text-ink">{fmt(rep.kgCompletado)}</p>
             </div>
             <div className="card p-4">
-              <p className="text-[11px] font-semibold text-[#888] uppercase tracking-wider">Kg Quiebre Total</p>
+              <p className="text-[11px] font-semibold text-muted uppercase tracking-wider">Kg Quiebre Total</p>
               <p className="font-rajdhani font-bold text-4xl mt-1" style={{ color: rep.kgQuiebre > 0 ? ROJO : VERDE }}>
                 {fmt(rep.kgQuiebre)}
-                <span className="text-base font-normal text-[#888] ml-2">
+                <span className="text-base font-normal text-muted ml-2">
                   ({rep.kgPedido > 0 ? fmt1((rep.kgQuiebre / rep.kgPedido) * 100) : '0'}%)
                 </span>
               </p>
@@ -159,7 +159,7 @@ export function ReporteQuiebreClient({ today }: { today: string }) {
           <div className="card p-0 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-[#666] border-b border-border-dark">
+                <tr className="text-left text-xs text-muted border-b border-border-dark">
                   <th className="px-4 py-3 font-medium">Grupo</th>
                   <th className="px-4 py-3 font-medium text-right">Kg Pedido</th>
                   <th className="px-4 py-3 font-medium text-right">Kg Completado</th>
@@ -170,17 +170,17 @@ export function ReporteQuiebreClient({ today }: { today: string }) {
               </thead>
               <tbody>
                 {rep.grupos.length === 0 ? (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-[#555]">Sin OF en el período</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-2">Sin OF en el período</td></tr>
                 ) : rep.grupos.map((g) => {
                   const col = grupoColor(g.nivelServicio)
                   return (
                     <tr key={g.nombre} className="border-b border-border-dark" style={{ borderLeft: `3px solid ${col}` }}>
                       <td className="px-4 py-2.5 font-semibold" style={{ color: col }}><span className="mr-1.5">{emojiDe(g.nombre)}</span>{g.nombre}</td>
-                      <td className="px-4 py-2.5 text-right text-[#ccc]">{fmt(g.kgPedido)}</td>
-                      <td className="px-4 py-2.5 text-right text-[#ccc]">{fmt(g.kgCompletado)}</td>
+                      <td className="px-4 py-2.5 text-right text-ink-2">{fmt(g.kgPedido)}</td>
+                      <td className="px-4 py-2.5 text-right text-ink-2">{fmt(g.kgCompletado)}</td>
                       <td className="px-4 py-2.5 text-right font-semibold" style={{ color: col }}>{fmt1(g.nivelServicio)}%</td>
-                      <td className="px-4 py-2.5 text-right" style={{ color: g.quiebreKg > 0 ? ROJO : '#888' }}>{fmt1(g.quiebreKg)}</td>
-                      <td className="px-4 py-2.5 text-[#999] text-xs">{g.razonFrecuente ?? '—'}</td>
+                      <td className="px-4 py-2.5 text-right" style={{ color: g.quiebreKg > 0 ? ROJO : '#9CA3AF' }}>{fmt1(g.quiebreKg)}</td>
+                      <td className="px-4 py-2.5 text-muted text-xs">{g.razonFrecuente ?? '—'}</td>
                     </tr>
                   )
                 })}
@@ -190,21 +190,21 @@ export function ReporteQuiebreClient({ today }: { today: string }) {
 
           {/* Cascada de pérdidas */}
           <div className="card">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wide mb-1">Cascada de Pérdidas (Fill Rate)</h3>
-            <p className="text-xs text-[#666] mb-4">Pedido vs Completado acumulado del período · las barras rojas muestran solo los kg de quiebre por razón</p>
+            <h3 className="text-sm font-semibold text-ink uppercase tracking-wide mb-1">Cascada de Pérdidas (Fill Rate)</h3>
+            <p className="text-xs text-muted mb-4">Pedido vs Completado acumulado del período · las barras rojas muestran solo los kg de quiebre por razón</p>
             <ResponsiveContainer width="100%" height={380}>
               <BarChart data={buildSteps(rep)} margin={{ top: 24, right: 12, left: 4, bottom: 84 }}>
-                <CartesianGrid stroke="#2a2a2a" vertical={false} />
-                <XAxis dataKey="name" tick={{ fill: '#ccc', fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={100} />
-                <YAxis tick={{ fill: '#888', fontSize: 11 }} domain={[0, 'dataMax']} tickFormatter={(v) => fmt(Number(v))} />
+                <CartesianGrid stroke="#E3E0D7" vertical={false} />
+                <XAxis dataKey="name" tick={{ fill: '#3A4049', fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={100} />
+                <YAxis tick={{ fill: '#6B7280', fontSize: 11 }} domain={[0, 'dataMax']} tickFormatter={(v) => fmt(Number(v))} />
                 <Tooltip
                   cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-                  contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 8, color: '#fff' }}
+                  contentStyle={{ background: '#FFFFFF', border: '1px solid #E3E0D7', borderRadius: 8, color: '#1E2227' }}
                   formatter={(v, _n, p) => [`${fmt1(Number(v))} kg`, (p?.payload as Step)?.tip ?? '']}
                 />
                 <Bar dataKey="value" isAnimationActive={false} radius={[3, 3, 0, 0]}>
                   {buildSteps(rep).map((s, i) => <Cell key={i} fill={s.fill} />)}
-                  <LabelList dataKey="value" position="top" formatter={(v) => fmt(Number(v ?? 0))} style={{ fill: '#fff', fontSize: 11, fontWeight: 600 }} />
+                  <LabelList dataKey="value" position="top" formatter={(v) => fmt(Number(v ?? 0))} style={{ fill: '#1E2227', fontSize: 11, fontWeight: 600 }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -212,10 +212,10 @@ export function ReporteQuiebreClient({ today }: { today: string }) {
 
           {/* Detalle OF con quiebre */}
           <div className="card p-0 overflow-x-auto">
-            <h3 className="text-sm font-semibold text-white uppercase tracking-wide px-4 pt-4 pb-2">OF con Quiebre (&lt; 95%)</h3>
+            <h3 className="text-sm font-semibold text-ink uppercase tracking-wide px-4 pt-4 pb-2">OF con Quiebre (&lt; 95%)</h3>
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs text-[#666] border-b border-border-dark">
+                <tr className="text-left text-xs text-muted border-b border-border-dark">
                   <th className="px-4 py-3 font-medium">OF</th>
                   <th className="px-4 py-3 font-medium">Producto</th>
                   <th className="px-4 py-3 font-medium text-right">Cant. Planificada</th>
@@ -229,14 +229,14 @@ export function ReporteQuiebreClient({ today }: { today: string }) {
                   <tr><td colSpan={6} className="px-4 py-8 text-center text-[#16a34a]">✓ Sin quiebres en el período</td></tr>
                 ) : rep.ofsConQuiebre.map((o) => (
                   <tr key={o.numeroOF} className="border-b border-border-dark">
-                    <td className="px-4 py-2.5 text-white font-medium whitespace-nowrap">{o.numeroOF}</td>
-                    <td className="px-4 py-2.5 text-[#ccc]">{o.producto}</td>
-                    <td className="px-4 py-2.5 text-right text-[#ccc]">{fmt(o.cantidadPlanificada)}</td>
-                    <td className="px-4 py-2.5 text-right text-[#ccc]">{fmt(o.cantidadCompletada)}</td>
+                    <td className="px-4 py-2.5 text-ink font-medium whitespace-nowrap">{o.numeroOF}</td>
+                    <td className="px-4 py-2.5 text-ink-2">{o.producto}</td>
+                    <td className="px-4 py-2.5 text-right text-ink-2">{fmt(o.cantidadPlanificada)}</td>
+                    <td className="px-4 py-2.5 text-right text-ink-2">{fmt(o.cantidadCompletada)}</td>
                     <td className="px-4 py-2.5 text-right font-semibold" style={{ color: ROJO }}>
                       <span className="inline-flex items-center gap-1 justify-end"><AlertTriangle className="w-3.5 h-3.5" />{fmt1(o.cumplimiento)}%</span>
                     </td>
-                    <td className="px-4 py-2.5 text-[#999] text-xs">{o.razonQuiebre ?? '—'}</td>
+                    <td className="px-4 py-2.5 text-muted text-xs">{o.razonQuiebre ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -246,7 +246,7 @@ export function ReporteQuiebreClient({ today }: { today: string }) {
       )}
 
       {loading && !rep && (
-        <div className="card flex items-center justify-center py-16 text-[#666]">
+        <div className="card flex items-center justify-center py-16 text-muted">
           <Loader2 className="w-5 h-5 animate-spin mr-2" /> Generando reporte…
         </div>
       )}

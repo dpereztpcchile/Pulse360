@@ -83,11 +83,11 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
       {/* ── Zona de carga ── */}
       <div className="card">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <h2 className="font-semibold text-white">Cargar programa del día</h2>
-          <label className="flex items-center gap-2 text-sm text-[#999]">
+          <h2 className="font-semibold text-ink">Cargar programa del día</h2>
+          <label className="flex items-center gap-2 text-sm text-muted">
             <Calendar className="w-4 h-4 text-pulse-red" /> Fecha
             <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)}
-              className="bg-bg-dark border border-border-dark rounded-lg px-3 py-1.5 text-sm text-white focus:border-pulse-red outline-none" />
+              className="bg-bg-dark border border-border-dark rounded-lg px-3 py-1.5 text-sm text-ink focus:border-pulse-red outline-none" />
           </label>
         </div>
 
@@ -97,10 +97,10 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
         </div>
 
         {file && (
-          <div className="flex items-center gap-2 mt-3 text-sm text-[#ccc]">
+          <div className="flex items-center gap-2 mt-3 text-sm text-ink-2">
             <FileSpreadsheet className="w-4 h-4 text-status-ok" />
             <span className="font-medium">{file.name}</span>
-            <span className="text-[#666]">· {fmtSize(file.size)}</span>
+            <span className="text-muted">· {fmtSize(file.size)}</span>
           </div>
         )}
 
@@ -121,7 +121,7 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
             <div className="h-2 rounded-full bg-border-dark overflow-hidden">
               <div className="h-full bg-pulse-red transition-all duration-150" style={{ width: `${progress}%` }} />
             </div>
-            <p className="text-xs text-[#666] mt-1 flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando programa… {progress}%</p>
+            <p className="text-xs text-muted mt-1 flex items-center gap-1.5"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando programa… {progress}%</p>
           </div>
         )}
 
@@ -142,10 +142,10 @@ export function CargaProgramaClient({ today, user }: { today: string; user: stri
           <div className="w-full max-w-md card border border-border-dark shadow-2xl">
             <div className="flex items-center gap-2 mb-3">
               <AlertCircle className="w-5 h-5 text-status-warn" />
-              <h2 className="font-semibold text-white">Programa existente</h2>
+              <h2 className="font-semibold text-ink">Programa existente</h2>
             </div>
-            <p className="text-sm text-[#999] mb-1">Ya existe un programa cargado para el <b className="text-white">{fmtFecha(fecha)}</b>.</p>
-            <p className="text-sm text-[#666] mb-4">Cargado el {dupInfo.cargadoEn ? fmtDateTime(dupInfo.cargadoEn) : '—'} por {dupInfo.cargadoPor}.</p>
+            <p className="text-sm text-muted mb-1">Ya existe un programa cargado para el <b className="text-ink">{fmtFecha(fecha)}</b>.</p>
+            <p className="text-sm text-muted mb-4">Cargado el {dupInfo.cargadoEn ? fmtDateTime(dupInfo.cargadoEn) : '—'} por {dupInfo.cargadoPor}.</p>
             <div className="flex gap-3">
               <button onClick={() => setDupInfo(null)} className="btn-secondary flex-1 justify-center text-sm">Cancelar</button>
               <button onClick={() => cargar(true)} className="btn-primary flex-1 justify-center text-sm">Reemplazar programa</button>
@@ -169,8 +169,8 @@ function UploadZone({ icon: Icon, label, sublabel, onFile }: { icon: ComponentTy
       className={`rounded-xl border-2 border-dashed transition-colors cursor-pointer px-5 py-8 text-center ${over ? 'border-pulse-red bg-pulse-red/5' : 'border-border-dark hover:border-pulse-red/50'}`}
     >
       <Icon className="w-9 h-9 text-pulse-red mx-auto mb-2" />
-      <p className="text-white font-medium">{label}</p>
-      <p className="text-xs text-[#666] mt-1">{sublabel}</p>
+      <p className="text-ink font-medium">{label}</p>
+      <p className="text-xs text-muted mt-1">{sublabel}</p>
       <button type="button" onClick={(e) => { e.stopPropagation(); ref.current?.click() }} className="btn-secondary text-sm mt-3">Seleccionar archivo</button>
       <input ref={ref} type="file" accept=".xlsx,.xls" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = '' }} />
@@ -192,50 +192,50 @@ function Preview({ parsed, onCargar, onCancel }: { parsed: ParseResult; onCargar
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {hasCarn && (
           <div className="bg-bg-dark rounded-lg p-4 border border-border-dark">
-            <div className="flex items-center gap-2 mb-3"><Scissors className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-white">Carnicería</h3></div>
+            <div className="flex items-center gap-2 mb-3"><Scissors className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-ink">Carnicería</h3></div>
             <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-              <div><p className="text-lg font-bold text-white">{parsed.carniceria.length}</p><p className="text-[10px] text-[#666]">cortes</p></div>
-              <div><p className="text-lg font-bold text-white">{fmtKg(totMP)}</p><p className="text-[10px] text-[#666]">kg MP</p></div>
-              <div><p className="text-lg font-bold text-white">{fmtKg(totPT)}</p><p className="text-[10px] text-[#666]">kg PT</p></div>
+              <div><p className="text-lg font-bold text-ink">{parsed.carniceria.length}</p><p className="text-[10px] text-muted">cortes</p></div>
+              <div><p className="text-lg font-bold text-ink">{fmtKg(totMP)}</p><p className="text-[10px] text-muted">kg MP</p></div>
+              <div><p className="text-lg font-bold text-ink">{fmtKg(totPT)}</p><p className="text-[10px] text-muted">kg PT</p></div>
             </div>
-            <ul className="text-xs text-[#999] space-y-1">
+            <ul className="text-xs text-muted space-y-1">
               {parsed.carniceria.slice(0, 5).map((c, i) => (
-                <li key={i} className="flex justify-between"><span className="truncate pr-2">{c.nombre}</span><span className="text-[#ccc] shrink-0">{fmtKg(c.kgMPTeorico)} kg MP</span></li>
+                <li key={i} className="flex justify-between"><span className="truncate pr-2">{c.nombre}</span><span className="text-ink-2 shrink-0">{fmtKg(c.kgMPTeorico)} kg MP</span></li>
               ))}
-              {parsed.carniceria.length > 5 && <li className="text-[#555]">+ {parsed.carniceria.length - 5} más…</li>}
+              {parsed.carniceria.length > 5 && <li className="text-muted-2">+ {parsed.carniceria.length - 5} más…</li>}
             </ul>
           </div>
         )}
 
         {hasMol && (
           <div className="bg-bg-dark rounded-lg p-4 border border-border-dark">
-            <div className="flex items-center gap-2 mb-3"><Boxes className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-white">Molienda — MOLIDA</h3></div>
+            <div className="flex items-center gap-2 mb-3"><Boxes className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-ink">Molienda — MOLIDA</h3></div>
             <div className="grid grid-cols-3 gap-2 mb-3 text-center">
-              <div><p className="text-lg font-bold text-white">{parsed.molienda.length}</p><p className="text-[10px] text-[#666]">productos</p></div>
-              <div><p className="text-lg font-bold text-white">{fmtKg(totMoler)}</p><p className="text-[10px] text-[#666]">kg a moler</p></div>
-              <div><p className="text-lg font-bold text-white">{totBatches}</p><p className="text-[10px] text-[#666]">batches</p></div>
+              <div><p className="text-lg font-bold text-ink">{parsed.molienda.length}</p><p className="text-[10px] text-muted">productos</p></div>
+              <div><p className="text-lg font-bold text-ink">{fmtKg(totMoler)}</p><p className="text-[10px] text-muted">kg a moler</p></div>
+              <div><p className="text-lg font-bold text-ink">{totBatches}</p><p className="text-[10px] text-muted">batches</p></div>
             </div>
-            <ul className="text-xs text-[#999] space-y-1">
+            <ul className="text-xs text-muted space-y-1">
               {parsed.molienda.slice(0, 5).map((m, i) => (
-                <li key={i} className="flex justify-between"><span className="truncate pr-2">{m.productoNombre}</span><span className="text-[#ccc] shrink-0">{m.numBatches} batches</span></li>
+                <li key={i} className="flex justify-between"><span className="truncate pr-2">{m.productoNombre}</span><span className="text-ink-2 shrink-0">{m.numBatches} batches</span></li>
               ))}
-              {parsed.molienda.length > 5 && <li className="text-[#555]">+ {parsed.molienda.length - 5} más…</li>}
+              {parsed.molienda.length > 5 && <li className="text-muted-2">+ {parsed.molienda.length - 5} más…</li>}
             </ul>
           </div>
         )}
 
         {hasOF && (
           <div className="bg-bg-dark rounded-lg p-4 border border-border-dark">
-            <div className="flex items-center gap-2 mb-3"><ClipboardList className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-white">Órdenes de Fabricación (SAP)</h3></div>
+            <div className="flex items-center gap-2 mb-3"><ClipboardList className="w-4 h-4 text-pulse-red" /><h3 className="font-semibold text-ink">Órdenes de Fabricación (SAP)</h3></div>
             <div className="grid grid-cols-2 gap-2 mb-3 text-center">
-              <div><p className="text-lg font-bold text-white">{parsed.ordenes.length}</p><p className="text-[10px] text-[#666]">OF</p></div>
-              <div><p className="text-lg font-bold text-white">{fmtKg(totOFPlan)}</p><p className="text-[10px] text-[#666]">cant. planificada</p></div>
+              <div><p className="text-lg font-bold text-ink">{parsed.ordenes.length}</p><p className="text-[10px] text-muted">OF</p></div>
+              <div><p className="text-lg font-bold text-ink">{fmtKg(totOFPlan)}</p><p className="text-[10px] text-muted">cant. planificada</p></div>
             </div>
-            <ul className="text-xs text-[#999] space-y-1">
+            <ul className="text-xs text-muted space-y-1">
               {parsed.ordenes.slice(0, 5).map((o, i) => (
-                <li key={i} className="flex justify-between gap-2"><span className="truncate"><b className="text-[#bbb]">{o.numeroOF}</b> · {o.producto}</span><span className="text-[#ccc] shrink-0">{fmtKg(o.cantidadPlanificada)}</span></li>
+                <li key={i} className="flex justify-between gap-2"><span className="truncate"><b className="text-ink-2">{o.numeroOF}</b> · {o.producto}</span><span className="text-ink-2 shrink-0">{fmtKg(o.cantidadPlanificada)}</span></li>
               ))}
-              {parsed.ordenes.length > 5 && <li className="text-[#555]">+ {parsed.ordenes.length - 5} más…</li>}
+              {parsed.ordenes.length > 5 && <li className="text-muted-2">+ {parsed.ordenes.length - 5} más…</li>}
             </ul>
           </div>
         )}

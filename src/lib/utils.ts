@@ -53,7 +53,7 @@ export const LINE_STATUS = {
 } as const
 
 export const ORDER_STATUS = {
-  PLANIFICADA: { label: 'Planificada', cls: 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]' },
+  PLANIFICADA: { label: 'Planificada', cls: 'bg-border-dark/60 text-muted border border-border-dark' },
   EN_PROCESO:  { label: 'En proceso',  cls: 'bg-status-ok/10 text-status-ok border border-status-ok/20' },
   COMPLETADA:  { label: 'Completada',  cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20' },
   DETENIDA:    { label: 'Detenida',    cls: 'bg-pulse-red/10 text-pulse-red border border-pulse-red/20' },
@@ -120,7 +120,7 @@ export function computeMaterialState(
 // ── Despacho ──
 
 export const DISPATCH_STATUS = {
-  PREPARANDO: { label: 'Preparando', cls: 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]', dot: 'bg-[#999]' },
+  PREPARANDO: { label: 'Preparando', cls: 'bg-border-dark/60 text-muted border border-border-dark', dot: 'bg-muted' },
   LISTO:      { label: 'Listo',      cls: 'bg-status-warn/10 text-status-warn border border-status-warn/20', dot: 'bg-status-warn' },
   DESPACHADO: { label: 'Despachado', cls: 'bg-blue-500/10 text-blue-400 border border-blue-500/20', dot: 'bg-blue-400' },
   ENTREGADO:  { label: 'Entregado',  cls: 'bg-status-ok/10 text-status-ok border border-status-ok/20', dot: 'bg-status-ok' },
@@ -147,8 +147,8 @@ export const NC_DESTINO = {
   VENTA_A_TERCEROS: { label: 'Venta a terceros', cls: 'bg-status-ok/10 text-status-ok border border-status-ok/20' },
   DECOMISO:         { label: 'Decomiso',         cls: 'bg-pulse-red/10 text-pulse-red border border-pulse-red/20' },
   DEVOLUCION:       { label: 'Devolución',       cls: 'bg-status-warn/10 text-status-warn border border-status-warn/20' },
-  RETENIDO:         { label: 'Retenido',         cls: 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]' },
-  OTRO:             { label: 'Otro',             cls: 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]' },
+  RETENIDO:         { label: 'Retenido',         cls: 'bg-border-dark/60 text-muted border border-border-dark' },
+  OTRO:             { label: 'Otro',             cls: 'bg-border-dark/60 text-muted border border-border-dark' },
 } as const
 export type NcDestinoKey = keyof typeof NC_DESTINO
 
@@ -252,9 +252,9 @@ export const ALERT_MODULE = {
 export type AlertModuleKey = keyof typeof ALERT_MODULE
 
 export const ALERT_SEVERITY = {
-  CRITICA:     { label: 'Crítica',     order: 0, text: 'text-white',          counterBg: 'bg-pulse-red',     counterText: 'text-white', badge: 'bg-pulse-red text-white',                              dot: 'bg-pulse-red' },
+  CRITICA:     { label: 'Crítica',     order: 0, text: 'text-ink',          counterBg: 'bg-pulse-red',     counterText: 'text-ink', badge: 'bg-pulse-red text-white',                              dot: 'bg-pulse-red' },
   ADVERTENCIA: { label: 'Advertencia', order: 1, text: 'text-status-warn',    counterBg: 'bg-status-warn',   counterText: 'text-black', badge: 'bg-status-warn/15 text-status-warn border border-status-warn/30', dot: 'bg-status-warn' },
-  INFORMATIVA: { label: 'Informativa', order: 2, text: 'text-[#999]',         counterBg: 'bg-card-dark',     counterText: 'text-[#999]', badge: 'bg-border-dark text-[#999] border border-[#333]',             dot: 'bg-[#777]' },
+  INFORMATIVA: { label: 'Informativa', order: 2, text: 'text-muted',         counterBg: 'bg-card-dark',     counterText: 'text-muted', badge: 'bg-border-dark text-muted border border-[#333]',             dot: 'bg-[#777]' },
 } as const
 export type AlertSeverityKey = keyof typeof ALERT_SEVERITY
 

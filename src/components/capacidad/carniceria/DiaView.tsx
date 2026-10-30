@@ -10,9 +10,9 @@ export function DiaView({ data }: { data: DiaViewData }) {
   if (data.esDomingo) {
     return (
       <div className="card text-center py-12">
-        <CalendarOff className="w-10 h-10 text-[#444] mx-auto mb-3" />
-        <p className="text-white font-semibold">Domingo — sin operación programada</p>
-        <p className="text-sm text-[#666] mt-1">La carnicería no trabaja los domingos.</p>
+        <CalendarOff className="w-10 h-10 text-muted-2 mx-auto mb-3" />
+        <p className="text-ink font-semibold">Domingo — sin operación programada</p>
+        <p className="text-sm text-muted mt-1">La carnicería no trabaja los domingos.</p>
       </div>
     )
   }
@@ -36,9 +36,9 @@ export function DiaView({ data }: { data: DiaViewData }) {
             <span className="text-3xl font-bold" style={{ color: meta.color }}>{data.ocupacionPorc}%</span>
           </div>
           <div>
-            <p className="text-xs text-[#666] uppercase tracking-wider mb-0.5">Estado de ocupación</p>
+            <p className="text-xs text-muted uppercase tracking-wider mb-0.5">Estado de ocupación</p>
             <p className="text-3xl font-bold" style={{ color: meta.color }}>{semaforoLabel}</p>
-            <p className="text-sm text-[#999] mt-0.5">
+            <p className="text-sm text-muted mt-0.5">
               {data.diaLabel} · {data.hasProgram ? `${fmt(data.pedidoKgMP)} kg MP pedidos de ${fmt(data.capacidadKgMP)} disponibles` : 'Sin pedido cargado'}
             </p>
           </div>
@@ -48,13 +48,13 @@ export function DiaView({ data }: { data: DiaViewData }) {
         <div className="card">
           <div className="grid grid-cols-3 gap-4 mb-5">
             <div>
-              <p className="text-xs text-[#666] mb-1">Capacidad disponible</p>
-              <p className="text-xl font-bold text-white">{fmt(data.capacidadKgMP)} <span className="text-sm font-normal text-[#666]">kg MP</span></p>
+              <p className="text-xs text-muted mb-1">Capacidad disponible</p>
+              <p className="text-xl font-bold text-ink">{fmt(data.capacidadKgMP)} <span className="text-sm font-normal text-muted">kg MP</span></p>
             </div>
             <div>
-              <p className="text-xs text-[#666] mb-1">Pedido del día</p>
+              <p className="text-xs text-muted mb-1">Pedido del día</p>
               {data.hasProgram ? (
-                <p className="text-xl font-bold text-white">{fmt(data.pedidoKgMP)} <span className="text-sm font-normal text-[#666]">kg MP</span></p>
+                <p className="text-xl font-bold text-ink">{fmt(data.pedidoKgMP)} <span className="text-sm font-normal text-muted">kg MP</span></p>
               ) : (
                 <Link href="/produccion/control-turno/CARNICERIA" className="inline-flex items-center gap-1 text-sm text-pulse-red hover:text-pulse-red-hover font-medium">
                   Sin programa cargado <ArrowUpRight className="w-3.5 h-3.5" />
@@ -62,9 +62,9 @@ export function DiaView({ data }: { data: DiaViewData }) {
               )}
             </div>
             <div>
-              <p className="text-xs text-[#666] mb-1">{deficit ? 'Déficit' : 'Holgura'}</p>
+              <p className="text-xs text-muted mb-1">{deficit ? 'Déficit' : 'Holgura'}</p>
               <p className="text-xl font-bold" style={{ color: deficit ? '#CC0000' : '#22C55E' }}>
-                {deficit ? '' : '+'}{fmt(data.holguraKgMP)} <span className="text-sm font-normal text-[#666]">kg</span>
+                {deficit ? '' : '+'}{fmt(data.holguraKgMP)} <span className="text-sm font-normal text-muted">kg</span>
               </p>
             </div>
           </div>
@@ -82,29 +82,29 @@ export function DiaView({ data }: { data: DiaViewData }) {
 
       {/* Panel de desglose */}
       <div className="card space-y-4">
-        <h3 className="font-semibold text-white">Desglose de capacidad</h3>
+        <h3 className="font-semibold text-ink">Desglose de capacidad</h3>
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-pulse-red/10"><Gauge className="w-5 h-5 text-pulse-red" /></div>
           <div>
-            <p className="text-xs text-[#666]">Productividad nominal</p>
-            <p className="font-semibold text-white">{PRODUCTIVIDAD_NOMINAL} Kg MP/HH</p>
+            <p className="text-xs text-muted">Productividad nominal</p>
+            <p className="font-semibold text-ink">{PRODUCTIVIDAD_NOMINAL} Kg MP/HH</p>
           </div>
         </div>
 
         <div>
-          <div className="flex items-center gap-2 mb-2 text-sm text-[#999]"><Users className="w-4 h-4 text-[#666]" /> HH disponibles hoy</div>
+          <div className="flex items-center gap-2 mb-2 text-sm text-muted"><Users className="w-4 h-4 text-muted" /> HH disponibles hoy</div>
           <div className="space-y-1.5">
             {data.breakdown.length === 0 ? (
-              <p className="text-sm text-[#555]">Sin turnos activos este día.</p>
+              <p className="text-sm text-muted-2">Sin turnos activos este día.</p>
             ) : data.breakdown.map((t) => (
               <div key={t.turnoNombre} className="flex items-center justify-between text-sm">
-                <span className="text-[#999]">{t.turnoNombre} <span className="text-[#555]">({t.personas} pers.)</span></span>
-                <span className="text-white font-medium">{t.hh.toLocaleString('es-CL')} HH</span>
+                <span className="text-muted">{t.turnoNombre} <span className="text-muted-2">({t.personas} pers.)</span></span>
+                <span className="text-ink font-medium">{t.hh.toLocaleString('es-CL')} HH</span>
               </div>
             ))}
             <div className="flex items-center justify-between text-sm pt-1.5 border-t border-border-dark">
-              <span className="text-[#ccc] font-medium">Total</span>
-              <span className="text-white font-bold">{data.hhDisponibles.toLocaleString('es-CL')} HH</span>
+              <span className="text-ink-2 font-medium">Total</span>
+              <span className="text-ink font-bold">{data.hhDisponibles.toLocaleString('es-CL')} HH</span>
             </div>
           </div>
         </div>
@@ -112,8 +112,8 @@ export function DiaView({ data }: { data: DiaViewData }) {
         <div className="flex items-center gap-3 pt-1">
           <div className="p-2 rounded-lg bg-pulse-red/10"><Boxes className="w-5 h-5 text-pulse-red" /></div>
           <div>
-            <p className="text-xs text-[#666]">Capacidad total</p>
-            <p className="font-semibold text-white">{fmt(data.capacidadKgMP)} kg MP</p>
+            <p className="text-xs text-muted">Capacidad total</p>
+            <p className="font-semibold text-ink">{fmt(data.capacidadKgMP)} kg MP</p>
           </div>
         </div>
       </div>

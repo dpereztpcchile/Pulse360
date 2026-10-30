@@ -49,8 +49,8 @@ export function ConfigClient({ initialRows }: { initialRows: Row[] }) {
     } catch { setError('Error de conexión') } finally { setSavingId(null) }
   }
 
-  const inputCls = 'w-full px-3 py-2 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red'
-  const labelCls = 'block text-xs font-medium text-[#888] mb-1'
+  const inputCls = 'w-full px-3 py-2 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red'
+  const labelCls = 'block text-xs font-medium text-muted mb-1'
 
   return (
     <div className="space-y-5">
@@ -61,7 +61,7 @@ export function ConfigClient({ initialRows }: { initialRows: Row[] }) {
       )}
 
       {rows.length === 0 && (
-        <div className="card text-center py-12 text-[#555] text-sm">No hay líneas de producción registradas</div>
+        <div className="card text-center py-12 text-muted-2 text-sm">No hay líneas de producción registradas</div>
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -72,10 +72,10 @@ export function ConfigClient({ initialRows }: { initialRows: Row[] }) {
             <div key={r.lineId} className="card space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-border-dark/50"><Factory className="w-4 h-4 text-[#999]" /></div>
+                  <div className="p-2 rounded-lg bg-border-dark/50"><Factory className="w-4 h-4 text-muted" /></div>
                   <div>
-                    <p className="font-semibold text-white">{r.lineName}</p>
-                    <p className="text-xs text-[#666] font-mono">{r.lineCode}</p>
+                    <p className="font-semibold text-ink">{r.lineName}</p>
+                    <p className="text-xs text-muted font-mono">{r.lineCode}</p>
                   </div>
                 </div>
                 {!r.configured && (
@@ -109,14 +109,14 @@ export function ConfigClient({ initialRows }: { initialRows: Row[] }) {
               {/* Cálculo automático */}
               <div className="flex items-center justify-between rounded-lg bg-bg-dark border border-border-dark px-4 py-3">
                 <div>
-                  <p className="text-xs text-[#666] uppercase tracking-wide">Capacidad total semanal</p>
-                  <p className="font-rajdhani font-bold text-2xl text-white">
-                    {weekly.toLocaleString('es-CL')} <span className="text-sm text-[#666] font-normal">kg/sem</span>
+                  <p className="text-xs text-muted uppercase tracking-wide">Capacidad total semanal</p>
+                  <p className="font-rajdhani font-bold text-2xl text-ink">
+                    {weekly.toLocaleString('es-CL')} <span className="text-sm text-muted font-normal">kg/sem</span>
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-[#666]">≈ {daily.toLocaleString('es-CL')} kg/día</p>
-                  <p className="text-[10px] text-[#555] mt-0.5">{r.kgPerHour}×{r.hoursPerShift}h×{r.activeShifts}t×{r.efficiency}%×{CAPACITY_DAYS_PER_WEEK}d</p>
+                  <p className="text-xs text-muted">≈ {daily.toLocaleString('es-CL')} kg/día</p>
+                  <p className="text-[10px] text-muted-2 mt-0.5">{r.kgPerHour}×{r.hoursPerShift}h×{r.activeShifts}t×{r.efficiency}%×{CAPACITY_DAYS_PER_WEEK}d</p>
                 </div>
               </div>
 

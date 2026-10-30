@@ -26,8 +26,8 @@ export function CircularGauge({
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-rajdhani font-bold text-2xl text-white leading-none">{Math.round(v)}<span className="text-sm text-[#666]">%</span></span>
-        {label && <span className="text-[10px] text-[#666] uppercase tracking-wide mt-0.5">{label}</span>}
+        <span className="font-rajdhani font-bold text-2xl text-ink leading-none">{Math.round(v)}<span className="text-sm text-muted">%</span></span>
+        {label && <span className="text-[10px] text-muted uppercase tracking-wide mt-0.5">{label}</span>}
       </div>
     </div>
   )
@@ -69,7 +69,7 @@ export function SemiGauge({
       </svg>
       <div className="absolute inset-x-0 top-[42%] flex flex-col items-center">
         <span className={cn('font-rajdhani font-bold text-3xl leading-none')} style={{ color }}>{v.toFixed(1)}</span>
-        {label && <span className="text-[10px] text-[#666] uppercase tracking-wide mt-0.5">{label}</span>}
+        {label && <span className="text-[10px] text-muted uppercase tracking-wide mt-0.5">{label}</span>}
       </div>
     </div>
   )

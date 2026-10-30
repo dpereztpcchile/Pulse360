@@ -65,13 +65,13 @@ export function MateriasPrimasReportView({ canExport, user }: { canExport: boole
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/reportes" className="text-xs text-[#666] hover:text-white flex items-center gap-1 mb-1">
+          <Link href="/reportes" className="text-xs text-muted hover:text-ink flex items-center gap-1 mb-1">
             <ArrowLeft className="w-3.5 h-3.5" /> Volver al centro de reportes
           </Link>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
             <Package className="w-6 h-6 text-pulse-red" /> Reporte de Materias Primas
           </h1>
-          <p className="text-sm text-[#666] mt-0.5">Período: {period}</p>
+          <p className="text-sm text-muted mt-0.5">Período: {period}</p>
         </div>
         <ExportButtons canExport={canExport} onExcel={onExcel} onPdf={onPdf} busy={busy} />
       </div>

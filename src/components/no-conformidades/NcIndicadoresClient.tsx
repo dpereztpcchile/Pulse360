@@ -127,7 +127,7 @@ export function NcIndicadoresClient() {
           <GrupoButton icon={Factory} label="Planta" active={grupo === 'PLANTA'} onClick={() => cambiarGrupo('PLANTA')} />
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-[#999] cursor-pointer select-none">
+        <label className="flex items-center gap-2 text-sm text-muted cursor-pointer select-none">
           <input type="checkbox" checked={excluirEnvase} onChange={(e) => setExcluirEnvase(e.target.checked)}
             className="accent-pulse-red w-4 h-4" />
           Excluir insumos de envase/embalaje
@@ -145,7 +145,7 @@ export function NcIndicadoresClient() {
         )}
 
         {hayFiltrosActivos && (
-          <button onClick={limpiarFiltros} className="ml-auto flex items-center gap-1 text-xs text-[#666] hover:text-white">
+          <button onClick={limpiarFiltros} className="ml-auto flex items-center gap-1 text-xs text-muted hover:text-ink">
             <X className="w-3.5 h-3.5" /> Limpiar filtros
           </button>
         )}
@@ -169,7 +169,7 @@ function GrupoButton({ icon: Icon, label, active, onClick }: {
   return (
     <button onClick={onClick}
       className={cn('flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors',
-        active ? 'bg-pulse-red text-white' : 'bg-card-dark text-[#999] hover:text-white')}>
+        active ? 'bg-pulse-red text-white' : 'bg-card-dark text-muted hover:text-ink')}>
       <Icon className="w-4 h-4" /> {label}
     </button>
   )
@@ -202,7 +202,7 @@ function SegmentadoresInline({ semanasDisponibles, mesesDisponibles, semanasSel,
 
   return (
     <div className="flex items-center gap-2">
-      <span className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-[#999]">
+      <span className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-muted">
         <Filter className="w-3.5 h-3.5" /> SEGMENTADORES:
       </span>
 
@@ -245,18 +245,18 @@ function MultiSelectDropdown({ label, disabled, children, widthClass = 'w-full' 
   }, [open])
 
   if (disabled) {
-    return <p className={cn('text-xs text-[#555] py-2 px-3', widthClass)}>Sin opciones</p>
+    return <p className={cn('text-xs text-muted-2 py-2 px-3', widthClass)}>Sin opciones</p>
   }
 
   return (
     <div className={cn('relative', widthClass)} ref={ref}>
       <button type="button" onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center justify-between gap-2 text-xs py-2 px-3 rounded border border-border-dark bg-bg-dark text-white hover:border-pulse-red transition-colors">
+        className="w-full flex items-center justify-between gap-2 text-xs py-2 px-3 rounded border border-border-dark bg-bg-dark text-ink hover:border-pulse-red transition-colors">
         <span className="truncate">{label}</span>
-        <ChevronDown className={cn('w-3.5 h-3.5 shrink-0 text-[#999] transition-transform', open && 'rotate-180')} />
+        <ChevronDown className={cn('w-3.5 h-3.5 shrink-0 text-muted transition-transform', open && 'rotate-180')} />
       </button>
       {open && (
-        <div className="absolute z-20 mt-1 w-full max-h-64 overflow-y-auto rounded border border-border-dark bg-[#111] shadow-xl py-1">
+        <div className="absolute z-20 mt-1 w-full max-h-64 overflow-y-auto rounded border border-border-dark bg-card-dark shadow-xl py-1">
           {children}
         </div>
       )}
@@ -270,16 +270,16 @@ function DropdownCheckboxItem({ checked, onChange, children }: {
   children: ReactNode
 }) {
   return (
-    <label className="flex items-center gap-2 text-xs py-1.5 px-3 cursor-pointer select-none hover:bg-white/5 text-[#ccc]">
+    <label className="flex items-center gap-2 text-xs py-1.5 px-3 cursor-pointer select-none hover:bg-border-dark/40 text-ink-2">
       <input type="checkbox" checked={checked} onChange={onChange} className="accent-pulse-red w-3.5 h-3.5 shrink-0" />
-      <span className={cn(checked && 'text-white font-medium')}>{children}</span>
+      <span className={cn(checked && 'text-ink font-medium')}>{children}</span>
     </label>
   )
 }
 
 function ProveedorView({ data }: { data: IndicadoresProveedor }) {
   if (data.totalNc === 0) {
-    return <div className="card p-10 text-center text-[#666] text-sm">Sin NC de Proveedor en el período seleccionado.</div>
+    return <div className="card p-10 text-center text-muted text-sm">Sin NC de Proveedor en el período seleccionado.</div>
   }
 
   const porSemanaLine = data.porSemana.map((s) => ({ semana: `${s.semana}`, costoPlanta: s.costoPlanta }))
@@ -303,8 +303,8 @@ function ProveedorView({ data }: { data: IndicadoresProveedor }) {
           caption="MONTO RECAUDADO POR V.T." />
         <IconKpi icon={BarChart3} caption="BALANCE DEL PERIODO">
           <div className="text-sm leading-tight space-y-0.5">
-            <p className="text-white font-semibold">IMPACTO: <span className="text-pulse-red">{fmtMoney(data.impacto)}</span></p>
-            <p className="text-white font-semibold">RETORNO: <span className="text-status-ok">{data.retornoPct.toLocaleString('es-CL')}%</span></p>
+            <p className="text-ink font-semibold">IMPACTO: <span className="text-pulse-red">{fmtMoney(data.impacto)}</span></p>
+            <p className="text-ink font-semibold">RETORNO: <span className="text-status-ok">{data.retornoPct.toLocaleString('es-CL')}%</span></p>
           </div>
         </IconKpi>
       </div>
@@ -347,22 +347,22 @@ function ProveedorMiniCard({ proveedor, detalle, totalNc }: {
 
   return (
     <div className="rounded-lg border border-border-dark overflow-hidden">
-      <p className="text-xs font-semibold text-white text-center py-2 bg-border-dark/40">{proveedor.proveedor}</p>
+      <p className="text-xs font-semibold text-ink text-center py-2 bg-border-dark/40">{proveedor.proveedor}</p>
       <div className="px-2 pt-2">
         <MiniHorizontalBars data={razones} xKey="razon" yKey="costoPlanta" />
       </div>
-      <div className="grid grid-cols-3 text-center text-[10px] text-[#ccc] bg-[#111] py-2 border-t border-border-dark">
+      <div className="grid grid-cols-3 text-center text-[10px] text-ink-2 bg-bg-dark/60 py-2 border-t border-border-dark">
         <div>
-          <p className="text-[#666] uppercase">Total</p>
-          <p className="font-semibold text-white">{fmtMoney(proveedor.costoPlanta)}</p>
+          <p className="text-muted uppercase">Total</p>
+          <p className="font-semibold text-ink">{fmtMoney(proveedor.costoPlanta)}</p>
         </div>
         <div>
-          <p className="text-[#666] uppercase">Suma NC</p>
-          <p className="font-semibold text-white">{proveedor.cantidad}</p>
+          <p className="text-muted uppercase">Suma NC</p>
+          <p className="font-semibold text-ink">{proveedor.cantidad}</p>
         </div>
         <div>
-          <p className="text-[#666] uppercase">Participación</p>
-          <p className="font-semibold text-white">{proveedor.participacionPct.toLocaleString('es-CL')}%</p>
+          <p className="text-muted uppercase">Participación</p>
+          <p className="font-semibold text-ink">{proveedor.participacionPct.toLocaleString('es-CL')}%</p>
         </div>
       </div>
     </div>
@@ -375,7 +375,7 @@ const RAZON_STACK_COLORS = ['#60A5FA', '#F2C94C', '#9CA3AF', '#F2994A', '#4C5FD5
 
 function PlantaView({ data }: { data: IndicadoresPlanta }) {
   if (data.totalNc === 0) {
-    return <div className="card p-10 text-center text-[#666] text-sm">Sin NC de Planta en el período seleccionado.</div>
+    return <div className="card p-10 text-center text-muted text-sm">Sin NC de Planta en el período seleccionado.</div>
   }
 
   const participacionDonut = [
@@ -415,8 +415,8 @@ function PlantaView({ data }: { data: IndicadoresPlanta }) {
           caption="MONTO RECAUDADO POR V.T." />
         <IconKpi icon={BarChart3} caption="BALANCE DEL PERIODO">
           <div className="text-sm leading-tight space-y-0.5">
-            <p className="text-white font-semibold">IMPACTO: <span className="text-pulse-red">{fmtMoney(data.impacto)}</span></p>
-            <p className="text-white font-semibold">RETORNO: <span className="text-status-ok">{data.retornoPct.toLocaleString('es-CL')}%</span></p>
+            <p className="text-ink font-semibold">IMPACTO: <span className="text-pulse-red">{fmtMoney(data.impacto)}</span></p>
+            <p className="text-ink font-semibold">RETORNO: <span className="text-status-ok">{data.retornoPct.toLocaleString('es-CL')}%</span></p>
           </div>
         </IconKpi>
       </div>
@@ -454,11 +454,11 @@ function RazonSemanaTable({ razones, semanas, valores, colors }: {
 
   return (
     <div className="mt-4">
-      <h4 className="text-xs font-semibold text-white mb-2">Pérdida en dinero por motivo</h4>
+      <h4 className="text-xs font-semibold text-ink mb-2">Pérdida en dinero por motivo</h4>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-border-dark text-[#666] uppercase tracking-wide">
+            <tr className="border-b border-border-dark text-muted uppercase tracking-wide">
               <th className="py-2 px-3 text-left font-medium">Razón</th>
               {semanas.map((s) => (
                 <th key={s} className="py-2 px-3 text-right font-medium">Semana {s}</th>
@@ -468,15 +468,15 @@ function RazonSemanaTable({ razones, semanas, valores, colors }: {
           <tbody>
             {razones.map((razon, i) => (
               <tr key={razon} className="border-b border-border-dark/50">
-                <td className="py-2 px-3 text-[#ddd] flex items-center gap-2 whitespace-nowrap">
+                <td className="py-2 px-3 text-ink-2 flex items-center gap-2 whitespace-nowrap">
                   <span className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
                   {razon}
                 </td>
                 {semanas.map((s) => {
                   const v = valores.get(`${s}|||${razon}`)
                   return (
-                    <td key={s} className="py-2 px-3 text-right text-[#ddd]">
-                      {v != null && v > 0 ? fmtMoney(v) : <span className="text-[#555]">—</span>}
+                    <td key={s} className="py-2 px-3 text-right text-ink-2">
+                      {v != null && v > 0 ? fmtMoney(v) : <span className="text-muted-2">—</span>}
                     </td>
                   )
                 })}
@@ -485,9 +485,9 @@ function RazonSemanaTable({ razones, semanas, valores, colors }: {
           </tbody>
           <tfoot>
             <tr className="border-t border-border-dark">
-              <td className="py-2 px-3 text-white font-semibold">Total</td>
+              <td className="py-2 px-3 text-ink font-semibold">Total</td>
               {totalPorSemana.map((t, i) => (
-                <td key={semanas[i]} className="py-2 px-3 text-right text-white font-semibold">
+                <td key={semanas[i]} className="py-2 px-3 text-right text-ink font-semibold">
                   {fmtMoney(t)}
                 </td>
               ))}

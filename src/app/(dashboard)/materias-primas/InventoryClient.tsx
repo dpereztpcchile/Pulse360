@@ -98,7 +98,7 @@ export function InventoryClient({
         <button
           onClick={() => setTab('TODOS')}
           className={cn('px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-            tab === 'TODOS' ? 'bg-pulse-red text-white' : 'bg-card-dark text-[#999] hover:text-white border border-border-dark')}
+            tab === 'TODOS' ? 'bg-pulse-red text-white' : 'bg-card-dark text-muted hover:text-ink border border-border-dark')}
         >
           Todos
         </button>
@@ -107,7 +107,7 @@ export function InventoryClient({
             key={c}
             onClick={() => setTab(c)}
             className={cn('px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
-              tab === c ? 'bg-pulse-red text-white' : 'bg-card-dark text-[#999] hover:text-white border border-border-dark')}
+              tab === c ? 'bg-pulse-red text-white' : 'bg-card-dark text-muted hover:text-ink border border-border-dark')}
           >
             {MATERIAL_CATEGORY[c].label}
           </button>
@@ -124,7 +124,7 @@ export function InventoryClient({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+              <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left font-medium">Insumo</th>
                 <th className="px-4 py-3 text-left font-medium">Código</th>
                 <th className="px-4 py-3 text-left font-medium">Categoría</th>
@@ -136,43 +136,43 @@ export function InventoryClient({
             </thead>
             <tbody className="divide-y divide-border-dark">
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="px-4 py-10 text-center text-[#555]">Sin insumos en esta categoría</td></tr>
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-muted-2">Sin insumos en esta categoría</td></tr>
               )}
               {filtered.map((m) => {
                 const st = MATERIAL_STATE[m.state]
                 const days = daysUntil(m.nearestExpiry)
                 return (
                   <tr key={m.id} className="hover:bg-border-dark/30 transition-colors">
-                    <td className="px-4 py-3 font-medium text-white">{m.name}</td>
-                    <td className="px-4 py-3 font-mono text-xs text-[#999]">{m.code}</td>
+                    <td className="px-4 py-3 font-medium text-ink">{m.name}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted">{m.code}</td>
                     <td className="px-4 py-3">
                       <span className={cn('inline-flex px-2 py-0.5 rounded-full text-xs font-semibold', MATERIAL_CATEGORY[m.category].cls)}>
                         {MATERIAL_CATEGORY[m.category].label}
                       </span>
                     </td>
                     <td className={cn('px-4 py-3 text-right font-rajdhani font-bold text-base',
-                      m.state === 'BAJO_MINIMO' ? 'text-pulse-red' : 'text-white')}>
-                      {m.currentStock.toLocaleString()} <span className="text-xs font-normal text-[#666]">{m.unit}</span>
+                      m.state === 'BAJO_MINIMO' ? 'text-pulse-red' : 'text-ink')}>
+                      {m.currentStock.toLocaleString()} <span className="text-xs font-normal text-muted">{m.unit}</span>
                     </td>
-                    <td className="px-4 py-3 text-right text-[#999]">{m.minStock.toLocaleString()} {m.unit}</td>
+                    <td className="px-4 py-3 text-right text-muted">{m.minStock.toLocaleString()} {m.unit}</td>
                     <td className="px-4 py-3">
                       <span className={cn(st.badge, st.blink && 'animate-pulse')}>
                         <span className={cn('w-1.5 h-1.5 rounded-full', st.dot)} />
                         {st.label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#999]">
+                    <td className="px-4 py-3 text-muted">
                       {m.nearestExpiry ? (
                         <span className={cn(days !== null && days <= 14 && 'text-status-warn font-medium')}>
                           {formatDate(m.nearestExpiry)}
                           {days !== null && (
-                            <span className="text-xs text-[#666] ml-1">
+                            <span className="text-xs text-muted ml-1">
                               ({days < 0 ? 'vencido' : `${days}d`})
                             </span>
                           )}
                         </span>
                       ) : (
-                        <span className="text-[#555]">—</span>
+                        <span className="text-muted-2">—</span>
                       )}
                     </td>
                   </tr>
@@ -188,8 +188,8 @@ export function InventoryClient({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-lg card border border-border-dark shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-white">Nuevo insumo</h2>
-              <button onClick={() => setModalOpen(false)} className="text-[#666] hover:text-white transition-colors">
+              <h2 className="text-lg font-semibold text-ink">Nuevo insumo</h2>
+              <button onClick={() => setModalOpen(false)} className="text-muted hover:text-ink transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -203,39 +203,39 @@ export function InventoryClient({
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-[#ccc] mb-1.5">Nombre</label>
+                  <label className="block text-sm font-medium text-ink-2 mb-1.5">Nombre</label>
                   <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required
-                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#ccc] mb-1.5">Código</label>
+                  <label className="block text-sm font-medium text-ink-2 mb-1.5">Código</label>
                   <input value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} required
-                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="col-span-1">
-                  <label className="block text-sm font-medium text-[#ccc] mb-1.5">Categoría</label>
+                  <label className="block text-sm font-medium text-ink-2 mb-1.5">Categoría</label>
                   <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
+                    className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red">
                     {CATEGORIES.map((c) => <option key={c} value={c}>{MATERIAL_CATEGORY[c].label}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#ccc] mb-1.5">Unidad</label>
+                  <label className="block text-sm font-medium text-ink-2 mb-1.5">Unidad</label>
                   <input value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })}
-                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#ccc] mb-1.5">Stock mínimo</label>
+                  <label className="block text-sm font-medium text-ink-2 mb-1.5">Stock mínimo</label>
                   <input type="number" min="0" value={form.minStock} onChange={(e) => setForm({ ...form, minStock: e.target.value })} required
-                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                    className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#ccc] mb-1.5">Consumo diario estimado (para días de cobertura)</label>
+                <label className="block text-sm font-medium text-ink-2 mb-1.5">Consumo diario estimado (para días de cobertura)</label>
                 <input type="number" min="0" value={form.dailyUsageKg} onChange={(e) => setForm({ ...form, dailyUsageKg: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                  className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
               </div>
 
               <div className="flex gap-3 pt-2">

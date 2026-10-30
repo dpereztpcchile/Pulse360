@@ -17,10 +17,10 @@ export default async function ConfiguracionPage() {
 
   const header = (
     <div>
-      <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+      <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
         <Gauge className="w-6 h-6 text-pulse-red" /> Capacidad vs Demanda
       </h1>
-      <p className="text-sm text-[#666] mt-0.5">Configuración de capacidad instalada por línea</p>
+      <p className="text-sm text-muted mt-0.5">Configuración de capacidad instalada por línea</p>
     </div>
   )
 

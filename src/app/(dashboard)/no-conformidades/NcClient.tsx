@@ -204,12 +204,12 @@ export function NcClient({
 
   return (
     <div className="space-y-5">
-      <p className="text-xs text-[#666]">
+      <p className="text-xs text-muted">
         Esta vista es solo de lectura: todas las NC se cargan desde el Excel en la pestaña{' '}
-        <span className="text-white font-medium">Carga de archivos</span>. Las NC marcadas como{' '}
-        <span className="text-white font-medium">gestionadas</span> (devolución coordinada con el proveedor) se excluyen de los Indicadores, pero quedan visibles aquí como histórico.
-        {' '}Usa el ícono <span className="text-white font-medium">▼</span> de cada columna para filtrar, y haz clic en el nombre de la columna para ordenar.
-        {' '}Usa <span className="text-white font-medium">Solo productos cárnicos</span> para excluir insumos de envase/embalaje (etiquetas, film, bandejas, etc.) del listado.
+        <span className="text-ink font-medium">Carga de archivos</span>. Las NC marcadas como{' '}
+        <span className="text-ink font-medium">gestionadas</span> (devolución coordinada con el proveedor) se excluyen de los Indicadores, pero quedan visibles aquí como histórico.
+        {' '}Usa el ícono <span className="text-ink font-medium">▼</span> de cada columna para filtrar, y haz clic en el nombre de la columna para ordenar.
+        {' '}Usa <span className="text-ink font-medium">Solo productos cárnicos</span> para excluir insumos de envase/embalaje (etiquetas, film, bandejas, etc.) del listado.
       </p>
 
       <div className="flex items-center gap-3">
@@ -221,7 +221,7 @@ export function NcClient({
             'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors',
             soloCarnicos
               ? 'bg-pulse-red/10 border-pulse-red text-pulse-red'
-              : 'border-border-dark text-[#999] hover:text-white hover:border-[#555]'
+              : 'border-border-dark text-muted hover:text-ink hover:border-muted-2'
           )}
         >
           <Beef className="w-3.5 h-3.5" />
@@ -229,11 +229,11 @@ export function NcClient({
         </button>
 
         {activeFilterCount > 0 && (
-          <button onClick={limpiarFiltros} className="text-xs text-[#999] hover:text-white transition-colors underline underline-offset-2">
+          <button onClick={limpiarFiltros} className="text-xs text-muted hover:text-ink transition-colors underline underline-offset-2">
             Limpiar {activeFilterCount} filtro{activeFilterCount === 1 ? '' : 's'}
           </button>
         )}
-        <span className="text-xs text-[#666] ml-auto">{filtered.length} de {initialNcs.length} NC</span>
+        <span className="text-xs text-muted ml-auto">{filtered.length} de {initialNcs.length} NC</span>
       </div>
 
       {/* Tabla */}
@@ -241,7 +241,7 @@ export function NcClient({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+              <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                 {COLUMNS.map(({ key, label, align, filterKey, searchable }) => {
                   const active = sortKey === key
                   const isFecha = key === 'fecha'
@@ -258,7 +258,7 @@ export function NcClient({
                         <button
                           type="button"
                           onClick={() => toggleSort(key)}
-                          className={cn('inline-flex items-center gap-1 hover:text-white transition-colors', active && 'text-white')}
+                          className={cn('inline-flex items-center gap-1 hover:text-ink transition-colors', active && 'text-ink')}
                         >
                           {label}
                           {active ? (
@@ -293,14 +293,14 @@ export function NcClient({
                                 <button
                                   type="button"
                                   onClick={() => { setPeriodMode('semana'); setPeriodSelected(null) }}
-                                  className={cn('flex-1 py-1 transition-colors', periodMode === 'semana' ? 'bg-pulse-red text-white' : 'text-[#999] hover:text-white')}
+                                  className={cn('flex-1 py-1 transition-colors', periodMode === 'semana' ? 'bg-pulse-red text-white' : 'text-muted hover:text-ink')}
                                 >
                                   Semana
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => { setPeriodMode('mes'); setPeriodSelected(null) }}
-                                  className={cn('flex-1 py-1 transition-colors', periodMode === 'mes' ? 'bg-pulse-red text-white' : 'text-[#999] hover:text-white')}
+                                  className={cn('flex-1 py-1 transition-colors', periodMode === 'mes' ? 'bg-pulse-red text-white' : 'text-muted hover:text-ink')}
                                 >
                                   Mes
                                 </button>
@@ -316,17 +316,17 @@ export function NcClient({
             </thead>
             <tbody className="divide-y divide-border-dark">
               {filtered.length === 0 && (
-                <tr><td colSpan={11} className="px-4 py-10 text-center text-[#555]">Sin no conformidades que coincidan</td></tr>
+                <tr><td colSpan={11} className="px-4 py-10 text-center text-muted-2">Sin no conformidades que coincidan</td></tr>
               )}
               {filtered.map((n) => (
                 <tr key={n.id} className={cn('transition-colors', n.gestionado ? 'opacity-60' : 'hover:bg-border-dark/30')}>
-                  <td className="px-4 py-3 font-mono text-xs text-[#999] whitespace-nowrap">{n.ncNumber}</td>
-                  <td className="px-4 py-3 text-[#999] whitespace-nowrap">{formatDate(n.fecha)}</td>
-                  <td className="px-4 py-3 text-[#999]">{n.semana}</td>
-                  <td className="px-4 py-3 font-medium text-white max-w-[220px] truncate">{n.producto}</td>
-                  <td className="px-4 py-3 text-[#999]">{n.razon}</td>
-                  <td className="px-4 py-3 text-right text-[#999]">{n.cantidadKg.toLocaleString('es-CL')}</td>
-                  <td className="px-4 py-3 text-right text-[#999]">{fmtMoney(n.valorNcOC)}</td>
+                  <td className="px-4 py-3 font-mono text-xs text-muted whitespace-nowrap">{n.ncNumber}</td>
+                  <td className="px-4 py-3 text-muted whitespace-nowrap">{formatDate(n.fecha)}</td>
+                  <td className="px-4 py-3 text-muted">{n.semana}</td>
+                  <td className="px-4 py-3 font-medium text-ink max-w-[220px] truncate">{n.producto}</td>
+                  <td className="px-4 py-3 text-muted">{n.razon}</td>
+                  <td className="px-4 py-3 text-right text-muted">{n.cantidadKg.toLocaleString('es-CL')}</td>
+                  <td className="px-4 py-3 text-right text-muted">{fmtMoney(n.valorNcOC)}</td>
                   <td className="px-4 py-3">
                     <span className={cn('inline-flex px-2 py-0.5 rounded-full text-xs font-semibold', NC_DESTINO[n.destino].cls)}>
                       {NC_DESTINO[n.destino].label}
@@ -337,9 +337,9 @@ export function NcClient({
                       {NC_RESPONSABLE[n.responsable].label}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-[#999]">{n.proveedor ?? '—'}</td>
+                  <td className="px-4 py-3 text-muted">{n.proveedor ?? '—'}</td>
                   <td className="px-4 py-3 text-center">
-                    {n.gestionado ? <CheckCircle2 className="w-4 h-4 text-status-ok inline" /> : <span className="text-[#555]">—</span>}
+                    {n.gestionado ? <CheckCircle2 className="w-4 h-4 text-status-ok inline" /> : <span className="text-muted-2">—</span>}
                   </td>
                 </tr>
               ))}

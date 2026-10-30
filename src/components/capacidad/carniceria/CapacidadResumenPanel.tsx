@@ -43,19 +43,19 @@ export function CapacidadResumenPanel({ data }: { data: CapacidadResumenData }) 
           </div>
           <div>
             <p className="font-rajdhani font-bold text-xl uppercase tracking-wide leading-none" style={{ color: meta.color }}>{estadoLabel}</p>
-            <p className="text-xs text-[#666] mt-1">{data.diaLabel} · {data.hasProgram ? 'Pedido cargado' : 'Sin pedido cargado'}</p>
+            <p className="text-xs text-muted mt-1">{data.diaLabel} · {data.hasProgram ? 'Pedido cargado' : 'Sin pedido cargado'}</p>
           </div>
         </div>
 
         <div className="space-y-1.5 text-sm">
           <div className="flex items-center justify-between">
-            <span className="text-[#999]">Capacidad disponible</span>
-            <span className="text-white font-medium">{fmt(data.capacidadKgMP)} kg MP</span>
+            <span className="text-muted">Capacidad disponible</span>
+            <span className="text-ink font-medium">{fmt(data.capacidadKgMP)} kg MP</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[#999]">Pedido del día</span>
+            <span className="text-muted">Pedido del día</span>
             {data.hasProgram ? (
-              <span className="text-white font-medium">{fmt(data.pedidoKgMP)} kg MP</span>
+              <span className="text-ink font-medium">{fmt(data.pedidoKgMP)} kg MP</span>
             ) : (
               <Link href="/carga-archivos" className="inline-flex items-center gap-1 text-pulse-red hover:text-pulse-red-hover font-medium">
                 Sin programa cargado <ArrowUpRight className="w-3.5 h-3.5" />
@@ -63,7 +63,7 @@ export function CapacidadResumenPanel({ data }: { data: CapacidadResumenData }) 
             )}
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-[#999]">{deficit ? 'Déficit' : 'Holgura'}</span>
+            <span className="text-muted">{deficit ? 'Déficit' : 'Holgura'}</span>
             <span className="font-semibold" style={{ color: deficit ? '#CC0000' : '#22C55E' }}>
               {deficit ? '' : '+'}{fmt(data.holguraKgMP)} kg
             </span>
@@ -85,33 +85,33 @@ export function CapacidadResumenPanel({ data }: { data: CapacidadResumenData }) 
       {/* Panel derecho */}
       <div className="lg:border-l lg:border-border-dark lg:pl-5 space-y-3">
         <div className="flex items-center justify-between">
-          <h4 className="font-semibold text-white text-sm">Desglose de capacidad</h4>
+          <h4 className="font-semibold text-ink text-sm">Desglose de capacidad</h4>
           <Link href="/capacidad" className="text-xs text-pulse-red hover:text-pulse-red-hover whitespace-nowrap">Ver detalle →</Link>
         </div>
 
         <div className="flex items-center justify-between text-sm">
-          <span className="text-[#999]">Productividad nominal</span>
-          <span className="text-white font-medium">{PRODUCTIVIDAD_NOMINAL} Kg MP/HH</span>
+          <span className="text-muted">Productividad nominal</span>
+          <span className="text-ink font-medium">{PRODUCTIVIDAD_NOMINAL} Kg MP/HH</span>
         </div>
 
         <div className="space-y-1">
           {data.breakdown.length === 0 ? (
-            <p className="text-sm text-[#555]">Sin turnos activos este día.</p>
+            <p className="text-sm text-muted-2">Sin turnos activos este día.</p>
           ) : data.breakdown.map((t) => (
             <div key={t.turnoNombre} className="flex items-center justify-between text-sm">
-              <span className="text-[#999]">{t.turnoNombre} <span className="text-[#555]">({t.personas} pers.)</span></span>
-              <span className="text-white font-medium">{t.hh.toLocaleString('es-CL')} HH</span>
+              <span className="text-muted">{t.turnoNombre} <span className="text-muted-2">({t.personas} pers.)</span></span>
+              <span className="text-ink font-medium">{t.hh.toLocaleString('es-CL')} HH</span>
             </div>
           ))}
           <div className="flex items-center justify-between text-sm pt-1.5 border-t border-border-dark">
-            <span className="text-[#ccc] font-medium">Total</span>
-            <span className="text-white font-bold">{data.hhDisponibles.toLocaleString('es-CL')} HH</span>
+            <span className="text-ink-2 font-medium">Total</span>
+            <span className="text-ink font-bold">{data.hhDisponibles.toLocaleString('es-CL')} HH</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between text-sm pt-1">
-          <span className="text-[#999]">Capacidad total</span>
-          <span className="text-white font-semibold">{fmt(data.capacidadKgMP)} kg MP</span>
+          <span className="text-muted">Capacidad total</span>
+          <span className="text-ink font-semibold">{fmt(data.capacidadKgMP)} kg MP</span>
         </div>
       </div>
     </div>

@@ -112,20 +112,20 @@ export function ActiveAlertsClient({ initial, canResolve }: { initial: ActiveAle
             )}>
               <div>
                 <p className={cn('text-xs font-semibold uppercase tracking-wider',
-                  sev === 'CRITICA' && 'text-white/80',
+                  sev === 'CRITICA' && 'text-ink/80',
                   sev === 'ADVERTENCIA' && 'text-black/70',
-                  sev === 'INFORMATIVA' && 'text-[#777]',
+                  sev === 'INFORMATIVA' && 'text-muted',
                 )}>{cfg.label}</p>
                 <p className={cn('font-rajdhani font-bold text-4xl leading-tight',
-                  sev === 'CRITICA' && 'text-white',
+                  sev === 'CRITICA' && 'text-ink',
                   sev === 'ADVERTENCIA' && 'text-black',
-                  sev === 'INFORMATIVA' && 'text-[#999]',
+                  sev === 'INFORMATIVA' && 'text-muted',
                 )}>{n}</p>
               </div>
               <Icon className={cn('w-8 h-8',
-                sev === 'CRITICA' && 'text-white/90',
+                sev === 'CRITICA' && 'text-ink/90',
                 sev === 'ADVERTENCIA' && 'text-black/70',
-                sev === 'INFORMATIVA' && 'text-[#555]',
+                sev === 'INFORMATIVA' && 'text-muted-2',
               )} />
             </div>
           )
@@ -142,7 +142,7 @@ export function ActiveAlertsClient({ initial, canResolve }: { initial: ActiveAle
               'px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors',
               filter === f.key
                 ? 'bg-pulse-red border-pulse-red text-white'
-                : 'bg-card-dark border-border-dark text-[#999] hover:text-white',
+                : 'bg-card-dark border-border-dark text-muted hover:text-ink',
             )}
           >
             {f.label}
@@ -151,7 +151,7 @@ export function ActiveAlertsClient({ initial, canResolve }: { initial: ActiveAle
         <select
           value={moduleFilter}
           onChange={(e) => setModuleFilter(e.target.value)}
-          className="px-3 py-1.5 rounded-lg text-sm bg-card-dark border border-border-dark text-[#999] focus:outline-none focus:border-pulse-red"
+          className="px-3 py-1.5 rounded-lg text-sm bg-card-dark border border-border-dark text-muted focus:outline-none focus:border-pulse-red"
         >
           <option value="">Todos los módulos</option>
           {Object.entries(ALERT_MODULE).map(([key, m]) => (
@@ -160,7 +160,7 @@ export function ActiveAlertsClient({ initial, canResolve }: { initial: ActiveAle
         </select>
         <button
           onClick={() => load()}
-          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-[#999] hover:text-white border border-border-dark bg-card-dark"
+          className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-muted hover:text-ink border border-border-dark bg-card-dark"
         >
           <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin')} /> Actualizar
         </button>
@@ -175,7 +175,7 @@ export function ActiveAlertsClient({ initial, canResolve }: { initial: ActiveAle
       {/* Lista de alertas */}
       <div className="space-y-3">
         {alerts.length === 0 && (
-          <div className="card text-center py-14 text-[#555]">
+          <div className="card text-center py-14 text-muted-2">
             <Inbox className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p className="text-sm">No hay alertas activas con los filtros seleccionados.</p>
           </div>
@@ -239,7 +239,7 @@ function AlertCard({
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="font-semibold text-white">{alert.title}</span>
+            <span className="font-semibold text-ink">{alert.title}</span>
             <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', sev.badge)}>{sev.label}</span>
             <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full', mod.cls)}>{mod.label}</span>
             {acknowledged && (
@@ -248,10 +248,10 @@ function AlertCard({
               </span>
             )}
           </div>
-          <p className="text-sm text-[#aaa]">{alert.description}</p>
-          <div className="flex items-center gap-3 mt-1.5 text-xs text-[#555] flex-wrap">
+          <p className="text-sm text-muted-2">{alert.description}</p>
+          <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-2 flex-wrap">
             <span>{clock(alert.createdAt)} · {timeAgo(alert.createdAt)}</span>
-            {alert.responsible && <span>· Responsable: <span className="text-[#888]">{alert.responsible}</span></span>}
+            {alert.responsible && <span>· Responsable: <span className="text-muted">{alert.responsible}</span></span>}
           </div>
 
           {resolving && (
@@ -261,7 +261,7 @@ function AlertCard({
                 onChange={(e) => onNote(e.target.value)}
                 rows={2}
                 placeholder="Describe la acción tomada para resolver esta alerta…"
-                className="w-full px-3 py-2 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red resize-none"
+                className="w-full px-3 py-2 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red resize-none"
               />
               <div className="flex items-center gap-2">
                 <button onClick={onResolve} disabled={busy} className="btn-primary text-sm disabled:opacity-60">

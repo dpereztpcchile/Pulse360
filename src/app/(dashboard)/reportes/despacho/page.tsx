@@ -17,7 +17,7 @@ export default async function DespachoReportPage() {
   }
 
   return (
-    <Suspense fallback={<div className="text-[#666]">Cargando…</div>}>
+    <Suspense fallback={<div className="text-muted">Cargando…</div>}>
       <DespachoReportView canExport={canExport} user={session?.user?.name ?? 'Usuario'} />
     </Suspense>
   )

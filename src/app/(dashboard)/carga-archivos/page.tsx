@@ -17,10 +17,10 @@ export default async function CargaArchivosPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <FileUp className="w-6 h-6 text-pulse-red" /> Carga de Archivos
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">Carga centralizada del programa diario (.xlsx) para Carnicería y Molienda</p>
+        <p className="text-sm text-muted mt-0.5">Carga centralizada del programa diario (.xlsx) para Carnicería y Molienda</p>
       </div>
 
       <CargaProgramaClient today={appToday()} user={session.user?.name ?? 'Administrador'} />

@@ -19,7 +19,7 @@ export function ShiftToggle({ turno }: { turno: string }) {
           key={s.key}
           onClick={() => router.push(`${pathname}?turno=${s.key}`)}
           className={cn('px-3 py-1.5 text-sm font-medium transition-colors',
-            turno === s.key ? 'bg-pulse-red text-white' : 'bg-card-dark text-[#999] hover:text-white')}
+            turno === s.key ? 'bg-pulse-red text-white' : 'bg-card-dark text-muted hover:text-ink')}
         >
           {s.label}
         </button>

@@ -34,7 +34,7 @@ function roleBadge(role: string) {
     case 'CALIDAD':       return 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
     case 'VERIFICADOR':   return 'bg-purple-500/15 text-purple-400 border border-purple-500/30'
     case 'VISITANTE':     return 'bg-gray-500/15 text-gray-400 border border-gray-500/30'
-    default:              return 'bg-[#2A2A2A] text-[#999] border border-[#3A3A3A]'
+    default:              return 'bg-border-dark/60 text-muted border border-border-dark'
   }
 }
 
@@ -171,10 +171,10 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
             <Users className="w-6 h-6 text-pulse-red" /> Gestión de Usuarios
           </h1>
-          <p className="text-sm text-[#666] mt-0.5">Administración de cuentas, roles y accesos</p>
+          <p className="text-sm text-muted mt-0.5">Administración de cuentas, roles y accesos</p>
         </div>
         <button onClick={openCreate} className="btn-primary text-sm font-bold uppercase tracking-wide">
           <Plus className="w-4 h-4" /> Nuevo usuario
@@ -184,13 +184,13 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
       {/* Resumen */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Total usuarios', value: counts.total, color: 'text-white' },
+          { label: 'Total usuarios', value: counts.total, color: 'text-ink' },
           { label: 'Activos', value: counts.activos, color: 'text-status-ok' },
           { label: 'Administradores', value: counts.admins, color: 'text-pulse-red' },
         ].map((c) => (
           <div key={c.label} className="card text-center">
             <p className={cn('font-rajdhani font-bold text-4xl', c.color)}>{c.value}</p>
-            <p className="text-xs text-[#666] mt-1 uppercase tracking-wider">{c.label}</p>
+            <p className="text-xs text-muted mt-1 uppercase tracking-wider">{c.label}</p>
           </div>
         ))}
       </div>
@@ -198,19 +198,19 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
       {/* Filtros */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#555]" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-2" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre o email..."
-            className="w-full pl-9 pr-4 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm
+            className="w-full pl-9 pr-4 py-2 rounded-lg bg-card-dark border border-border-dark text-ink text-sm
                        placeholder-[#555] focus:outline-none focus:border-pulse-red transition-colors"
           />
         </div>
         <select
           value={roleFilter}
           onChange={(e) => setRoleFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm
+          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-ink text-sm
                      focus:outline-none focus:border-pulse-red"
         >
           <option value="TODOS">Todos los roles</option>
@@ -219,7 +219,7 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm
+          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-ink text-sm
                      focus:outline-none focus:border-pulse-red"
         >
           <option value="TODOS">Todos los estados</option>
@@ -233,7 +233,7 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+              <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                 <th className="px-5 py-3 text-left font-medium">Nombre</th>
                 <th className="px-5 py-3 text-left font-medium">Email</th>
                 <th className="px-5 py-3 text-left font-medium">Rol</th>
@@ -244,7 +244,7 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
             </thead>
             <tbody className="divide-y divide-border-dark">
               {filtered.length === 0 && (
-                <tr><td colSpan={6} className="px-5 py-10 text-center text-[#555]">Sin resultados</td></tr>
+                <tr><td colSpan={6} className="px-5 py-10 text-center text-muted-2">Sin resultados</td></tr>
               )}
               {filtered.map((u) => (
                 <tr key={u.id} className="hover:bg-border-dark/30 transition-colors">
@@ -255,13 +255,13 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
                           {u.name.split(' ').map((n) => n[0]).slice(0, 2).join('')}
                         </span>
                       </div>
-                      <span className="font-medium text-white">
+                      <span className="font-medium text-ink">
                         {u.name}
-                        {u.id === currentUserId && <span className="text-xs text-[#555] ml-1">(tú)</span>}
+                        {u.id === currentUserId && <span className="text-xs text-muted-2 ml-1">(tú)</span>}
                       </span>
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 text-[#999] font-mono text-xs">{u.email}</td>
+                  <td className="px-5 py-3.5 text-muted font-mono text-xs">{u.email}</td>
                   <td className="px-5 py-3.5">
                     <span className={cn('inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold', roleBadge(u.role))}>
                       {u.role === 'ADMINISTRADOR' && <Shield className="w-3 h-3" />}
@@ -271,26 +271,26 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
                   <td className="px-5 py-3.5">
                     <span className={cn(
                       'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold',
-                      u.active ? 'bg-status-ok/10 text-status-ok' : 'bg-[#3A1212] text-[#A04545]'
+                      u.active ? 'bg-status-ok/10 text-status-ok' : 'bg-pulse-red/10 text-pulse-red'
                     )}>
-                      <span className={cn('w-1.5 h-1.5 rounded-full', u.active ? 'bg-status-ok' : 'bg-[#A04545]')} />
+                      <span className={cn('w-1.5 h-1.5 rounded-full', u.active ? 'bg-status-ok' : 'bg-pulse-red')} />
                       {u.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-xs text-[#666] font-mono">{formatLastLogin(u.lastLoginAt)}</td>
+                  <td className="px-5 py-3.5 text-xs text-muted font-mono">{formatLastLogin(u.lastLoginAt)}</td>
                   <td className="px-5 py-3.5">
                     <div className="flex items-center justify-end gap-1">
                       <button onClick={() => openEdit(u)} title="Editar"
-                        className="p-1.5 rounded-lg text-[#888] hover:bg-border-dark hover:text-white transition-colors">
+                        className="p-1.5 rounded-lg text-muted hover:bg-border-dark hover:text-ink transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button onClick={() => { setResetUser(u); setNewPass(''); setError('') }} title="Resetear contraseña"
-                        className="p-1.5 rounded-lg text-[#888] hover:bg-border-dark hover:text-status-warn transition-colors">
+                        className="p-1.5 rounded-lg text-muted hover:bg-border-dark hover:text-status-warn transition-colors">
                         <KeyRound className="w-4 h-4" />
                       </button>
                       <button onClick={() => handleToggleActive(u)} title={u.active ? 'Desactivar' : 'Activar'}
                         className={cn('p-1.5 rounded-lg hover:bg-border-dark transition-colors',
-                          u.active ? 'text-[#888] hover:text-pulse-red' : 'text-status-ok')}>
+                          u.active ? 'text-muted hover:text-pulse-red' : 'text-status-ok')}>
                         <Power className="w-4 h-4" />
                       </button>
                     </div>
@@ -307,10 +307,10 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md card border border-border-dark shadow-2xl">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-ink">
                 {editing ? 'Editar usuario' : 'Nuevo usuario'}
               </h2>
-              <button onClick={() => setModalOpen(false)} className="text-[#666] hover:text-white transition-colors">
+              <button onClick={() => setModalOpen(false)} className="text-muted hover:text-ink transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -323,15 +323,15 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#ccc] mb-1.5">Nombre completo</label>
+                <label className="block text-sm font-medium text-ink-2 mb-1.5">Nombre completo</label>
                 <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required
-                  className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm
+                  className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm
                              focus:outline-none focus:border-pulse-red transition-colors" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#ccc] mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-ink-2 mb-1.5">Email</label>
                 <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required
-                  className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm
+                  className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm
                              focus:outline-none focus:border-pulse-red transition-colors" />
               </div>
               {!editing && (
@@ -345,17 +345,17 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
               )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-[#ccc] mb-1.5">Rol</label>
+                  <label className="block text-sm font-medium text-ink-2 mb-1.5">Rol</label>
                   <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm
+                    className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm
                                focus:outline-none focus:border-pulse-red">
                     {ROLES.map((r) => <option key={r} value={r}>{getRoleLabel(r)}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-[#ccc] mb-1.5">Planta</label>
+                  <label className="block text-sm font-medium text-ink-2 mb-1.5">Planta</label>
                   <select value={form.plantId} onChange={(e) => setForm({ ...form, plantId: e.target.value })}
-                    className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm
+                    className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm
                                focus:outline-none focus:border-pulse-red">
                     <option value="">Sin asignar</option>
                     {plants.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -381,15 +381,15 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-sm card border border-border-dark shadow-2xl">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-status-warn" /> Resetear contraseña
               </h2>
-              <button onClick={() => setResetUser(null)} className="text-[#666] hover:text-white transition-colors">
+              <button onClick={() => setResetUser(null)} className="text-muted hover:text-ink transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-sm text-[#666] mb-4">
-              Nueva contraseña para <span className="text-white font-medium">{resetUser.name}</span>.
+            <p className="text-sm text-muted mb-4">
+              Nueva contraseña para <span className="text-ink font-medium">{resetUser.name}</span>.
               Se le pedirá definir una contraseña propia en su próximo inicio de sesión.
             </p>
 
@@ -402,7 +402,7 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
             <form onSubmit={handleReset} className="space-y-4">
               <input type="password" value={newPass} onChange={(e) => setNewPass(e.target.value)}
                 required minLength={8} placeholder="Mínimo 8 caracteres" autoFocus
-                className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm
+                className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm
                            placeholder-[#555] focus:outline-none focus:border-pulse-red transition-colors" />
               <div className="flex gap-3">
                 <button type="button" onClick={() => setResetUser(null)} className="btn-secondary flex-1 justify-center text-sm">
@@ -422,27 +422,27 @@ export function UsersClient({ initialUsers, plants, currentUserId }: Props) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-sm card border border-border-dark shadow-2xl">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-status-ok" /> Usuario creado
               </h2>
-              <button onClick={() => setCreated(null)} className="text-[#666] hover:text-white transition-colors">
+              <button onClick={() => setCreated(null)} className="text-muted hover:text-ink transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-sm text-[#999] mb-4">
-              Comparte estos datos con <span className="text-white font-medium">{created.name}</span> para su primer ingreso:
+            <p className="text-sm text-muted mb-4">
+              Comparte estos datos con <span className="text-ink font-medium">{created.name}</span> para su primer ingreso:
             </p>
             <div className="space-y-2 mb-5">
               <div className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2">
-                <p className="text-[10px] text-[#666] uppercase tracking-wider">Email</p>
-                <p className="text-sm font-mono text-white">{created.email}</p>
+                <p className="text-[10px] text-muted uppercase tracking-wider">Email</p>
+                <p className="text-sm font-mono text-ink">{created.email}</p>
               </div>
               <div className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2">
-                <p className="text-[10px] text-[#666] uppercase tracking-wider">Contraseña temporal</p>
-                <p className="text-sm font-mono text-white">123456</p>
+                <p className="text-[10px] text-muted uppercase tracking-wider">Contraseña temporal</p>
+                <p className="text-sm font-mono text-ink">123456</p>
               </div>
             </div>
-            <p className="text-xs text-[#555] mb-4">
+            <p className="text-xs text-muted-2 mb-4">
               Al iniciar sesión, se le pedirá definir una contraseña propia antes de poder usar el sistema.
             </p>
             <button onClick={() => setCreated(null)} className="btn-primary w-full justify-center text-sm">

@@ -19,10 +19,10 @@ export default async function AlertasPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <Bell className="w-6 h-6 text-pulse-red" /> Alertas
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">
+        <p className="text-sm text-muted mt-0.5">
           Centro de alertas generadas automáticamente por todos los módulos del sistema
         </p>
       </div>

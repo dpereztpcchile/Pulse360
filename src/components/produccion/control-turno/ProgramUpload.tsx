@@ -148,9 +148,9 @@ export function ProgramUpload({ fecha, turno, user, canManage }: { fecha: string
           <div className="w-full max-w-sm card border border-border-dark shadow-2xl">
             <div className="flex items-center gap-2 mb-3">
               <AlertCircle className="w-5 h-5 text-status-warn" />
-              <h2 className="font-semibold text-white">Programa existente</h2>
+              <h2 className="font-semibold text-ink">Programa existente</h2>
             </div>
-            <p className="text-sm text-[#999] mb-4">Ya existe un programa cargado para este día y turno. ¿Deseas reemplazarlo? Se perderán los registros actuales.</p>
+            <p className="text-sm text-muted mb-4">Ya existe un programa cargado para este día y turno. ¿Deseas reemplazarlo? Se perderán los registros actuales.</p>
             <div className="flex gap-3">
               <button onClick={() => { setConfirmReplace(false); pending.current = null }} className="btn-secondary flex-1 justify-center text-sm">Cancelar</button>
               <button onClick={() => send(true)} disabled={busy} className="btn-primary flex-1 justify-center text-sm disabled:opacity-60">

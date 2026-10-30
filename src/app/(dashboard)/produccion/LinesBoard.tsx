@@ -57,19 +57,19 @@ export function LinesBoard({ initialLines }: { initialLines: Line[] }) {
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-status-ok" />
                   </span>
                 )}
-                <h3 className="font-rajdhani font-bold text-lg text-white uppercase tracking-wide">
+                <h3 className="font-rajdhani font-bold text-lg text-ink uppercase tracking-wide">
                   {line.name}
                 </h3>
               </div>
               <span className={cn('font-rajdhani font-bold leading-none text-4xl',
-                progress >= 75 ? 'text-status-ok' : progress >= 40 ? 'text-status-warn' : progress > 0 ? 'text-pulse-red' : 'text-[#555]')}>
-                {progress}<span className="text-xl text-[#666] font-normal">%</span>
+                progress >= 75 ? 'text-status-ok' : progress >= 40 ? 'text-status-warn' : progress > 0 ? 'text-pulse-red' : 'text-muted-2')}>
+                {progress}<span className="text-xl text-muted font-normal">%</span>
               </span>
             </div>
 
             {/* Barra de progreso plan vs real */}
             <div className="mb-4">
-              <div className="flex justify-between text-xs text-[#666] mb-1.5">
+              <div className="flex justify-between text-xs text-muted mb-1.5">
                 <span>Producción vs plan</span>
               </div>
               <div className="h-2.5 bg-bg-dark rounded-full overflow-hidden">
@@ -78,9 +78,9 @@ export function LinesBoard({ initialLines }: { initialLines: Line[] }) {
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="flex justify-between text-xs text-[#555] mt-1">
-                <span className="font-rajdhani font-bold text-base text-white">
-                  {line.dayKg.toLocaleString()} <span className="text-xs font-normal text-[#666]">kg hoy</span>
+              <div className="flex justify-between text-xs text-muted-2 mt-1">
+                <span className="font-rajdhani font-bold text-base text-ink">
+                  {line.dayKg.toLocaleString()} <span className="text-xs font-normal text-muted">kg hoy</span>
                 </span>
                 <span>Plan: {line.dailyPlanKg.toLocaleString()} kg</span>
               </div>
@@ -89,36 +89,36 @@ export function LinesBoard({ initialLines }: { initialLines: Line[] }) {
             {/* Métricas */}
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-bg-dark rounded-lg p-3 border border-border-dark">
-                <div className="flex items-center gap-1.5 text-xs text-[#666] mb-1">
+                <div className="flex items-center gap-1.5 text-xs text-muted mb-1">
                   <Gauge className="w-3.5 h-3.5" /> {line.code === 'CARNICERIA' ? 'Utilización de capacidad' : 'Utilización'}
                 </div>
                 {line.code === 'CARNICERIA' ? (
-                  <p className="font-rajdhani font-bold text-2xl text-white">
-                    {line.utilCapacidad != null ? <>{line.utilCapacidad}<span className="text-sm text-[#666] font-normal">%</span></> : '—'}
+                  <p className="font-rajdhani font-bold text-2xl text-ink">
+                    {line.utilCapacidad != null ? <>{line.utilCapacidad}<span className="text-sm text-muted font-normal">%</span></> : '—'}
                   </p>
                 ) : (
-                  <p className="font-rajdhani font-bold text-2xl text-white">
-                    {line.utilization}<span className="text-sm text-[#666] font-normal">%</span>
+                  <p className="font-rajdhani font-bold text-2xl text-ink">
+                    {line.utilization}<span className="text-sm text-muted font-normal">%</span>
                   </p>
                 )}
               </div>
               {line.code === 'CARNICERIA' ? (
                 <div className="bg-bg-dark rounded-lg p-3 border border-border-dark">
-                  <div className="flex items-center gap-1.5 text-xs text-[#666] mb-1">
+                  <div className="flex items-center gap-1.5 text-xs text-muted mb-1">
                     <User className="w-3.5 h-3.5" /> Kg / HH
                   </div>
-                  <p className="font-rajdhani font-bold text-2xl text-white">
+                  <p className="font-rajdhani font-bold text-2xl text-ink">
                     {line.prodRealKgHH != null ? line.prodRealKgHH : '—'}
                   </p>
                 </div>
               ) : (
                 <div className="bg-bg-dark rounded-lg p-3 border border-border-dark">
-                  <div className="flex items-center gap-1.5 text-xs text-[#666] mb-1">
+                  <div className="flex items-center gap-1.5 text-xs text-muted mb-1">
                     <Zap className="w-3.5 h-3.5" /> OEE
                   </div>
                   <p className={cn('font-rajdhani font-bold text-2xl',
-                    line.oee >= 75 ? 'text-status-ok' : line.oee >= 60 ? 'text-status-warn' : line.oee > 0 ? 'text-pulse-red' : 'text-[#555]')}>
-                    {line.oee}<span className="text-sm text-[#666] font-normal">%</span>
+                    line.oee >= 75 ? 'text-status-ok' : line.oee >= 60 ? 'text-status-warn' : line.oee > 0 ? 'text-pulse-red' : 'text-muted-2')}>
+                    {line.oee}<span className="text-sm text-muted font-normal">%</span>
                   </p>
                 </div>
               )}
@@ -136,11 +136,11 @@ export function LinesBoard({ initialLines }: { initialLines: Line[] }) {
                       <span className="w-2 h-2 rounded-full" style={{ backgroundColor: meta.color }} />
                       <span className="font-rajdhani font-bold text-sm uppercase tracking-wide" style={{ color: meta.color }}>{meta.label.toUpperCase()}</span>
                     </span>
-                    <span className="text-xs text-[#999]">{c.ocupacionPorc}% ocupación</span>
+                    <span className="text-xs text-muted">{c.ocupacionPorc}% ocupación</span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[#666]">Cap: <span className="text-[#ccc]">{fmtKg(c.capacidadKgMP)} kg</span></span>
-                    <span className="text-[#666]">{c.hasProgram ? <>Pedido: <span className="text-[#ccc]">{fmtKg(c.pedidoKgMP)} kg</span></> : 'Sin pedido'}</span>
+                    <span className="text-muted">Cap: <span className="text-ink-2">{fmtKg(c.capacidadKgMP)} kg</span></span>
+                    <span className="text-muted">{c.hasProgram ? <>Pedido: <span className="text-ink-2">{fmtKg(c.pedidoKgMP)} kg</span></> : 'Sin pedido'}</span>
                     <span className="font-semibold" style={{ color: deficit ? '#CC0000' : '#22C55E' }}>{deficit ? '' : '+'}{fmtKg(c.holguraKgMP)} kg</span>
                   </div>
                 </div>

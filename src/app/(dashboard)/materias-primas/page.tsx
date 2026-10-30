@@ -58,10 +58,10 @@ export default async function MateriasPrimasPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <Package className="w-6 h-6 text-pulse-red" /> Materias Primas
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">Inventario y control de stock</p>
+        <p className="text-sm text-muted mt-0.5">Inventario y control de stock</p>
       </div>
 
       <MaterialsTabs />

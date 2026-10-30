@@ -13,9 +13,9 @@ export function Kpi({ label, value, sub, accent }: {
 }) {
   return (
     <div className="card p-4">
-      <p className="text-xs uppercase tracking-wide text-[#666]">{label}</p>
-      <p className={cn('kpi-value mt-1', accent ? 'text-pulse-red' : 'text-white')}>{value}</p>
-      {sub && <p className="text-xs text-[#666] mt-0.5">{sub}</p>}
+      <p className="text-xs uppercase tracking-wide text-muted">{label}</p>
+      <p className={cn('kpi-value mt-1', accent ? 'text-pulse-red' : 'text-ink')}>{value}</p>
+      {sub && <p className="text-xs text-muted mt-0.5">{sub}</p>}
     </div>
   )
 }
@@ -31,11 +31,11 @@ export function IconKpi({ icon: Icon, value, caption, children }: {
   return (
     <div className="card p-4 flex items-start gap-3">
       <div className="shrink-0 w-10 h-10 rounded-lg bg-white/90 flex items-center justify-center">
-        <Icon className="w-5 h-5 text-[#111]" strokeWidth={2} />
+        <Icon className="w-5 h-5 text-ink" strokeWidth={2} />
       </div>
       <div className="flex-1 min-w-0">
-        {children ? children : <p className="text-2xl font-bold text-white leading-tight">{value}</p>}
-        <p className="text-[11px] uppercase tracking-wide text-[#999] mt-1 leading-tight">{caption}</p>
+        {children ? children : <p className="text-2xl font-bold text-ink leading-tight">{value}</p>}
+        <p className="text-[11px] uppercase tracking-wide text-muted mt-1 leading-tight">{caption}</p>
       </div>
     </div>
   )
@@ -49,7 +49,7 @@ export function SectionCard({ title, children, className }: {
 }) {
   return (
     <div className={cn('card p-4', className)}>
-      <h3 className="text-sm font-semibold text-white mb-3">{title}</h3>
+      <h3 className="text-sm font-semibold text-ink mb-3">{title}</h3>
       {children}
     </div>
   )
@@ -81,13 +81,13 @@ export function DataTable({ columns, rows }: {
   rows: Record<string, unknown>[]
 }) {
   if (rows.length === 0) {
-    return <p className="text-sm text-[#666] py-6 text-center">Sin datos en el período</p>
+    return <p className="text-sm text-muted py-6 text-center">Sin datos en el período</p>
   }
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wide">
+          <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wide">
             {columns.map((c) => (
               <th key={c.key} className={cn('py-2 px-3 font-medium', c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left')}>
                 {c.label}
@@ -99,7 +99,7 @@ export function DataTable({ columns, rows }: {
           {rows.map((row, i) => (
             <tr key={i} className="border-b border-border-dark/50 hover:bg-border-dark/30">
               {columns.map((c) => (
-                <td key={c.key} className={cn('py-2 px-3 text-[#ddd]', c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left')}>
+                <td key={c.key} className={cn('py-2 px-3 text-ink-2', c.align === 'right' ? 'text-right' : c.align === 'center' ? 'text-center' : 'text-left')}>
                   {c.render ? c.render(row[c.key], row) : String(row[c.key] ?? '—')}
                 </td>
               ))}
@@ -115,7 +115,7 @@ export function DataTable({ columns, rows }: {
 export function ReportState({ loading, error }: { loading: boolean; error: string | null }) {
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-[#666]">
+      <div className="flex items-center justify-center py-20 text-muted">
         <Loader2 className="w-6 h-6 animate-spin mr-2" /> Generando reporte…
       </div>
     )

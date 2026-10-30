@@ -112,25 +112,25 @@ export function OrdersClient({ initialOrders, lines, role }: { initialOrders: Or
       {/* Filtros + acción */}
       <div className="flex items-center gap-3 flex-wrap">
         <input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
         <select value={fLine} onChange={(e) => setFLine(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
+          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red">
           <option value="TODOS">Todas las líneas</option>
           {lines.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
         </select>
         <select value={fShift} onChange={(e) => setFShift(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
+          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red">
           <option value="TODOS">Todos los turnos</option>
           {SHIFTS.map((s) => <option key={s} value={s}>{SHIFT_LABELS[s]}</option>)}
         </select>
         <select value={fStatus} onChange={(e) => setFStatus(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
+          className="px-3 py-2 rounded-lg bg-card-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red">
           <option value="TODOS">Todos los estados</option>
           {STATUSES.map((s) => <option key={s} value={s}>{ORDER_STATUS[s].label}</option>)}
         </select>
         {(fDate || fLine !== 'TODOS' || fShift !== 'TODOS' || fStatus !== 'TODOS') && (
           <button onClick={() => { setFDate(''); setFLine('TODOS'); setFShift('TODOS'); setFStatus('TODOS') }}
-            className="text-xs text-[#666] hover:text-white transition-colors">Limpiar filtros</button>
+            className="text-xs text-muted hover:text-ink transition-colors">Limpiar filtros</button>
         )}
         {canManage && (
           <button onClick={openCreate} className="btn-primary text-sm ml-auto">
@@ -144,7 +144,7 @@ export function OrdersClient({ initialOrders, lines, role }: { initialOrders: Or
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border-dark text-[#666] text-xs uppercase tracking-wider">
+              <tr className="border-b border-border-dark text-muted text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left font-medium">N° Orden</th>
                 <th className="px-4 py-3 text-left font-medium">Producto</th>
                 <th className="px-4 py-3 text-left font-medium">Línea</th>
@@ -159,28 +159,28 @@ export function OrdersClient({ initialOrders, lines, role }: { initialOrders: Or
             </thead>
             <tbody className="divide-y divide-border-dark">
               {filtered.length === 0 && (
-                <tr><td colSpan={10} className="px-4 py-10 text-center text-[#555]">Sin órdenes que coincidan</td></tr>
+                <tr><td colSpan={10} className="px-4 py-10 text-center text-muted-2">Sin órdenes que coincidan</td></tr>
               )}
               {filtered.map((o) => {
                 const pct = o.plannedKg > 0 ? Math.round((o.realKg / o.plannedKg) * 100) : 0
                 return (
                   <tr key={o.id} className="hover:bg-border-dark/30 transition-colors">
-                    <td className="px-4 py-3 font-mono text-xs text-[#999]">{o.orderNumber}</td>
-                    <td className="px-4 py-3 font-medium text-white">{o.product}</td>
-                    <td className="px-4 py-3 text-[#999]">{o.lineName}</td>
-                    <td className="px-4 py-3 text-[#999]">{SHIFT_LABELS[o.shift]}</td>
-                    <td className="px-4 py-3 text-right text-white font-rajdhani font-semibold">{o.plannedKg.toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right text-white font-rajdhani font-semibold">{o.realKg.toLocaleString()}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted">{o.orderNumber}</td>
+                    <td className="px-4 py-3 font-medium text-ink">{o.product}</td>
+                    <td className="px-4 py-3 text-muted">{o.lineName}</td>
+                    <td className="px-4 py-3 text-muted">{SHIFT_LABELS[o.shift]}</td>
+                    <td className="px-4 py-3 text-right text-ink font-rajdhani font-semibold">{o.plannedKg.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-right text-ink font-rajdhani font-semibold">{o.realKg.toLocaleString()}</td>
                     <td className={cn('px-4 py-3 text-right font-rajdhani font-bold', complianceColor(pct))}>{pct}%</td>
                     <td className="px-4 py-3">
                       <span className={cn('inline-flex px-2 py-0.5 rounded-full text-xs font-semibold', ORDER_STATUS[o.status].cls)}>
                         {ORDER_STATUS[o.status].label}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#999]">{o.responsible}</td>
+                    <td className="px-4 py-3 text-muted">{o.responsible}</td>
                     <td className="px-4 py-3 text-right">
                       <button onClick={() => openEdit(o)} title={canManage ? 'Editar' : 'Actualizar producción'}
-                        className="p-1.5 rounded-lg text-[#888] hover:bg-border-dark hover:text-white transition-colors">
+                        className="p-1.5 rounded-lg text-muted hover:bg-border-dark hover:text-ink transition-colors">
                         <Pencil className="w-4 h-4" />
                       </button>
                     </td>
@@ -197,10 +197,10 @@ export function OrdersClient({ initialOrders, lines, role }: { initialOrders: Or
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-lg card border border-border-dark shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-ink">
                 {editing ? (canManage ? `Editar ${editing.orderNumber}` : `Actualizar ${editing.orderNumber}`) : 'Nueva orden de producción'}
               </h2>
-              <button onClick={() => setModalOpen(false)} className="text-[#666] hover:text-white transition-colors">
+              <button onClick={() => setModalOpen(false)} className="text-muted hover:text-ink transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -216,47 +216,47 @@ export function OrdersClient({ initialOrders, lines, role }: { initialOrders: Or
               {canManage && (
                 <>
                   <div>
-                    <label className="block text-sm font-medium text-[#ccc] mb-1.5">Producto</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-1.5">Producto</label>
                     <input value={form.product} onChange={(e) => setForm({ ...form, product: e.target.value })} required placeholder="Ej. Carne Molida Especial 500g"
-                      className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                      className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-[#ccc] mb-1.5">Línea</label>
+                      <label className="block text-sm font-medium text-ink-2 mb-1.5">Línea</label>
                       <select value={form.lineId} onChange={(e) => setForm({ ...form, lineId: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
+                        className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red">
                         {lines.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#ccc] mb-1.5">Turno</label>
+                      <label className="block text-sm font-medium text-ink-2 mb-1.5">Turno</label>
                       <select value={form.shift} onChange={(e) => setForm({ ...form, shift: e.target.value })}
-                        className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
+                        className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red">
                         {SHIFTS.map((s) => <option key={s} value={s}>{SHIFT_LABELS[s]}</option>)}
                       </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-medium text-[#ccc] mb-1.5">Fecha</label>
+                      <label className="block text-sm font-medium text-ink-2 mb-1.5">Fecha</label>
                       <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required
-                        className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                        className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#ccc] mb-1.5">Cantidad planificada (kg)</label>
+                      <label className="block text-sm font-medium text-ink-2 mb-1.5">Cantidad planificada (kg)</label>
                       <input type="number" min="1" value={form.plannedKg} onChange={(e) => setForm({ ...form, plannedKg: e.target.value })} required
-                        className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                        className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#ccc] mb-1.5">Responsable</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-1.5">Responsable</label>
                     <input value={form.responsible} onChange={(e) => setForm({ ...form, responsible: e.target.value })} required
-                      className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                      className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#ccc] mb-1.5">Observaciones</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-1.5">Observaciones</label>
                     <textarea value={form.observations} onChange={(e) => setForm({ ...form, observations: e.target.value })} rows={2} placeholder="Ej. Ajuste de molienda por temperatura MP, Cambio de cuchillas programado, Parada por limpieza CIP"
-                      className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red resize-none" />
+                      className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red resize-none" />
                   </div>
                 </>
               )}
@@ -265,14 +265,14 @@ export function OrdersClient({ initialOrders, lines, role }: { initialOrders: Or
               {editing && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-[#ccc] mb-1.5">Producción real (kg)</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-1.5">Producción real (kg)</label>
                     <input type="number" min="0" value={form.realKg} onChange={(e) => setForm({ ...form, realKg: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red" />
+                      className="w-full px-4 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#ccc] mb-1.5">Estado</label>
+                    <label className="block text-sm font-medium text-ink-2 mb-1.5">Estado</label>
                     <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
-                      className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-white text-sm focus:outline-none focus:border-pulse-red">
+                      className="w-full px-3 py-2.5 rounded-lg bg-bg-dark border border-border-dark text-ink text-sm focus:outline-none focus:border-pulse-red">
                       {STATUSES.map((s) => <option key={s} value={s}>{ORDER_STATUS[s].label}</option>)}
                     </select>
                   </div>
@@ -280,7 +280,7 @@ export function OrdersClient({ initialOrders, lines, role }: { initialOrders: Or
               )}
 
               {!canManage && !editing && (
-                <p className="text-sm text-[#666]">No tienes permisos para crear órdenes.</p>
+                <p className="text-sm text-muted">No tienes permisos para crear órdenes.</p>
               )}
 
               <div className="flex gap-3 pt-2">

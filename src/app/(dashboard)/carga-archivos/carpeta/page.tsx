@@ -24,19 +24,19 @@ export default async function CarpetaPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/carga-archivos" className="text-xs text-[#666] hover:text-white flex items-center gap-1 mb-1">
+        <Link href="/carga-archivos" className="text-xs text-muted hover:text-ink flex items-center gap-1 mb-1">
           <ArrowLeft className="w-3.5 h-3.5" /> Volver
         </Link>
-        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-ink flex items-center gap-2">
           <FolderOpen className="w-6 h-6 text-pulse-red" /> Archivos cargados
         </h1>
-        <p className="text-sm text-[#666] mt-0.5">Programas .xlsx subidos al sistema</p>
+        <p className="text-sm text-muted mt-0.5">Programas .xlsx subidos al sistema</p>
       </div>
 
       <div className="card p-0 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-[#666] border-b border-border-dark">
+            <tr className="text-left text-xs text-muted border-b border-border-dark">
               <th className="px-4 py-3 font-medium">Nombre del archivo</th>
               <th className="px-4 py-3 font-medium">Fecha de carga</th>
               <th className="px-4 py-3 font-medium text-right">Tamaño</th>
@@ -45,16 +45,16 @@ export default async function CarpetaPage() {
           </thead>
           <tbody>
             {archivos.length === 0 ? (
-              <tr><td colSpan={4} className="px-4 py-10 text-center text-[#555]">No hay archivos cargados.</td></tr>
+              <tr><td colSpan={4} className="px-4 py-10 text-center text-muted-2">No hay archivos cargados.</td></tr>
             ) : archivos.map((a) => (
               <tr key={a.id} className="border-b border-border-dark hover:bg-white/[0.02]">
                 <td className="px-4 py-3">
-                  <span className="flex items-center gap-2 text-white">
+                  <span className="flex items-center gap-2 text-ink">
                     <FileSpreadsheet className="w-4 h-4 text-status-ok shrink-0" /> {a.archivoNombre}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-[#999]">{fmtDateTime(a.cargadoEn)}</td>
-                <td className="px-4 py-3 text-right text-[#999]">{fmtSize(a.archivoTamanio)}</td>
+                <td className="px-4 py-3 text-muted">{fmtDateTime(a.cargadoEn)}</td>
+                <td className="px-4 py-3 text-right text-muted">{fmtSize(a.archivoTamanio)}</td>
                 <td className="px-4 py-3 text-center">
                   {a.archivoData ? (
                     <a href={`/api/carga-archivos/${a.id}/download`}
@@ -62,7 +62,7 @@ export default async function CarpetaPage() {
                       <Download className="w-3.5 h-3.5" /> Descargar
                     </a>
                   ) : (
-                    <span className="text-xs text-[#555]" title="Archivo no almacenado (carga anterior)">No disponible</span>
+                    <span className="text-xs text-muted-2" title="Archivo no almacenado (carga anterior)">No disponible</span>
                   )}
                 </td>
               </tr>

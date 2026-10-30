@@ -17,7 +17,7 @@ export function SubViewTabs({ vista, isAdmin }: { vista: 'semanal' | 'saturacion
             key={t.key}
             href={t.href}
             className={cn('flex items-center gap-2 px-4 py-2 text-sm font-medium transition-colors',
-              active ? 'bg-pulse-red text-white' : 'bg-card-dark text-[#999] hover:text-white')}
+              active ? 'bg-pulse-red text-white' : 'bg-card-dark text-muted hover:text-ink')}
           >
             <t.icon className="w-4 h-4" /> {t.label}
           </Link>

@@ -39,17 +39,17 @@ export function OrdenesFabricacionClient({ initialOrdenes }: { initialOrdenes: O
     <div className="space-y-5">
       {/* Filtro de fecha */}
       <div className="card p-4 flex items-center gap-3">
-        <span className="flex items-center gap-1.5 text-sm text-[#999]"><Calendar className="w-4 h-4 text-pulse-red" /> Fecha</span>
+        <span className="flex items-center gap-1.5 text-sm text-muted"><Calendar className="w-4 h-4 text-pulse-red" /> Fecha</span>
         <input type="date" value={fDate} onChange={(e) => setFDate(e.target.value)}
-          className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-white focus:border-pulse-red outline-none" />
-        {fDate && <button onClick={() => setFDate('')} className="text-xs text-[#666] hover:text-white">Limpiar</button>}
-        <span className="ml-auto text-xs text-[#666]">{filtered.length} OF</span>
+          className="bg-bg-dark border border-border-dark rounded-lg px-3 py-2 text-sm text-ink focus:border-pulse-red outline-none" />
+        {fDate && <button onClick={() => setFDate('')} className="text-xs text-muted hover:text-ink">Limpiar</button>}
+        <span className="ml-auto text-xs text-muted">{filtered.length} OF</span>
       </div>
 
       <div className="card p-0 overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-[#666] border-b border-border-dark">
+            <tr className="text-left text-xs text-muted border-b border-border-dark">
               <th className="px-4 py-3 font-medium">OF</th>
               <th className="px-4 py-3 font-medium">Producto</th>
               <th className="px-4 py-3 font-medium text-right">Cantidad Planificada</th>
@@ -59,9 +59,9 @@ export function OrdenesFabricacionClient({ initialOrdenes }: { initialOrdenes: O
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-[#555]">
-                <ClipboardList className="w-8 h-8 mx-auto mb-2 text-[#333]" />
-                No hay órdenes de fabricación. Se cargan desde el Excel SAP en <b className="text-[#888]">Carga de Archivos</b>.
+              <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-2">
+                <ClipboardList className="w-8 h-8 mx-auto mb-2 text-muted-2" />
+                No hay órdenes de fabricación. Se cargan desde el Excel SAP en <b className="text-muted">Carga de Archivos</b>.
               </td></tr>
             ) : filtered.map((o) => <OrdenRow key={o.id} o={o} onSave={save} />)}
           </tbody>
@@ -84,13 +84,13 @@ function OrdenRow({ o, onSave }: { o: OF; onSave: (id: string, p: Record<string,
 
   return (
     <tr className="border-b border-border-dark hover:bg-white/[0.02] align-top">
-      <td className="px-4 py-2.5 text-white font-medium whitespace-nowrap">{o.numeroOF}</td>
-      <td className="px-4 py-2.5 text-[#ccc]">{o.producto}</td>
-      <td className="px-4 py-2.5 text-right text-[#ccc] whitespace-nowrap">{fmt(o.cantidadPlanificada)} {o.unidad && <span className="text-[#777] text-xs">{o.unidad}</span>}</td>
+      <td className="px-4 py-2.5 text-ink font-medium whitespace-nowrap">{o.numeroOF}</td>
+      <td className="px-4 py-2.5 text-ink-2">{o.producto}</td>
+      <td className="px-4 py-2.5 text-right text-ink-2 whitespace-nowrap">{fmt(o.cantidadPlanificada)} {o.unidad && <span className="text-muted text-xs">{o.unidad}</span>}</td>
       <td className="px-4 py-2.5 text-center">
         <input type="number" min="0" value={comp} onChange={(e) => setComp(e.target.value)}
           onBlur={() => { if (comp !== (o.cantidadCompletada ? o.cantidadCompletada.toString() : '')) onSave(o.id, { cantidadCompletada: comp === '' ? 0 : Number(comp) }) }}
-          className="w-28 px-2 py-1 rounded bg-bg-dark border border-border-dark text-white text-sm text-right focus:outline-none focus:border-pulse-red" />
+          className="w-28 px-2 py-1 rounded bg-bg-dark border border-border-dark text-ink text-sm text-right focus:outline-none focus:border-pulse-red" />
       </td>
       <td className="px-4 py-2.5">
         <span className="flex items-center justify-end gap-1 font-semibold" style={{ color: pctColor }}>
@@ -101,7 +101,7 @@ function OrdenRow({ o, onSave }: { o: OF; onSave: (id: string, p: Record<string,
           <input type="text" value={razon} placeholder="Razón del quiebre…"
             onChange={(e) => setRazon(e.target.value)}
             onBlur={() => { if (razon !== (o.razonQuiebre ?? '')) onSave(o.id, { razonQuiebre: razon }) }}
-            className="w-full mt-1.5 px-2 py-1 rounded bg-bg-dark border border-pulse-red/40 text-white text-xs focus:outline-none focus:border-pulse-red" />
+            className="w-full mt-1.5 px-2 py-1 rounded bg-bg-dark border border-pulse-red/40 text-ink text-xs focus:outline-none focus:border-pulse-red" />
         )}
       </td>
     </tr>

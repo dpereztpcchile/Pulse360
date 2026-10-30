@@ -79,14 +79,14 @@ export default function CambiarClavePage() {
             <div className="flex items-center gap-3">
               <div className="relative w-12 h-12 flex items-center justify-center">
                 <Activity className="absolute w-7 h-7 text-pulse-red opacity-80" strokeWidth={2.5} />
-                <BarChart3 className="absolute w-10 h-10 text-white opacity-20" />
+                <BarChart3 className="absolute w-10 h-10 text-ink opacity-20" />
               </div>
               <div className="text-5xl font-bold leading-none tracking-wider">
-                <span className="text-white">PULSE</span>
+                <span className="text-ink">PULSE</span>
                 <span className="text-pulse-red">360</span>
               </div>
             </div>
-            <div className="text-sm text-[#666] tracking-[0.4em] uppercase font-medium">
+            <div className="text-sm text-muted tracking-[0.4em] uppercase font-medium">
               Smart Plant Platform
             </div>
           </div>
@@ -95,9 +95,9 @@ export default function CambiarClavePage() {
         <div className="card border border-border-dark shadow-2xl shadow-black/50">
           <div className="flex items-center gap-2 mb-1">
             <KeyRound className="w-5 h-5 text-pulse-red" />
-            <h2 className="text-xl font-semibold text-white">Cambia tu contraseña</h2>
+            <h2 className="text-xl font-semibold text-ink">Cambia tu contraseña</h2>
           </div>
-          <p className="text-sm text-[#666] mb-6">
+          <p className="text-sm text-muted mb-6">
             {session?.user?.name ? `Hola, ${session.user.name}. ` : ''}
             Por seguridad, debes definir una nueva contraseña antes de continuar.
           </p>
@@ -110,7 +110,7 @@ export default function CambiarClavePage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-[#ccc] mb-1.5">
+              <label className="block text-sm font-medium text-ink-2 mb-1.5">
                 Contraseña actual
               </label>
               <input
@@ -120,14 +120,14 @@ export default function CambiarClavePage() {
                 required
                 placeholder="La contraseña que te entregaron"
                 className="w-full px-4 py-2.5 rounded-lg bg-card-dark border border-border-dark
-                           text-white placeholder-[#555] text-sm
+                           text-ink placeholder-[#555] text-sm
                            focus:outline-none focus:border-pulse-red focus:ring-1 focus:ring-pulse-red
                            transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#ccc] mb-1.5">
+              <label className="block text-sm font-medium text-ink-2 mb-1.5">
                 Nueva contraseña
               </label>
               <div className="relative">
@@ -139,14 +139,14 @@ export default function CambiarClavePage() {
                   minLength={8}
                   placeholder="Mínimo 8 caracteres"
                   className="w-full px-4 py-2.5 pr-10 rounded-lg bg-card-dark border border-border-dark
-                             text-white placeholder-[#555] text-sm
+                             text-ink placeholder-[#555] text-sm
                              focus:outline-none focus:border-pulse-red focus:ring-1 focus:ring-pulse-red
                              transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555] hover:text-white"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-2 hover:text-ink"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -155,7 +155,7 @@ export default function CambiarClavePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-[#ccc] mb-1.5">
+              <label className="block text-sm font-medium text-ink-2 mb-1.5">
                 Confirmar nueva contraseña
               </label>
               <input
@@ -166,7 +166,7 @@ export default function CambiarClavePage() {
                 minLength={8}
                 placeholder="Repite la nueva contraseña"
                 className="w-full px-4 py-2.5 rounded-lg bg-card-dark border border-border-dark
-                           text-white placeholder-[#555] text-sm
+                           text-ink placeholder-[#555] text-sm
                            focus:outline-none focus:border-pulse-red focus:ring-1 focus:ring-pulse-red
                            transition-colors"
               />
@@ -192,7 +192,7 @@ export default function CambiarClavePage() {
 
           <button
             onClick={() => signOut({ callbackUrl: '/login' })}
-            className="w-full text-center text-xs text-[#555] hover:text-[#888] mt-5"
+            className="w-full text-center text-xs text-muted-2 hover:text-muted mt-5"
           >
             Cerrar sesión
           </button>

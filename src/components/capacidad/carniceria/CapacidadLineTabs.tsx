@@ -17,7 +17,7 @@ export function CapacidadLineTabs() {
           <Link
             key={l.code}
             href="/capacidad"
-            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px border-pulse-red text-white whitespace-nowrap"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px border-pulse-red text-ink whitespace-nowrap"
           >
             {l.label}
           </Link>
@@ -26,11 +26,11 @@ export function CapacidadLineTabs() {
             key={l.code}
             className={cn(
               'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px border-transparent',
-              'text-[#444] cursor-not-allowed whitespace-nowrap',
+              'text-muted-2 cursor-not-allowed whitespace-nowrap',
             )}
           >
             {l.label}
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-border-dark text-[#777] uppercase tracking-wide">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-border-dark text-muted uppercase tracking-wide">
               Próximamente
             </span>
           </span>
