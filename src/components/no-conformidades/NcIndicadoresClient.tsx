@@ -44,9 +44,9 @@ interface IndicadoresPlanta {
   impacto: number
   retornoPct: number
   participacion: { planta: number; proveedor: number }
-  porSemanaRazon: { semana: number; razon: string; costoPlanta: number; cantidad: number }[]
-  porRazon: { razon: string; costoPlanta: number; cantidad: number }[]
-  porSemana: { semana: number; costoPlanta: number; cantidad: number }[]
+  porSemanaRazon: { semana: number; razon: string; valorNcOC: number; costoPlanta: number; cantidad: number }[]
+  porRazon: { razon: string; valorNcOC: number; costoPlanta: number; cantidad: number }[]
+  porSemana: { semana: number; valorNcOC: number; costoPlanta: number; cantidad: number }[]
   semanasDisponibles: number[]
   mesesDisponibles: string[]
 }
@@ -369,7 +369,7 @@ function ProveedorMiniCard({ proveedor, detalle, totalNc }: {
   )
 }
 
-// Paleta fija para las series de razón del stacked bar "NC Manejo interno Planta",
+// Paleta fija para las series de razón del stacked bar "Origen no conformidades",
 // cicla en el mismo orden para el gráfico, la leyenda y la tabla de valores.
 const RAZON_STACK_COLORS = ['#60A5FA', '#F2C94C', '#9CA3AF', '#F2994A', '#4C5FD5', '#22C55E', '#CC0000', '#A855F7']
 
@@ -387,10 +387,15 @@ function PlantaView({ data }: { data: IndicadoresPlanta }) {
   const razones = data.porRazon.map((r) => r.razon)
   const semanas = data.porSemana.map((s) => s.semana)
 
-  // Pivot semana × razón → una serie por razón, para el stacked bar.
+  // Monto generado por semana (valor bruto de las NC) para el gráfico de línea.
+  const montoPorSemanaLine = data.porSemana.map((s) => ({ semana: `${s.semana}`, valorNcOC: s.valorNcOC }))
+
+  // Pivot semana × razón → una serie por razón, para el stacked bar "Origen no conformidades".
+  // Usa el monto GENERADO (valorNcOC), igual que la línea semanal y el KPI de monto total,
+  // así la suma de la tabla por semana cuadra con el punto de la línea.
   const valorPorSemanaYRazon = new Map<string, number>()
   for (const r of data.porSemanaRazon) {
-    valorPorSemanaYRazon.set(`${r.semana}|||${r.razon}`, r.costoPlanta)
+    valorPorSemanaYRazon.set(`${r.semana}|||${r.razon}`, r.valorNcOC)
   }
   const stackedData = semanas.map((s) => {
     const row: Record<string, string | number> = { semana: `${s}` }
@@ -408,11 +413,15 @@ function PlantaView({ data }: { data: IndicadoresPlanta }) {
       {/* 4 KPI cards — mismo formato que Proveedor */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <IconKpi icon={ClipboardList} value={data.totalNc.toLocaleString('es-CL')}
-          caption="NC CONFORMIDADES DEL PERIODO (PRODUCTOS CÁRNICOS)" />
+          caption="NO CONFORMIDADES DEL PERIODO" />
         <IconKpi icon={Coins} value={fmtMoney(data.totalValorNcOC)}
           caption="MONTO TOTAL GENERADO POR NC" />
-        <IconKpi icon={HandCoins} value={fmtMoney(data.montoRecaudadoVentaTercero)}
-          caption="MONTO RECAUDADO POR V.T." />
+        <IconKpi icon={HandCoins} caption="MONTO RECAUDADO POR V.T.">
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="text-[11px] font-semibold uppercase leading-tight text-ink-2">Procedente<br />de NC</p>
+            <p className="text-2xl font-bold text-ink leading-tight">{fmtMoney(data.montoRecaudadoVentaTercero)}</p>
+          </div>
+        </IconKpi>
         <IconKpi icon={BarChart3} caption="BALANCE DEL PERIODO">
           <div className="text-sm leading-tight space-y-0.5">
             <p className="text-ink font-semibold">IMPACTO: <span className="text-pulse-red">{fmtMoney(data.impacto)}</span></p>
@@ -421,21 +430,26 @@ function PlantaView({ data }: { data: IndicadoresPlanta }) {
         </IconKpi>
       </div>
 
+      {/* Monto generado por semana + origen de las NC por razón, lado a lado */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <SectionCard title="Monto generado (semanas)">
+          <MoneyLineChart data={montoPorSemanaLine} xKey="semana" yKey="valorNcOC" color="#3B82F6" height={320} />
+        </SectionCard>
+        <SectionCard title="Origen no conformidades">
+          <StackedBars data={stackedData} xKey="semana" series={stackedSeries} height={260} />
+          <RazonSemanaTable razones={razones} semanas={semanas} valores={valorPorSemanaYRazon} colors={RAZON_STACK_COLORS} />
+        </SectionCard>
+      </div>
+
       {/* Participación NC: Planta vs Proveedor */}
       <SectionCard title="Participación NC">
         <ParticipacionDonut data={participacionDonut} />
-      </SectionCard>
-
-      {/* NC Manejo interno Planta (semanas): stacked bar + tabla de detalle por razón */}
-      <SectionCard title="NC manejo interno planta (semanas)">
-        <StackedBars data={stackedData} xKey="semana" series={stackedSeries} />
-        <RazonSemanaTable razones={razones} semanas={semanas} valores={valorPorSemanaYRazon} colors={RAZON_STACK_COLORS} />
       </SectionCard>
     </div>
   )
 }
 
-/** Tabla "Pérdida en dinero por motivo": complementa el stacked bar (en escala
+/** Tabla "Monto generado por motivo": complementa el stacked bar (en escala
  *  logarítmica) con el detalle exacto en $ por razón × semana, más una fila
  *  de TOTAL por semana. Como el gráfico ya no imprime el valor de cada
  *  segmento individual (solo el total de la barra), esta tabla es la fuente
@@ -454,7 +468,7 @@ function RazonSemanaTable({ razones, semanas, valores, colors }: {
 
   return (
     <div className="mt-4">
-      <h4 className="text-xs font-semibold text-ink mb-2">Pérdida en dinero por motivo</h4>
+      <h4 className="text-xs font-semibold text-ink mb-2">Monto generado por motivo</h4>
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
